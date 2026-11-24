@@ -17,7 +17,7 @@ Acceptance PR1: state mới schema valid; 16 ID canonical; reject NaN, unknown U
 
 ## PR sau (ROADMAP)
 
-2. Persistence IndexedDB + autosave 30s + backup 2 + import/export JSON checksum; migration v1→v2→v3, one writer; không import entitlement/verified. 3. Origin zone, 3 microhabitat, capacity 5, suitability & production budget; habitat placement/move. 4. Canvas 2.5D, FSM/steering, sprite, feeding. 5. Tutorial 0–15 phút. 6. Rescue fixture. 7. Passport PNG offline. Genetics preview demo S03 G1, full nest G2. Kiểm test từng PR; không mở G2/G5 khi chưa đủ gate. Không xóa phần GDD cũ.
+2. Persistence IndexedDB + autosave 30s + backup 2 + import/export JSON checksum; Dravio Save Schema v1 + khung migration theo schemaVersion (ADR 0007; trước đây ghi "migration v1→v2→v3"), one writer; không import entitlement/verified. 3. Origin zone, 3 microhabitat, capacity 5, suitability & production budget; habitat placement/move. 4. Canvas 2.5D, FSM/steering, sprite, feeding. 5. Tutorial 0–15 phút. 6. Rescue fixture. 7. Passport PNG offline. Genetics preview demo S03 G1, full nest G2. Kiểm test từng PR; không mở G2/G5 khi chưa đủ gate. Không xóa phần GDD cũ.
 
 ## Báo cáo mỗi PR
 

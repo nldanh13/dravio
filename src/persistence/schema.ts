@@ -1,7 +1,7 @@
 import { SCHEMA_VERSION, type GameState } from '../types/state';
 
 /**
- * Định dạng file save v3 (GDD 3.1 trang 18; ADR 0006).
+ * Dravio Save Schema v1 (GDD 3.1 trang 18; ADR 0006, 0007).
  * Envelope = metadata + checksum SHA-256 trên JSON chuẩn hóa của `state`.
  */
 

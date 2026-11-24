@@ -7,7 +7,8 @@ import type { DragonInstance, GrowthStage, LanguageCode, MutationType, Realm } f
  * không để field rỗng không có logic.
  */
 
-export const SCHEMA_VERSION = 3;
+/** Dravio Save Schema v1 — định dạng save chính thức đầu tiên (ADR 0007). Số 3 được dành riêng, không dùng lại. */
+export const SCHEMA_VERSION = 1;
 
 export interface UpgradesState {
   islandCapacityLevel: number;

@@ -2,7 +2,7 @@ import { DRAGON_SPECIES } from '../data/dragons';
 import { validateGameState } from '../engine/core/validation';
 import type { DragonInstance } from '../types/game';
 import { SCHEMA_VERSION, type GameState } from '../types/state';
-import { migrateLegacy } from './migrations';
+import { migrateState } from './migrations';
 import { SAVE_FORMAT, canonicalJson, sha256Hex } from './schema';
 
 /**
@@ -23,7 +23,7 @@ export type SaveErrorCode =
 export interface ParsedSave {
   state: GameState;
   savedAtMs: number;
-  /** Phiên bản schema gốc nếu đã migrate (1 hoặc 2). */
+  /** `schemaVersion` gốc nếu save đã được migrate lên SCHEMA_VERSION (ví dụ 3 = bản phát triển trước v1). */
   migratedFrom: number | null;
   warnings: string[];
 }
@@ -47,31 +47,21 @@ export async function parseSaveText(text: string): Promise<ParseResult> {
   }
   if (!isObj(raw)) return fail('bad-format');
 
-  if (raw.format === SAVE_FORMAT) {
-    const version = raw.schemaVersion;
-    if (typeof version !== 'number' || !Number.isInteger(version)) return fail('bad-format', ['schemaVersion']);
-    // Save do bản mới hơn ghi: không đọc, không ghi đè (tránh mất dữ liệu khi người chơi quay về bản cũ).
-    if (version > SCHEMA_VERSION) return fail('newer-version', [`schemaVersion ${version}`]);
-    if (version !== SCHEMA_VERSION) return fail('unsupported-version', [`schemaVersion ${version}`]);
-    if (typeof raw.checksum !== 'string' || !isObj(raw.state)) return fail('bad-format', ['checksum/state']);
-    const actual = await sha256Hex(canonicalJson(raw.state));
-    if (actual !== raw.checksum) return fail('bad-checksum');
-    if (raw.state.schemaVersion !== SCHEMA_VERSION) return fail('bad-format', ['state.schemaVersion']);
-    const v = validateGameState(raw.state);
-    if (!v.ok) return fail('invalid-state', v.errors);
-    const savedAtMs = typeof raw.savedAtMs === 'number' && Number.isSafeInteger(raw.savedAtMs) ? raw.savedAtMs : v.state.clock.lastProcessedAtMs;
-    return { ok: true, save: { state: v.state, savedAtMs, migratedFrom: null, warnings: [] } };
-  }
-
-  if (raw.version === 1 || raw.version === 2) {
-    const m = migrateLegacy(raw);
-    if (!m.ok) return fail('migration-failed', m.errors);
-    const v = validateGameState(m.value);
-    if (!v.ok) return fail('migration-failed', v.errors);
-    return { ok: true, save: { state: v.state, savedAtMs: v.state.clock.lastProcessedAtMs, migratedFrom: raw.version, warnings: m.warnings } };
-  }
-  if (typeof raw.version === 'number' && raw.version > 2) return fail('unsupported-version', [`version ${raw.version}`]);
-  return fail('bad-format');
+  if (raw.format !== SAVE_FORMAT) return fail('bad-format');
+  const version = raw.schemaVersion;
+  if (typeof version !== 'number' || !Number.isInteger(version)) return fail('bad-format', ['schemaVersion']);
+  if (typeof raw.checksum !== 'string' || !isObj(raw.state)) return fail('bad-format', ['checksum/state']);
+  if (raw.state.schemaVersion !== version) return fail('bad-format', ['state.schemaVersion']);
+  // Checksum kiểm trên state đúng như đã ghi, trước mọi migration.
+  const actual = await sha256Hex(canonicalJson(raw.state));
+  if (actual !== raw.checksum) return fail('bad-checksum');
+  // Save do bản mới hơn ghi → 'newer-version': không đọc, không ghi đè.
+  const m = migrateState(version, raw.state);
+  if (!m.ok) return fail(m.code, m.details);
+  const v = validateGameState(m.state);
+  if (!v.ok) return fail(version === SCHEMA_VERSION ? 'invalid-state' : 'migration-failed', v.errors);
+  const savedAtMs = typeof raw.savedAtMs === 'number' && Number.isSafeInteger(raw.savedAtMs) ? raw.savedAtMs : v.state.clock.lastProcessedAtMs;
+  return { ok: true, save: { state: v.state, savedAtMs, migratedFrom: version === SCHEMA_VERSION ? null : version, warnings: [] } };
 }
 
 const STATE_KEYS: readonly (keyof GameState)[] = [
