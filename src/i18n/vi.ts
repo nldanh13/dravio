@@ -93,6 +93,8 @@ export const vi = {
   'world.zoomIn': 'Phóng to',
   'world.zoomOut': 'Thu nhỏ',
   'world.zoomLevel': 'Zoom {x}×',
+  'world.feedAction': 'Cho ăn',
+  'world.growthMeter': 'Trưởng thành: {n}%',
   'world.food': 'Thức ăn sẽ thả',
   'world.dragons': 'Rồng trong khu',
   'world.noDragons': 'Chưa có rồng nào trong khu.',

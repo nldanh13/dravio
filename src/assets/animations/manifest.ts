@@ -18,6 +18,8 @@ export interface DragonFrameAsset {
   mutation: MutationType;
   pose: PoseId;
   url: string;
+  /** Canonical frame if an optional painted/derived asset is unavailable. */
+  fallbackUrl?: string;
   /** Điểm gắn hiệu ứng (px viewBox), đã theo tỉ lệ stage. `ground` = điểm neo. */
   attach: Readonly<Partial<Record<AttachPoint, readonly [number, number]>>>;
   /** Hộp va chạm minh họa đo trên biến thể Normal; không dùng cho logic domain. */
@@ -26,6 +28,10 @@ export interface DragonFrameAsset {
 }
 
 const files = import.meta.glob<string>('./frames/*/*.svg', { eager: true, query: '?url&no-inline', import: 'default' });
+
+// Optional authored raster frames use the same canonical 240×200 logical canvas and anchor.
+const painted = import.meta.glob<string>('./painted/*/*.{webp,png}', { eager: true, query: '?url&no-inline', import: 'default' });
+const shaded = import.meta.glob<string>('./shaded/*/*.svg', { eager: true, query: '?url&no-inline', import: 'default' });
 
 type AttachTable = Record<string, Record<string, Record<string, Record<string, [number, number]>>>>;
 type HitboxTable = Record<string, Record<string, Record<string, { x: number; y: number; w: number; h: number }>>>;
@@ -43,10 +49,12 @@ function build(): DragonFrameAsset[] {
     for (const stage of STAGES) {
       for (const mutation of MUTATIONS) {
         for (const pose of FRAME_POSES[speciesId]) {
-          const url = files[`./frames/${speciesId}/${stage}_${mutation}_${pose}.svg`];
+          const key = `${speciesId}/${stage}_${mutation}_${pose}`;
+          const canonical = files[`./frames/${key}.svg`];
+          const url = painted[`./painted/${key}.webp`] ?? painted[`./painted/${key}.png`] ?? shaded[`./shaded/${key}.svg`] ?? canonical;
           const attach = ATTACH[speciesId]?.[stage]?.[pose];
           const hitbox = HITBOX[speciesId]?.[stage]?.[pose];
-          if (!url || !attach || !hitbox) throw new Error(`Incomplete frame ${speciesId}/${stage}_${mutation}_${pose}`);
+          if (!canonical || !url || !attach || !hitbox) throw new Error(`Incomplete frame ${speciesId}/${stage}_${mutation}_${pose}`);
           out.push({
             assetId: `dragon.${speciesId}.${stage}.${mutation}.${pose}`,
             speciesId,
@@ -54,6 +62,7 @@ function build(): DragonFrameAsset[] {
             mutation,
             pose,
             url,
+            ...(url !== canonical ? { fallbackUrl: canonical } : {}),
             attach: { ...attach, ground: [120, 170] },
             hitbox,
             tier: 'prototype',

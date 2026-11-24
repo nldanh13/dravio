@@ -95,6 +95,8 @@ export const en: Record<TranslationKey, string> = {
   'world.zoomIn': 'Zoom in',
   'world.zoomOut': 'Zoom out',
   'world.zoomLevel': 'Zoom {x}×',
+  'world.feedAction': 'Feed',
+  'world.growthMeter': 'Growth: {n}%',
   'world.food': 'Food to drop',
   'world.dragons': 'Dragons in the zone',
   'world.noDragons': 'No dragons in the zone yet.',

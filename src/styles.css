@@ -78,3 +78,115 @@ input { min-height: 44px; font: inherit; padding: 0 12px; border-radius: 8px; bo
 .inspector { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; background: var(--card); margin-top: 12px; }
 .inspector h3 { margin: 4px 0; }
 button[aria-pressed='true'] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+
+
+/* Ancient Fantasy visual slice. UI textures are independent of simulation. */
+:root {
+  color-scheme: light;
+  --bg: #233b2c; --fg: #3e3021; --muted: #705d43; --card: #f5efe0;
+  --line: #c5aa75; --accent: #a86a26;
+  --forest: #28553b; --moss: #638c3c; --gold: #e6c16f;
+  --parchment: #f5efe0; --wood: #62452c; --ink: #392e20;
+}
+body {
+  background: radial-gradient(ellipse at 50% -15%, #a6c87a 0, #446a40 38%, #203b2c 78%);
+  min-height: 100vh;
+}
+.sanctuary-shell { max-width: 1480px; padding: max(14px, env(safe-area-inset-top)) clamp(10px, 2vw, 28px) 28px; }
+.sanctuary-hud {
+  padding: 10px 16px; border: 2px solid #d6b978; border-radius: 20px;
+  background: linear-gradient(150deg,#825e39,#4c3524 60%,#65472d);
+  box-shadow: inset 0 1px 0 #f8df9b, 0 5px 14px #14271d80;
+  color: #fff3ce; gap: 14px;
+}
+.sanctuary-brand { display: flex; align-items:center; gap: 10px; min-width:0; }
+.brand-crest, .resource-coin, .resource-leaf {
+  display:grid; place-items:center; flex:none; width:44px; height:44px;
+  border-radius:50%; border:2px solid #f5d98d;
+  background:radial-gradient(circle at 34% 22%,#fff3a7,#d79a37 50%,#966022);
+  color:#75401f; font:700 26px Georgia,serif; box-shadow:0 2px 4px #39230b88;
+}
+.brand-crest { width:54px; height:54px; background:radial-gradient(circle at 30% 15%,#fce5a0,#73984c 60%,#315639); }
+.sanctuary-brand h1 { font: bold clamp(27px,4vw,44px)/1 Georgia,serif; letter-spacing:.04em; color:#ffe1a0; text-shadow:0 2px #33251a, 0 0 12px #d8a84966; }
+.brand-tagline { font-size:.77rem; color:#f6deb1; margin:6px 0 0; }
+.sanctuary-resources { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.resource-medallion { display:flex; align-items:center; gap:7px; padding:4px 12px 4px 5px; border:1px solid #d1b27b; border-radius:26px; background:#382c20a6; min-width:100px; }
+.resource-medallion small { display:block; color:#e8d7b0; font-size:.7rem; }
+.resource-medallion strong { font-variant-numeric:tabular-nums; color:#fff5d7; }
+.resource-coin,.resource-leaf { width:34px;height:34px;font-size:21px; }
+.resource-leaf { background:radial-gradient(circle at 25% 20%,#e4f3b3,#8eaf4a 45%,#38603b); color:#f0f5cb; }
+.sanctuary-shell button, .sanctuary-shell select, .sanctuary-shell input:not([type=radio]) {
+  background:linear-gradient(#fff6db,#ead3a4); border:1px solid #aa8855;
+  border-radius:12px; box-shadow:inset 0 1px #fff9e5,0 2px 1px #7b59352b;
+}
+.sanctuary-shell button { font-weight:650; }
+.sanctuary-shell button:not(:disabled):hover { filter:brightness(1.05); }
+.sanctuary-shell button:not(:disabled):active { transform:translateY(1px); }
+.sanctuary-shell button:disabled { opacity:.58; cursor:not-allowed; }
+.sanctuary-shell :focus-visible { outline:3px solid #d99837; outline-offset:2px; }
+.sanctuary-world {
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(245px,315px);
+  grid-template-areas:"title title" "hint hint" "scene dragon" "nav dragon" "camera dragon" "controls dragon" "feedback dragon";
+  align-items:start; gap:10px 14px; margin:16px 0 0; padding:14px;
+  border:2px solid #bca16c; border-radius:22px;
+  background:linear-gradient(135deg,#f5efe0,#e9d9b8);
+  box-shadow:0 8px 24px #172c2066,inset 0 0 0 3px #fff3ce80;
+}
+.sanctuary-world > h2 { grid-area:title; margin:0; font:700 1.45rem Georgia,serif; color:#395b35; }
+.sanctuary-hint { grid-area:hint; font-size:.8rem; margin:0; }
+.sanctuary-world .world-frame {
+  grid-area:scene; border:3px solid #b59a63; border-radius:14px;
+  box-shadow:0 3px 12px #5a432955,inset 0 0 0 2px #f3d593;
+  background:#315642; min-width:0;
+}
+.sanctuary-world .habitat-nav { grid-area:nav; display:grid; grid-template-columns:auto repeat(3,minmax(0,1fr)) auto; gap:5px; margin:0; }
+.sanctuary-world .habitat-nav button { min-width:0; padding:6px; font-size:.85rem; line-height:1.25; }
+.sanctuary-world button[aria-pressed='true'] { color:#fff9d8; background:linear-gradient(#91b34b,#476e35); border:1px solid #b78c42; box-shadow:inset 0 1px #dce7a5,0 0 0 2px #e1c06b; }
+.sanctuary-world .camera-controls { grid-area:camera; margin:0; }
+.sanctuary-world .world-controls { grid-area:controls; align-items:flex-end; margin:0; }
+.sanctuary-world .world-controls .diet-picker { background:#fff6df; border-color:#cfb57e; padding:4px 9px; min-width:0; margin:0; }
+.sanctuary-world > [role="alert"], .sanctuary-world > [role="status"] { grid-area:feedback; margin:0; }
+.sanctuary-dragon-panel {
+  grid-area:dragon; min-width:0; align-self:stretch; padding:14px;
+  border:2px solid #b99558; border-radius:18px;
+  background:radial-gradient(ellipse at top,#fff9e7,#f2e5ca 68%,#e5cc9d);
+  box-shadow:inset 0 0 0 3px #fff3d6,0 3px 8px #8e6c3930;
+}
+.sanctuary-dragon-panel > h3 { margin:0 0 10px; color:#4e623b; font:700 1.05rem Georgia,serif; }
+.sanctuary-dragon-panel .inspector { padding:0; background:none; border:none; }
+.dragon-portrait { text-align:center; padding:10px; background:radial-gradient(ellipse at center,#e8edc3,#e0c89580 72%,transparent 73%); }
+.dragon-portrait img { display:block; margin:0 auto; object-fit:contain; }
+.dragon-portrait h3 { font:700 1.45rem Georgia,serif; }
+.dragon-portrait span { font-size:.8rem; color:#6a5c43; }
+.dragon-meters { display:grid; gap:8px; margin:12px 0; }
+.dragon-meters label { font-size:.8rem; font-weight:700; }
+.dragon-meters progress { width:100%; height:12px; accent-color:#638c3c; border-radius:12px; }
+.dragon-actions { display:grid; gap:7px; margin:12px 0; }
+.sanctuary-shell .action-feed { background:linear-gradient(#a6c758,#527d34); color:#fff9e3; border-color:#66783f; }
+.sanctuary-shell .action-pet { background:linear-gradient(#ecab99,#c7786d); color:#49291e; border-color:#b27461; }
+.sanctuary-shell .action-focus { background:linear-gradient(#f5d187,#b98235); color:#382514; border-color:#9f7233; }
+.sanctuary-dragon-panel form { display:flex; flex-wrap:wrap; }
+.sanctuary-dragon-panel form label { flex:1 1 100%; min-width:0; }
+.sanctuary-dragon-panel form input { width:100%; }
+.sanctuary-drawer { margin-top:12px; border:1px solid #b59a63; border-radius:14px; background:#f5efe0; overflow:hidden; }
+.sanctuary-drawer > summary { cursor:pointer; padding:13px 16px; background:linear-gradient(#f6e7c6,#e7ce9e); font-weight:700; color:#4a5937; }
+.sanctuary-drawer > section { padding:0 14px 14px; margin-top:12px; }
+.sanctuary-drawer > .notice { margin:12px; }
+@media(max-width:850px) {
+  .sanctuary-world { grid-template-columns:minmax(0,1fr); grid-template-areas:"title" "hint" "scene" "nav" "camera" "controls" "feedback" "dragon"; padding:10px; gap:10px; }
+  .sanctuary-hud { flex-wrap:wrap; }
+  .brand-tagline { display:none; }
+  .sanctuary-dragon-panel { padding:12px; }
+  .dragon-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:450px) {
+  .sanctuary-shell { padding-inline:8px; }
+  .sanctuary-hud { padding:9px; gap:8px; }
+  .sanctuary-brand h1 { font-size:30px; }
+  .brand-crest { width:38px; height:38px; font-size:20px; }
+  .sanctuary-resources { gap:6px; }
+  .resource-medallion { min-width:0; padding-right:8px; }
+  .sanctuary-world .habitat-nav button { font-size:.74rem; padding:4px; }
+  .sanctuary-hint { font-size:.75rem; }
+}
+@media(prefers-reduced-motion:reduce) { .sanctuary-shell button { transform:none!important; } }

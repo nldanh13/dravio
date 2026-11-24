@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { ORIGIN_HABITAT_IDS, type OriginHabitatId } from '../assets/habitats/origin/manifest';
+import { getDragonFrame } from '../assets/animations/manifest';
+import { getCommonDragonSprite } from '../assets/dragons/manifest';
 import { FOOD_ICONS } from '../assets/icons/food/manifest';
 import { DIET_IDS, type DietId } from '../data/care';
 import { getSpecies } from '../data/dragons';
@@ -218,9 +220,9 @@ export function WorldView({ session }: { session: GameSession }) {
   };
 
   return (
-    <section aria-labelledby="world-heading">
+    <section className="sanctuary-world" aria-labelledby="world-heading">
       <h2 id="world-heading">{t('world.heading')}</h2>
-      <p className="muted">{t('world.hint')}</p>
+      <p className="muted sanctuary-hint">{t('world.hint')}</p>
       <nav className="habitat-nav" aria-label={t('world.nav')}>
         <button type="button" onClick={() => go(idx - 1)} disabled={idx <= 0} aria-label={t('world.prev')}>
           ◀
@@ -294,6 +296,7 @@ export function WorldView({ session }: { session: GameSession }) {
         </p>
       )}
       {notice && !error && <p role="status">{notice}</p>}
+      <aside className="sanctuary-dragon-panel">
       <h3>{t('world.dragons')}</h3>
       {placed.length === 0 ? (
         <p className="muted">{t('world.noDragons')}</p>
@@ -307,21 +310,29 @@ export function WorldView({ session }: { session: GameSession }) {
         </div>
       )}
       {dragon && (
-        <Inspector key={dragon.uid} dragon={dragon} name={nameOf(dragon.uid)} canAct={canAct} onPet={() => pet(dragon)} onRename={(n) => rename(dragon, n)} onClose={() => setSelected(null)} />
+        <Inspector key={dragon.uid} dragon={dragon} name={nameOf(dragon.uid)} canAct={canAct} onPet={() => pet(dragon)} onRename={(n) => rename(dragon, n)} onClose={() => setSelected(null)} onFeed={dropFood} onFocus={() => rendererRef.current?.focus(dragon.uid)} selectedHere={!!selectedHere} />
       )}
+      </aside>
     </section>
   );
 }
 
-function Inspector(props: { dragon: DragonInstance; name: string; canAct: boolean; onPet: () => void; onRename: (n: string | null) => void; onClose: () => void }) {
+function Inspector(props: { dragon: DragonInstance; name: string; canAct: boolean; onPet: () => void; onRename: (n: string | null) => void; onClose: () => void; onFeed: () => void; onFocus: () => void; selectedHere: boolean }) {
   const { t } = useTranslation();
   const { dragon, canAct } = props;
   const [nameDraft, setNameDraft] = useState(dragon.nickname ?? '');
+  const species = getSpecies(dragon.speciesId);
+  const stage = growthStage(dragon.xpSec, species);
+  const portrait = getCommonDragonSprite(dragon.speciesId, stage, dragon.mutation);
+  const portraitFrame = portrait ? getDragonFrame(portrait.speciesId, stage, dragon.mutation, 'idle') : null;
+  const growth = Math.max(0, Math.min(100, dragon.xpSec / species.growthTimeSec * 100));
   return (
     <div className="inspector" aria-live="polite">
-      <h3>
-        {t('world.selected')}: {props.name}
-      </h3>
+      <div className="dragon-portrait">
+        {portrait && <img src={portraitFrame?.url ?? portrait.url} onError={(e) => { if (e.currentTarget.getAttribute('src') !== portrait.url) e.currentTarget.src = portrait.url; }} alt="" width={144} height={120} />}
+        <h3>{props.name}</h3>
+        <span>{t(`stage.${stage}`)} · {t(`mutation.${dragon.mutation}`)}</span>
+      </div>
       <p className="muted">
         {t('world.info', {
           species: t(`species.${dragon.speciesId}`),
@@ -333,10 +344,16 @@ function Inspector(props: { dragon: DragonInstance; name: string; canAct: boolea
       <p className="muted">
         {t('world.bond', { n: dragon.bond })} · {t('world.eats', { diets: getSpecies(dragon.speciesId).anatomy.dietIds.map((x) => t(`diet.${x}`)).join(', ') })}
       </p>
-      <div className="row compact">
-        <button type="button" disabled={!canAct} onClick={props.onPet}>
+      <div className="dragon-meters">
+        <label>{t('world.bond', { n: dragon.bond })}<progress max={100} value={dragon.bond} /></label>
+        <label>{t('world.growthMeter', { n: Math.floor(growth) })}<progress max={100} value={growth} /></label>
+      </div>
+      <div className="dragon-actions">
+        <button type="button" className="action-feed" disabled={!canAct || !props.selectedHere} onClick={props.onFeed}>{t('world.feedAction')}</button>
+        <button type="button" className="action-pet" disabled={!canAct} onClick={props.onPet}>
           {t('world.pet')}
         </button>
+        <button type="button" className="action-focus" disabled={!props.selectedHere} onClick={props.onFocus}>{t('world.focus', { x: FOCUS_ZOOM })}</button>
         <button type="button" onClick={props.onClose}>
           {t('world.deselect')}
         </button>

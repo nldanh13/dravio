@@ -29,6 +29,7 @@ export type LayerId = 'sky' | 'far' | 'mid' | 'ground' | 'foreground';
 export interface HabitatLayer {
   id: LayerId;
   url: string;
+  fallbackUrl?: string;
   width: number;
   height: number;
   /** Hệ số parallax theo camera ngang (0 = đứng yên, 1 = theo mặt đất). */
@@ -52,6 +53,14 @@ const url = (rel: string): string => {
   if (!u) throw new Error(`Missing habitat asset ${rel}`);
   return u;
 };
+
+// Optional painted replacements preserve the manifest's logical dimensions and anchors.
+const raster = import.meta.glob<string>('./painted/**/*.{webp,png}', { eager: true, query: '?url&no-inline', import: 'default' });
+function artUrl(stem: string): { url: string; fallbackUrl?: string } {
+  const canonical = url(stem + '.svg');
+  const replacement = raster[`./painted/${stem}.webp`] ?? raster[`./painted/${stem}.png`];
+  return replacement ? { url: replacement, fallbackUrl: canonical } : { url: canonical };
+}
 
 // ---------------------------------------------------------------- props
 export type PropId =
@@ -77,6 +86,7 @@ export interface PropAsset {
   assetId: string;
   id: PropId;
   url: string;
+  fallbackUrl?: string;
   width: number;
   height: number;
   /** Điểm neo (đáy giữa) trong viewBox của vật thể. */
@@ -105,7 +115,7 @@ const PROP_SIZE: Readonly<Record<PropId, readonly [number, number, boolean]>> = 
 export const PROPS: Readonly<Record<PropId, PropAsset>> = Object.fromEntries(
   (Object.keys(PROP_SIZE) as PropId[]).map((id) => {
     const [width, height, flat] = PROP_SIZE[id];
-    return [id, { assetId: `habitat.origin.prop.${id}`, id, url: url(`props/${id}.svg`), width, height, anchor: [width / 2, height - 4], flat }];
+    return [id, { assetId: `habitat.origin.prop.${id}`, id, ...artUrl(`props/${id}`), width, height, anchor: [width / 2, height - 4], flat }];
   }),
 ) as unknown as Record<PropId, PropAsset>;
 
@@ -269,7 +279,7 @@ const S = (id: string, kind: SpotKind, x: number, y: number, r: number, prop: Pr
 });
 
 function layersOf(id: OriginHabitatId): HabitatLayer[] {
-  return (Object.keys(LAYER_SPEC) as LayerId[]).map((l) => ({ id: l, url: url(`${id}/${l}.svg`), ...LAYER_SPEC[l] }));
+  return (Object.keys(LAYER_SPEC) as LayerId[]).map((l) => ({ id: l, ...artUrl(`${id}/${l}`), ...LAYER_SPEC[l] }));
 }
 const undiscovered = (marker: MarkerIcon): UndiscoveredSpec => ({
   mistUrl: url('undiscovered/mist.svg'),

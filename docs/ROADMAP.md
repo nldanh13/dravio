@@ -44,6 +44,11 @@ Thứ tự PR đề xuất, mỗi PR một lát cắt có test:
 6. Một ca chăm sóc dựng sẵn (Forecast → … → Closed rút gọn)
 7. Xuất PNG Dragon Passport
 
+### G1 — Ancient Fantasy visual upgrade (ADR 0104, chờ nghiệm thu)
+- Bản giao diện chơi ưu tiên HUD thật, bảng rồng, lớp di tích cổ Meadow; giữ Renderer/Engine và asset prototype.
+- [ ] Duyệt lát cắt painterly hoàn chỉnh Emberling + Sproutling, asset tách lớp, atlas/alpha pipeline và UI trên desktop/mobile.
+- [ ] Chạy kiểm thử tích hợp trên thiết bị thật. Không đánh dấu G1 hoặc art thương mại hoàn thành chỉ vì có prototype.
+
 ### G2 — MVP offline
 3 realm, 16 loài, tổ ấp, 3 thiên tai, 4 loại chăm sóc, thám hiểm, nghiên cứu, Codex, achievement, kinh tế đầy đủ, offline receipt.
 - Art: hoạt ảnh đào hang (burrow) cho Sproutling — clip đề xuất 1.800 ms, tư thế đào riêng, hiệu ứng bụi đất; chỉ làm cùng cơ chế hang G2 (ADR 0102 mục 4).
