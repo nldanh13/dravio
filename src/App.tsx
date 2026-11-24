@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 import { DRAGON_SPECIES, getSpecies } from './data/dragons';
 import { MICRO_PER_G } from './data/economy';
 import { pairKey } from './engine/genetics/alleles';
@@ -162,25 +162,53 @@ export function App({ session }: { session: GameSession }) {
 }
 
 function Shell({ session, onToggle }: { session: GameSession; onToggle: () => void }) {
-  const { t } = useTranslation();
+  const { t, n } = useTranslation();
+  const { state } = useSyncExternalStore(session.subscribe, session.getSnapshot);
+  const origin = state?.zones.find((z) => z.id === 'origin');
+  const population = state?.dragons.filter((d) => d.location.kind === 'zone' && d.location.zoneId === 'origin').length ?? 0;
   return (
-    <main>
-      <header>
-        <div>
-          <h1>{t('app.title')}</h1>
-          <p className="muted">{t('app.tagline')}</p>
+    <main className="sanctuary-shell">
+      <header className="sanctuary-hud">
+        <div className="sanctuary-brand">
+          <span className="brand-crest" aria-hidden="true">✦</span>
+          <div>
+            <h1>{t('app.title')}</h1>
+            <p className="brand-tagline">{t('app.tagline')}</p>
+          </div>
         </div>
-        <button type="button" onClick={onToggle}>
-          {t('lang.switch')}
-        </button>
+        <div className="sanctuary-resources">
+          <div className="resource-medallion">
+            <span className="resource-coin" aria-hidden="true">✦</span>
+            <div><small>{t('save.gold')}</small><strong>{state ? n(state.goldMicro / MICRO_PER_G) : '—'}</strong></div>
+          </div>
+          <div className="resource-medallion">
+            <span className="resource-leaf" aria-hidden="true">❧</span>
+            <div><small>{t('world.dragons')}</small><strong>{origin ? population + '/' + origin.capacity : '—'}</strong></div>
+          </div>
+          <button type="button" className="hud-language" onClick={onToggle}>{t('lang.switch')}</button>
+        </div>
       </header>
-      <p className="notice">{t('app.status')}</p>
       <WorldView session={session} />
-      <ZonePanel session={session} />
-      <SavePanel session={session} />
-      <Catalog />
-      <EmberlingGallery />
-      <BreedingPreview />
+      <details className="sanctuary-drawer">
+        <summary>{t('zone.heading')} · {t('zone.storage')}</summary>
+        <ZonePanel session={session} />
+      </details>
+      <details className="sanctuary-drawer">
+        <summary>{t('catalog.heading')}</summary>
+        <Catalog />
+      </details>
+      <details className="sanctuary-drawer">
+        <summary>{t('save.heading')}</summary>
+        <SavePanel session={session} />
+      </details>
+      {import.meta.env.DEV && (
+        <details className="sanctuary-drawer dev-tools">
+          <summary>DEV</summary>
+          <p className="notice">{t('app.status')}</p>
+          <EmberlingGallery />
+          <BreedingPreview />
+        </details>
+      )}
     </main>
   );
 }
