@@ -6,7 +6,7 @@ Cập nhật: 25/11/2026 (G0 được tác giả xác nhận, G1 PR1 đã merge)
 
 | Epic | Phạm vi P0 trong GDD | Đã có | Còn thiếu |
 | --- | --- | --- | --- |
-| TD-01 Core | repository, schema, pure engine, commands, RNG/clock, save | Repo, TS strict, CI, RNG có seed, clock + cap 24h + high-water mark, `GameState`, command bus (requestId, lỗi có kiểu), domain events, validate runtime | Scheduler cho jobs, persistence IndexedDB + migration + backup |
+| TD-01 Core | repository, schema, pure engine, commands, RNG/clock, save | Repo, TS strict, CI, RNG có seed, clock + cap 24h + high-water mark, `GameState`, command bus (requestId, lỗi có kiểu), domain events, validate runtime, persistence IndexedDB + migration v1→v3 + 2 backup + import/export checksum (ADR 0006) | Scheduler cho jobs |
 | TD-02 World | graph, 3 realm, suitability, capacity, renderer | 7 microhabitat, `suitability` 0–100 với hard gate | Graph vùng, `ZoneState`, sức chứa, Canvas renderer |
 | TD-03 Dragons | 16 catalog, behavior, feeding, phenotype, inventory | Catalog 16 loài (ID + kinh tế v2), anatomy/diet/sinh cảnh G0, kiểu hình và stage dẫn xuất, sprite Emberling prototype | FSM/utility hành vi, cho ăn, bond, kho, sprite 15 loài còn lại |
 | TD-04 Genetics | recipes, preview, breeding, lineage, pity | Luật tương thích, huyết thống, preview = phân phối engine, roll lai, biến thể + pity 200, phí/thời gian ấp | Tổ ấp (`BreedingEgg`, gõ/boost, cooldown 10 phút), phả hệ đầy đủ, UI Punnett |
@@ -34,7 +34,7 @@ Nguồn: G0 Decision Pack 1.0 (`docs/g0/`, ADR 0003). Chỉ đánh dấu những
 Kịch bản nghiệm thu chạy trên gameplay thật: S01 qua PR1–PR4 (phần engine của S01 đã có test ở PR1), S02 bản giản lược ở PR6 (đầy đủ ở G2). Kiểm thử ưu tiên Windows + Chromium, ghi cấu hình thực tế.
 Thứ tự PR đề xuất, mỗi PR một lát cắt có test:
 1. [x] `GameState` + command bus (`advanceTime`, `feed` + `consumeFood`, `pet`, `renameDragon`) + validate runtime + domain events — ADR 0004, `tests/unit/gameState.test.ts`. Chưa có: trứng tutorial, nhận bonus offline (PR5)
-2. Persistence: IndexedDB, autosave 30s, export/import JSON + checksum, backup
+2. [x] Persistence: IndexedDB, autosave 30s, export/import JSON + checksum, backup — ADR 0006, `tests/unit/persistence.test.ts`, kiểm trên Chromium 158 headless (Linux). Migration v1/v2 dựng theo mô tả GDD, cần đối chiếu save Tendorya thật. Chưa kiểm trên Windows thật
 3. Zone đất Khởi Nguyên: suitability, sức chứa 5, ngân sách sản xuất
 4. Canvas renderer 2.5D + steering + FSM hành vi cơ bản; thả thức ăn (0,8s / 12s / XP mỗi 8s)
 5. Tutorial 0–15 phút: 150 G, Emberling, trứng Sproutling, mốc Adult
