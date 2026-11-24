@@ -74,3 +74,90 @@ export const browserImageLoader: ImageLoader = (url) =>
     img.onerror = () => reject(new Error(`image failed: ${url}`));
     img.src = url;
   });
+
+/**
+ * Cache ảnh theo nhu cầu (ADR 0012): `get(url)` trả ảnh nếu đã tải, nếu chưa thì bắt đầu tải và trả null
+ * (renderer bỏ qua phần đó trong khung hiện tại). Mỗi lần `get` đánh dấu "vừa dùng"; `sweep(now)` giải
+ * phóng ảnh không dùng quá `idleMs` để không giữ cả 444 khung trong bộ nhớ. Không tải Internet:
+ * URL đến từ manifest đóng gói (`?url&no-inline`).
+ */
+export interface ImageCacheStats {
+  loaded: number;
+  loading: number;
+  failed: number;
+  released: number;
+  requested: number;
+}
+
+export interface ImageCache {
+  get(url: string, nowMs: number): CanvasImageSource | null;
+  /** Tải trước (không đánh dấu dùng). */
+  prefetch(urls: Iterable<string>, nowMs: number): void;
+  /** Giải phóng ảnh không dùng quá `idleMs`; trả số ảnh đã giải phóng. */
+  sweep(nowMs: number): number;
+  has(url: string): boolean;
+  stats(): ImageCacheStats;
+  /** Chờ mọi ảnh đang tải (test/ảnh chụp). */
+  settle(): Promise<void>;
+  dispose(): void;
+}
+
+export function createImageCache(load: ImageLoader, opts: { idleMs?: number; maxFailures?: number } = {}): ImageCache {
+  const idleMs = opts.idleMs ?? 30_000;
+  const images = new Map<string, { img: CanvasImageSource; lastUsed: number }>();
+  const pending = new Map<string, Promise<void>>();
+  const failed = new Set<string>();
+  let released = 0;
+  let requested = 0;
+  let disposed = false;
+  const start = (url: string, nowMs: number) => {
+    if (images.has(url) || pending.has(url) || failed.has(url) || disposed) return;
+    requested++;
+    const p = load(url).then(
+      (img) => {
+        pending.delete(url);
+        if (!disposed) images.set(url, { img, lastUsed: nowMs });
+      },
+      () => {
+        pending.delete(url);
+        failed.add(url);
+      },
+    );
+    pending.set(url, p);
+  };
+  return {
+    get(url, nowMs) {
+      const e = images.get(url);
+      if (e) {
+        e.lastUsed = nowMs;
+        return e.img;
+      }
+      start(url, nowMs);
+      return null;
+    },
+    prefetch(urls, nowMs) {
+      for (const u of urls) start(u, nowMs);
+    },
+    sweep(nowMs) {
+      let n = 0;
+      for (const [u, e] of images) {
+        if (nowMs - e.lastUsed > idleMs) {
+          images.delete(u);
+          n++;
+        }
+      }
+      released += n;
+      return n;
+    },
+    has: (url) => images.has(url),
+    stats: () => ({ loaded: images.size, loading: pending.size, failed: failed.size, released, requested }),
+    async settle() {
+      while (pending.size > 0) await Promise.all([...pending.values()]);
+    },
+    dispose() {
+      disposed = true;
+      images.clear();
+      pending.clear();
+    },
+  };
+}

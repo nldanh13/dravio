@@ -4,7 +4,9 @@ import { createRng, hashSeed, type Rng } from '../engine/core/rng';
 import { growthStage } from '../engine/economy/rates';
 import type { DragonInstance, GrowthStage, MutationType, Personality } from '../types/game';
 import type { GameState } from '../types/state';
-import { regionOf, inWater, type HabitatRegion, type Obstacle, type Vec } from './originLayout';
+import { DRAGON_SCENE_SCALE } from '../assets/habitats/origin/manifest';
+import { altitudeAt, flightRuleFor, resolveDragonClip, type CommonSpeciesId, type DragonAnimState } from '../assets/animations/dragonAnimations';
+import { regionOf, inWater, obstacleDistance, type HabitatRegion, type Obstacle, type Vec } from './originLayout';
 import { add, arrive, avoid, contain, len, limit, resolve, scale, separate, sub } from './steering';
 
 /**
@@ -15,6 +17,12 @@ import { add, arrive, avoid, contain, len, limit, resolve, scale, separate, sub 
  * Toạ độ, vận tốc, năng lượng là trạng thái hiển thị **chỉ trong bộ nhớ**, không vào GameState/save.
  * Mọi thay đổi gameplay đi qua lệnh (`consumeFood`) do callback gửi — renderer không tự cộng XP/vàng.
  * RNG riêng (cosmetic) có seed theo rồng, không dùng RNG domain, không `Math.random`.
+ *
+ * ADR 0012 (tích hợp asset): toạ độ = px cảnh sinh cảnh; tốc độ khớp sải bước của clip
+ * (`stridePx`) để chân không trượt; mỗi agent mang trạng thái hoạt ảnh (`anim`) chọn từ clip
+ * `dragonAnimations`; độ cao bay theo clip `fly` (18/40/56 px viewBox × DRAGON_SCENE_SCALE,
+ * không nhân stageScale); hạ cánh liên tục bằng clip `landing` (`altitudeAt`); luật tập bay
+ * Zephyr Baby (`flightRuleFor`, ADR 0102 mục 2) được thực thi tại đây.
  */
 
 export type BehaviorState = 'idle' | 'wander' | 'seekFood' | 'eat' | 'rest' | 'sleep' | 'pet';
@@ -25,10 +33,38 @@ export const DECISION_JITTER_MS = 300;
 export const EAT_MS = 600;
 export const PET_MS = 1000;
 /** Bán kính "chạm" thức ăn, đơn vị thế giới. */
-export const REACH = 22;
-export const BODY_RADIUS = 18;
-const FLY_ALTITUDE = 70;
+export const REACH = 20;
+export const BODY_RADIUS = 14;
 const FOOD_RETRY_MS = 8000;
+/** Thời gian cất cánh lên độ cao bay (ms). */
+export const TAKEOFF_MS = 300;
+/** Nghỉ tối thiểu giữa hai lần tập bay của rồng có luật bay (Zephyr Baby). */
+export const PRACTICE_FLIGHT_COOLDOWN_MS = 4000;
+const STAGE_SCALE: Record<GrowthStage, number> = { baby: 0.68, juvenile: 0.85, adult: 1 };
+
+/** Độ cao bay (px cảnh) của loài/stage; 0 nếu loài không bay. Không nhân stageScale (ADR 0102 mục 3). */
+export function flightAltitude(speciesId: string, stage: GrowthStage): number {
+  const clip = resolveDragonClip(speciesId as CommonSpeciesId, 'fly');
+  return (clip?.altitude?.[stage] ?? 0) * DRAGON_SCENE_SCALE;
+}
+
+/** Tốc độ (px cảnh/s) khớp sải bước của clip: một chu kỳ ≈ 0,85 × thời lượng clip (0,8–1,2 s cho walk). */
+export function clipSpeed(speciesId: string, stage: GrowthStage, state: 'walk' | 'swim' | 'fly'): number {
+  const clip = resolveDragonClip(speciesId as CommonSpeciesId, state) ?? resolveDragonClip('emberling', 'walk');
+  const stride = (clip?.stridePx ?? 36) * DRAGON_SCENE_SCALE * STAGE_SCALE[stage];
+  return stride / (((clip?.durationMs ?? 1000) * 0.85) / 1000);
+}
+
+/** Trạng thái chăm sóc hiển thị (PR6 nối với HealthCase). */
+export type CareVisual = 'injured' | 'recovery' | null;
+
+export interface AnimState {
+  state: DragonAnimState;
+  /** ms mô phỏng lúc bắt đầu clip. */
+  since: number;
+  /** Quãng đường (px cảnh) từ đầu clip — clip di chuyển lấy pha theo quãng đường. */
+  dist: number;
+}
 
 export interface Mobility {
   walk: boolean;
@@ -70,6 +106,22 @@ export interface Agent {
   /** Mốc ăn XP gần nhất theo save (để không đi tới thức ăn khi còn cooldown). */
   lastFeedXpAtMs: number | undefined;
   rng: Rng;
+  /** Hoạt ảnh hiện tại (chỉ hiển thị). */
+  anim: AnimState;
+  /** Hạ cánh đang diễn ra: độ cao lúc bắt đầu (px cảnh). */
+  landing: { since: number; startZ: number } | null;
+  /** Cất cánh lúc (ms mô phỏng). */
+  takeoffAt: number;
+  /** Hết hạn chuyến tập bay (luật bay); null = bay tới khi tới đích. */
+  flightEndsAt: number | null;
+  /** Không được tập bay trước mốc này. */
+  noFlightUntil: number;
+  /** Nhấp nháy: lần kế tiếp và lúc kết thúc lần hiện tại (RNG cosmetic). */
+  nextBlinkAt: number;
+  blinkUntil: number;
+  care: CareVisual;
+  /** Clip một lần do bên ngoài kích hoạt (happy). */
+  oneShot: { state: DragonAnimState; until: number } | null;
 }
 
 export interface FoodVisual {
@@ -89,12 +141,21 @@ export interface LivingWorldOptions {
   seed?: string;
   /** Đêm theo giờ địa phương (lớp hiển thị); mặc định luôn ngày. */
   isNight?: () => boolean;
+  /** Rồng đang có hạn chế sức khỏe (ca chăm sóc mở…): không cất cánh. Mặc định: không. */
+  healthRestricted?: (uid: string) => boolean;
 }
 
+/**
+ * Đi tới thức ăn nhanh hơn đi dạo (thức ăn chỉ tồn tại 12 s): nhịp bước tăng theo cùng tỉ lệ vì pha
+ * clip tính theo quãng đường, nên chân vẫn không trượt.
+ */
+export const HURRY_FACTOR = 2.4;
+
 function speedOf(a: Agent): number {
-  const base = a.airborne ? 95 : a.mobility.swim && inWaterAgent(a) ? 70 : 58;
-  const stage = a.stage === 'baby' ? 0.75 : a.stage === 'juvenile' ? 0.9 : 1;
-  return base * stage;
+  const hurry = a.state === 'seekFood' ? HURRY_FACTOR : 1;
+  if (a.airborne) return clipSpeed(a.speciesId, a.stage, 'fly') * (a.state === 'seekFood' ? 1.5 : 1);
+  if (a.mobility.swim && inWaterAgent(a)) return clipSpeed(a.speciesId, a.stage, 'swim') * hurry;
+  return clipSpeed(a.speciesId, a.stage, 'walk') * hurry;
 }
 
 function inWaterAgent(a: Agent): boolean {
@@ -102,21 +163,27 @@ function inWaterAgent(a: Agent): boolean {
   return !!r && !a.airborne && inWater(r, a.pos);
 }
 
-/** Vật cản chặn rồng này lúc này: bay thì không gì; bơi thì chỉ `solid`; đi bộ thì cả mặt nước. */
+/** Vật cản rắn chặn rồng này lúc này: bay thì không gì. Mặt nước xét riêng (`blocksWater`). */
 export function blockingObstacles(a: Pick<Agent, 'airborne' | 'mobility'>, region: HabitatRegion): Obstacle[] {
   if (a.airborne) return [];
-  return region.obstacles.filter((o) => o.kind === 'solid' || (o.kind === 'water' && !a.mobility.swim));
+  return region.obstacles.filter((o) => o.kind === 'solid');
+}
+
+/** Mặt nước chặn rồng không biết bơi khi đang ở trên đất. */
+export function blocksWater(a: Pick<Agent, 'airborne' | 'mobility'>): boolean {
+  return !a.airborne && !a.mobility.swim;
 }
 
 /** Điểm có thể đứng được cho rồng (đi bộ: không trong nước/vật cản). */
 export function reachable(a: Pick<Agent, 'mobility'>, region: HabitatRegion, p: Vec): boolean {
   if (p.x < region.x0 || p.x > region.x1 || p.y < region.y0 || p.y > region.y1) return false;
-  const blocked = blockingObstacles({ airborne: false, mobility: a.mobility }, region);
-  return blocked.every((o) => Math.hypot(p.x - o.x, p.y - o.y) >= o.r + BODY_RADIUS * 0.5);
+  const walker = { airborne: false, mobility: a.mobility };
+  if (blocksWater(walker) && inWater(region, p)) return false;
+  return blockingObstacles(walker, region).every((o) => obstacleDistance(o, p, BODY_RADIUS * 0.5) >= 1);
 }
 
 function randomPoint(rng: Rng, region: HabitatRegion, ok: (p: Vec) => boolean): Vec {
-  const m = 40;
+  const m = 30;
   for (let i = 0; i < 24; i++) {
     const p = { x: region.x0 + m + rng.next() * (region.x1 - region.x0 - 2 * m), y: region.y0 + m + rng.next() * (region.y1 - region.y0 - 2 * m) };
     if (ok(p)) return p;
@@ -230,9 +297,64 @@ export class LivingWorld {
       ignoredFood: new Map(),
       lastFeedXpAtMs: d.lastFeedXpAtMs,
       rng,
+      anim: { state: 'idle', since: this.simMs, dist: 0 },
+      landing: null,
+      takeoffAt: 0,
+      flightEndsAt: null,
+      noFlightUntil: 0,
+      nextBlinkAt: this.simMs + 3000 + rng.next() * 2000,
+      blinkUntil: 0,
+      care: null,
+      oneShot: null,
     };
     a.pos = randomPoint(rng, region, (p) => reachable(a, region, p));
     return a;
+  }
+
+  /** Hiển thị chăm sóc (PR6 nối với HealthCase): injured giữ rồng nghỉ tại chỗ; recovery chạy một lần. */
+  setCare(uid: string, care: CareVisual): void {
+    const a = this.agents.get(uid);
+    if (!a || a.care === care) return;
+    a.care = care;
+    if (care) {
+      a.state = 'rest';
+      a.target = null;
+      a.foodId = null;
+      if (a.airborne) this.land(a);
+    }
+    if (care === 'recovery') {
+      const clip = resolveDragonClip(a.speciesId as CommonSpeciesId, 'recovery');
+      a.oneShot = { state: 'recovery', until: this.simMs + (clip?.durationMs ?? 1500) };
+    }
+  }
+
+  /** Clip vui một lần (ví dụ thành tựu, PR5). Không đổi GameState. */
+  celebrate(uid: string): void {
+    const a = this.agents.get(uid);
+    if (!a || a.care === 'injured') return;
+    const clip = resolveDragonClip(a.speciesId as CommonSpeciesId, 'happy');
+    a.oneShot = { state: 'happy', until: this.simMs + (clip?.durationMs ?? 900) };
+  }
+
+  private land(a: Agent): void {
+    if (a.airborne || a.z > 0.5) a.landing = { since: this.simMs, startZ: a.z };
+    a.airborne = false;
+    a.flightEndsAt = null;
+  }
+
+  private takeOff(a: Agent): boolean {
+    if (!a.mobility.fly || a.airborne) return a.airborne;
+    if (a.care || this.opts.healthRestricted?.(a.uid)) return false;
+    const rule = flightRuleFor(a.speciesId as CommonSpeciesId, a.stage);
+    if (rule) {
+      if (this.simMs < a.noFlightUntil) return false;
+      a.flightEndsAt = this.simMs + rule.minFlightMs + a.rng.next() * (rule.maxFlightMs - rule.minFlightMs);
+      a.noFlightUntil = a.flightEndsAt + PRACTICE_FLIGHT_COOLDOWN_MS;
+    } else a.flightEndsAt = null;
+    a.airborne = true;
+    a.landing = null;
+    a.takeoffAt = this.simMs;
+    return true;
   }
 
   /** Phản ứng khi người chơi vuốt ve thành công (lệnh `pet` đã được chấp nhận). */
@@ -244,7 +366,7 @@ export class LivingWorld {
     a.target = null;
     a.foodId = null;
     a.vel = { x: 0, y: 0 };
-    a.airborne = false;
+    if (a.airborne) this.land(a);
   }
 
   /**
@@ -272,7 +394,35 @@ export class LivingWorld {
       }
       this.move(a, region, dt, positions, nowMs);
       this.energy(a, dt);
+      this.animate(a, region, dt);
     }
+  }
+
+  /** Chọn clip hiển thị từ trạng thái hành vi + vận động (ADR 0012). */
+  private animate(a: Agent, region: HabitatRegion, dt: number): void {
+    if (this.simMs >= a.nextBlinkAt) {
+      a.blinkUntil = this.simMs + 140;
+      a.nextBlinkAt = this.simMs + 3000 + a.rng.next() * 2000;
+    }
+    if (a.oneShot && this.simMs >= a.oneShot.until) {
+      if (a.oneShot.state === 'recovery' && a.care === 'recovery') a.care = null;
+      a.oneShot = null;
+    }
+    const speed = len(a.vel);
+    let next: DragonAnimState;
+    if (a.landing) next = 'landing';
+    else if (a.oneShot) next = a.oneShot.state;
+    else if (a.care === 'injured') next = 'injured';
+    else if (a.state === 'pet') next = 'pet';
+    else if (a.state === 'eat') next = 'eat';
+    else if (a.state === 'sleep' || a.state === 'rest') next = 'sleep';
+    else if (a.airborne) next = 'fly';
+    else if (a.mobility.swim && inWater(region, a.pos)) next = 'swim';
+    else if (speed > 3) next = 'walk';
+    else next = 'idle';
+    if (!resolveDragonClip(a.speciesId as CommonSpeciesId, next)) next = 'idle';
+    if (next !== a.anim.state) a.anim = { state: next, since: this.simMs, dist: 0 };
+    else a.anim.dist += speed * dt;
   }
 
   private wantsSleep(a: Agent, night: boolean): boolean {
@@ -332,9 +482,11 @@ export class LivingWorld {
     if (a.state === 'wander' && a.target) return;
     if (a.rng.next() < WANDER_CHANCE[a.personality]) {
       a.state = 'wander';
-      const fly = a.mobility.fly && a.rng.next() < 0.4;
-      a.target = randomPoint(a.rng, region, (p) => fly || reachable(a, region, p));
-      a.airborne = fly;
+      const fly = a.mobility.fly && a.rng.next() < 0.4 && this.takeOff(a);
+      const rule = fly ? flightRuleFor(a.speciesId as CommonSpeciesId, a.stage) : null;
+      // Tập bay (Baby): chuyến ngắn quanh chỗ đang đứng, trong sinh cảnh hiện tại.
+      const near = (p: Vec) => !rule || len(sub(p, a.pos)) < 140;
+      a.target = randomPoint(a.rng, region, (p) => near(p) && reachable(a, region, p));
     } else {
       a.state = 'idle';
       a.target = null;
@@ -344,12 +496,32 @@ export class LivingWorld {
   private move(a: Agent, region: HabitatRegion, dt: number, all: readonly Agent[], nowMs: number): void {
     const moving = (a.state === 'wander' || a.state === 'seekFood') && a.target;
     // Hạ cánh: chỉ bay khi đang đi tới đích; nghỉ/ngủ/ăn phải ở trên đất (nơi đậu).
-    if (a.state === 'seekFood' && a.target && len(sub(a.target, a.pos)) < 60) a.airborne = false;
-    if (!moving) a.airborne = false;
-    if (a.airborne && !a.mobility.fly) a.airborne = false;
-    const targetZ = a.airborne ? FLY_ALTITUDE : 0;
-    a.z += (targetZ - a.z) * Math.min(1, dt * 3);
-    if (a.z < 0.5 && !a.airborne) a.z = 0;
+    if (a.airborne && a.state === 'seekFood' && a.target && len(sub(a.target, a.pos)) < 40) this.land(a);
+    if (a.airborne && !moving) this.land(a);
+    if (a.airborne && !a.mobility.fly) this.land(a);
+    // Luật tập bay (Zephyr Baby): hết giờ thì bắt buộc hạ cánh, kể cả chưa tới đích.
+    if (a.airborne && a.flightEndsAt !== null && this.simMs >= a.flightEndsAt) {
+      this.land(a);
+      if (a.state === 'wander') {
+        a.state = 'idle';
+        a.target = null;
+      }
+    }
+    const cruise = flightAltitude(a.speciesId, a.stage);
+    if (a.airborne) {
+      const u = Math.min(1, (this.simMs - a.takeoffAt) / TAKEOFF_MS);
+      a.z = Math.max(a.z, cruise * u * u * (3 - 2 * u));
+    } else if (a.landing) {
+      const clip = resolveDragonClip(a.speciesId as CommonSpeciesId, 'landing');
+      if (clip) {
+        const t = Math.min(1, (this.simMs - a.landing.since) / clip.durationMs);
+        a.z = altitudeAt(a.speciesId as CommonSpeciesId, clip, a.stage, t, a.landing.startZ / DRAGON_SCENE_SCALE) * DRAGON_SCENE_SCALE;
+        if (t >= 1) a.landing = null;
+      } else {
+        a.z = 0;
+        a.landing = null;
+      }
+    } else a.z = 0;
 
     let desired = { x: 0, y: 0 };
     const maxSpeed = speedOf(a);
@@ -361,7 +533,7 @@ export class LivingWorld {
     steer = add(steer, separate(a.pos, all.filter((o) => o !== a && o.habitatId === a.habitatId).map((o) => o.pos), BODY_RADIUS * 2.2, maxSpeed * 0.8));
     a.vel = limit(add(a.vel, scale(limit(steer, maxSpeed * 4), dt)), maxSpeed);
     if (!moving) a.vel = scale(a.vel, Math.max(0, 1 - dt * 6));
-    a.pos = resolve(add(a.pos, scale(a.vel, dt)), region, blocked, BODY_RADIUS * 0.5);
+    a.pos = resolve(add(a.pos, scale(a.vel, dt)), region, blocked, BODY_RADIUS * 0.5, blocksWater(a));
     const speed = len(a.vel);
     if (Math.abs(a.vel.x) > 4) a.facing = a.vel.x > 0 ? 1 : -1;
     a.phase += dt * (speed > 3 ? speed / 25 : 1);
@@ -378,7 +550,7 @@ export class LivingWorld {
         a.target = null;
         return;
       }
-      if (len(sub(f.pos, a.pos)) <= REACH && !a.airborne && a.z < 4) {
+      if (len(sub(f.pos, a.pos)) <= REACH && !a.airborne && a.z < 1) {
         const r = this.opts.consume(f.id, a.uid);
         a.foodId = null;
         a.target = null;
@@ -394,12 +566,12 @@ export class LivingWorld {
         a.vel = { x: 0, y: 0 };
       } else if (a.mobility.fly && !reachable(a, region, f.pos)) {
         // Thức ăn ở chỗ không đứng được (ví dụ giữa hồ) và rồng không bơi: bay tới rồi bỏ qua.
-        if (len(sub(f.pos, a.pos)) < 60) {
+        if (len(sub(f.pos, a.pos)) < 40) {
           a.ignoredFood.set(f.id, this.simMs + FOOD_RETRY_MS);
           a.state = 'idle';
           a.foodId = null;
           a.target = null;
-        } else a.airborne = true;
+        } else this.takeOff(a);
       }
     }
     if ((a.state === 'eat' || a.state === 'pet') && this.simMs >= a.stateUntil) a.state = 'idle';

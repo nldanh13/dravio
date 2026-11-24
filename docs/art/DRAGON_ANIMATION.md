@@ -1,7 +1,7 @@
 # Hoạt ảnh rồng Common — G1 (prototype)
 
 Trạng thái: **prototype G1 đã được tác giả duyệt** (ADR 0102, Chấp nhận 24/11/2026). Không phải hoạt ảnh thương mại cuối cùng (G3).
-Phạm vi: tài nguyên + đặc tả dữ liệu. **Không** có FSM, Behavior Engine hay renderer trong PR này.
+Phạm vi: tài nguyên + đặc tả dữ liệu. Đã tích hợp vào Canvas renderer và Living World ở ADR 0012 (`src/rendering/dragonVisual.ts`, `livingWorld.ts`); hợp đồng renderer: `docs/rendering/ASSET_CONTRACT.md` v2.
 
 ## Tổng quan
 

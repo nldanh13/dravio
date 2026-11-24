@@ -1,7 +1,7 @@
 # Môi trường Khởi Nguyên — G1 (prototype)
 
 Trạng thái: **prototype chờ tác giả duyệt** (ADR 0103). Không phải art thương mại cuối cùng (G3).
-Phạm vi: tài nguyên hình ảnh + dữ liệu bố cục. **Không** có luật domain (mở khóa, sức chứa, suitability, bố trí) — các phần đó thuộc Game Engine (ADR 0008, 0009, 0010).
+Phạm vi: tài nguyên hình ảnh + dữ liệu bố cục. **Không** có luật domain (mở khóa, sức chứa, suitability, bố trí) — các phần đó thuộc Game Engine (ADR 0008, 0009, 0010). Đã tích hợp vào renderer ở ADR 0012: `src/rendering/originLayout.ts` dẫn xuất vùng đi/mặt hồ/vật cản từ `geometry.json` và vị trí vật thể.
 
 ## Tổng quan
 

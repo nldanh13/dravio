@@ -1,0 +1,232 @@
+{
+ "when": "2026-11-24T19:43:41.015Z",
+ "browser": "158.0.8127.36",
+ "prod": {
+  "meadow": {
+   "fps": 60,
+   "p95FrameMs": 16.799999999999272,
+   "avgDrawMs": 0.2829166667109045,
+   "frames": 998,
+   "longFrames": 0,
+   "running": true,
+   "reducedMotion": false,
+   "dpr": 1,
+   "backingWidth": 926,
+   "backingHeight": 521,
+   "particles": 9,
+   "images": {
+    "loaded": 49,
+    "loading": 0,
+    "failed": 0,
+    "released": 0,
+    "requested": 49
+   }
+  },
+  "pondbank": {
+   "fps": 60,
+   "p95FrameMs": 16.700000000000728,
+   "avgDrawMs": 0.33541666668994974,
+   "frames": 1157,
+   "longFrames": 0,
+   "running": true,
+   "reducedMotion": false,
+   "dpr": 1,
+   "backingWidth": 926,
+   "backingHeight": 521,
+   "particles": 9,
+   "images": {
+    "loaded": 83,
+    "loading": 0,
+    "failed": 0,
+    "released": 0,
+    "requested": 83
+   }
+  },
+  "memory": {
+   "heapKB": [
+    4708,
+    4876,
+    4904,
+    4901,
+    5062
+   ],
+   "images": [
+    {
+     "loaded": 97,
+     "loading": 0,
+     "failed": 0,
+     "released": 18,
+     "requested": 115
+    },
+    {
+     "loaded": 92,
+     "loading": 0,
+     "failed": 0,
+     "released": 59,
+     "requested": 151
+    },
+    {
+     "loaded": 82,
+     "loading": 0,
+     "failed": 0,
+     "released": 71,
+     "requested": 153
+    },
+    {
+     "loaded": 50,
+     "loading": 0,
+     "failed": 0,
+     "released": 130,
+     "requested": 180
+    }
+   ]
+  },
+  "afterNavigation": {
+   "fps": 60,
+   "p95FrameMs": 16.79999999998836,
+   "avgDrawMs": 0.3337500000023283,
+   "frames": 7682,
+   "longFrames": 0,
+   "running": true,
+   "reducedMotion": false,
+   "dpr": 1,
+   "backingWidth": 926,
+   "backingHeight": 521,
+   "particles": 4,
+   "images": {
+    "loaded": 50,
+    "loading": 0,
+    "failed": 0,
+    "released": 130,
+    "requested": 180
+   }
+  },
+  "reload": {
+   "timeMode": "night",
+   "dragonButtons": 5,
+   "stats": {
+    "fps": 60,
+    "p95FrameMs": 16.700000000000273,
+    "avgDrawMs": 0.3152173913195324,
+    "frames": 184,
+    "longFrames": 0,
+    "running": true,
+    "reducedMotion": false,
+    "dpr": 1,
+    "backingWidth": 926,
+    "backingHeight": 521,
+    "particles": 4,
+    "images": {
+     "loaded": 46,
+     "loading": 0,
+     "failed": 0,
+     "released": 0,
+     "requested": 46
+    }
+   }
+  },
+  "reducedMotion": {
+   "fps": 60,
+   "p95FrameMs": 16.800000000000182,
+   "avgDrawMs": 0.37083333334497487,
+   "frames": 342,
+   "longFrames": 0,
+   "running": true,
+   "reducedMotion": true,
+   "dpr": 1,
+   "backingWidth": 926,
+   "backingHeight": 521,
+   "particles": 0,
+   "images": {
+    "loaded": 46,
+    "loading": 0,
+    "failed": 0,
+    "released": 0,
+    "requested": 46
+   }
+  },
+  "consoleErrors": []
+ },
+ "dev": {
+  "space": {
+   "outsideSceneSeekers": 0,
+   "insideSceneSeekers": 1
+  },
+  "animStates": [
+   "d_99e172c3da3bab73:walk",
+   "e2e-zephyr-adult:idle",
+   "e2e-zephyr-baby:walk",
+   "e2e-droplet-adult:walk",
+   "e2e-sprout-juv:walk"
+  ],
+  "animSeen": {
+   "d_99e172c3da3bab73": [
+    "idle",
+    "walk"
+   ],
+   "e2e-zephyr-adult": [
+    "eat",
+    "fly",
+    "idle",
+    "landing",
+    "sleep",
+    "walk"
+   ],
+   "e2e-zephyr-baby": [
+    "fly",
+    "idle",
+    "landing",
+    "sleep",
+    "walk"
+   ],
+   "e2e-droplet-adult": [
+    "idle",
+    "sleep",
+    "swim",
+    "walk"
+   ],
+   "e2e-sprout-juv": [
+    "idle",
+    "sleep",
+    "walk"
+   ]
+  },
+  "secondTabNotice": "Bản G1 — thế giới sống của Khu Khởi Nguyên với mỹ thuật prototype (chưa phải art thương mại cuối cùng). | Dravio đang mở ở tab khác. Tab này chỉ xem, không lưu.",
+  "assetFailure": {
+   "failedImages": 5,
+   "framesDrawn": 244,
+   "fps": 60,
+   "otherDragonsAnimating": 4
+  },
+  "touch": {
+   "seekersAfterTap": 1,
+   "canvasCss": [
+    356,
+    200
+   ],
+   "horizontalOverflow": 0,
+   "stats": {
+    "fps": 60,
+    "p95FrameMs": 16.700000000000273,
+    "avgDrawMs": 0.28518518523150493,
+    "frames": 189,
+    "longFrames": 0,
+    "running": true,
+    "reducedMotion": false,
+    "dpr": 2,
+    "backingWidth": 712,
+    "backingHeight": 400,
+    "particles": 2,
+    "images": {
+     "loaded": 22,
+     "loading": 0,
+     "failed": 0,
+     "released": 0,
+     "requested": 22
+    }
+   }
+  },
+  "pageErrors": []
+ },
+ "notes": []
+}

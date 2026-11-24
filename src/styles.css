@@ -62,8 +62,14 @@ label.button.disabled { opacity: 0.5; cursor: not-allowed; }
 .tier-unsuitable { color: #a12d2d; }
 .dev-tools { margin-top: 12px; border: 2px dashed #a12d2d; border-radius: 8px; padding: 8px 12px; }
 
-.world-frame { background: var(--card); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; overflow-y: hidden; }
-.world-canvas { display: block; width: 100%; min-width: 640px; aspect-ratio: 2.6 / 1; touch-action: pan-x pan-y; -webkit-tap-highlight-color: transparent; cursor: pointer; }
+.world-frame { background: var(--card); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+/* Một microhabitat 16:9 mỗi lần (ADR 0012): vừa chiều rộng, không cuộn ngang trên màn hình hẹp. */
+.world-canvas { display: block; width: 100%; aspect-ratio: 16 / 9; touch-action: manipulation; -webkit-tap-highlight-color: transparent; cursor: pointer; }
+.world-canvas:focus-visible { outline: 3px solid #c2572b; outline-offset: -3px; }
+.habitat-nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.habitat-nav button[aria-pressed='true'] { font-weight: 700; }
+.world-controls { align-items: flex-end; }
+.diet-option { display: inline-flex; align-items: center; gap: 4px; }
 .diet-picker { border: 1px solid var(--line); border-radius: 8px; margin-top: 12px; }
 label.inline { flex-direction: row; align-items: center; min-height: 44px; }
 input { min-height: 44px; font: inherit; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--fg); }

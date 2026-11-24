@@ -1,4 +1,5 @@
-import { SPRITES, type AssetSource } from '../assets/manifest';
+import type { AssetSource } from '../assets/manifest';
+import { COMMON_DRAGON_SPRITES, SPRITE_ANCHOR } from '../assets/dragons/manifest';
 import type { GrowthStage, MutationType } from '../types/game';
 
 /**
@@ -91,14 +92,27 @@ export function validateRenderManifest(m: unknown): string[] {
   return errors;
 }
 
-/** Manifest mặc định từ asset đã có (`src/assets/manifest.ts`): 12 sprite Emberling G0 của AI 2. */
+/**
+ * Manifest sprite tĩnh mặc định: 48 sprite Common (4 loài × 3 stage × 4 biến thể, ADR 0101).
+ * Neo chân (120, 170) — đúng điểm chạm đất trong SVG (bóng elip có tâm 175 nằm dưới chân);
+ * PR4 dùng 175 (tâm bóng), đã sửa ở ADR 0012 để khớp khung hoạt ảnh.
+ * Cảnh hoạt ảnh dùng khung + clip (`src/assets/animations`), không dùng manifest này.
+ */
 export function defaultRenderManifest(): RenderManifest {
   const dragons: RenderManifest['dragons'] = {};
-  for (const s of SPRITES) {
+  for (const s of COMMON_DRAGON_SPRITES) {
     const bySpecies = (dragons[s.speciesId] ??= {});
     const byStage = (bySpecies[s.stage] ??= {});
-    // Emberling G0: khung 240×200, chân tại (120, 175), tỉ lệ stage đã vẽ sẵn, nhìn sang phải (kiểm trong SVG).
-    byStage[s.mutation] = { url: s.url, width: 240, height: 200, anchorX: 120, anchorY: 175, stageScaled: true, facing: 'right', source: s.source };
+    byStage[s.mutation] = {
+      url: s.url,
+      width: s.width,
+      height: s.height,
+      anchorX: SPRITE_ANCHOR.x,
+      anchorY: SPRITE_ANCHOR.y,
+      stageScaled: true,
+      facing: 'right',
+      source: { origin: s.source.origin, license: s.source.license, review: s.source.review },
+    };
   }
   return { version: RENDER_MANIFEST_VERSION, dragons, habitats: {} };
 }
