@@ -3,7 +3,6 @@ import { dispatch } from '../engine/core/commands';
 import { createInitialState } from '../engine/core/initialState';
 import { createRng, hashSeed } from '../engine/core/rng';
 import { createAutosave } from '../persistence/autosave';
-import { LEGACY_V2_STORAGE_KEY } from '../persistence/migrations';
 import type { ImportPreview, SaveErrorCode } from '../persistence/saveFile';
 import { SaveManager, type SlotFailure } from '../persistence/saveManager';
 import { IndexedDbSaveStore, MemorySaveStore, type SaveStore } from '../persistence/store';
@@ -25,7 +24,9 @@ export interface SessionSnapshot {
   persistent: boolean;
   lockUnsupported: boolean;
   lastSavedAtMs: number | null;
-  loadedFrom: 'main' | 'backup1' | 'backup2' | 'legacy' | 'new' | null;
+  loadedFrom: 'main' | 'backup1' | 'backup2' | 'new' | null;
+  /** `schemaVersion` gốc nếu save vừa được migrate (bản gốc đã được giữ trong `archive:schema-N`). */
+  migratedFrom: number | null;
   failures: SlotFailure[];
   saveError: boolean;
   importPreview: ImportPreview | null;
@@ -46,6 +47,7 @@ export class GameSession {
     lockUnsupported: false,
     lastSavedAtMs: null,
     loadedFrom: null,
+    migratedFrom: null,
     failures: [],
     saveError: false,
     importPreview: null,
@@ -84,17 +86,7 @@ export class GameSession {
       persistent = false;
     }
     this.lock = await acquireWriterLock();
-    const manager = new SaveManager({
-      store,
-      nowMs: () => this.clock.nowMs(),
-      readLegacy: () => {
-        try {
-          return globalThis.localStorage.getItem(LEGACY_V2_STORAGE_KEY);
-        } catch {
-          return null;
-        }
-      },
-    });
+    const manager = new SaveManager({ store, nowMs: () => this.clock.nowMs() });
     this.manager = manager;
     manager.setReadOnly(!this.lock.acquired);
     const outcome = await manager.load();
@@ -107,7 +99,7 @@ export class GameSession {
     let state: GameState;
     if (outcome.kind === 'loaded') {
       state = outcome.save.state;
-      this.set({ loadedFrom: outcome.slot, lastSavedAtMs: outcome.save.savedAtMs });
+      this.set({ loadedFrom: outcome.slot, migratedFrom: outcome.save.migratedFrom, lastSavedAtMs: outcome.save.savedAtMs });
     } else {
       state = this.newGame();
       this.set({ loadedFrom: 'new' });

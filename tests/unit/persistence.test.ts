@@ -3,15 +3,14 @@ import { fixedClock } from '../../src/engine/core/clock';
 import { dispatch } from '../../src/engine/core/commands';
 import { createInitialState } from '../../src/engine/core/initialState';
 import { createRng } from '../../src/engine/core/rng';
-import { validateGameState } from '../../src/engine/core/validation';
 import { AUTOSAVE_INTERVAL_MS, createAutosave, type Timer } from '../../src/persistence/autosave';
-import { migrateLegacy, migrateV1toV2, type LegacySaveV1 } from '../../src/persistence/migrations';
+import { MIGRATION_STEPS, migrateState, type MigrationStep } from '../../src/persistence/migrations';
 import { MAX_SAVE_BYTES, parseSaveText } from '../../src/persistence/saveFile';
 import { SaveManager } from '../../src/persistence/saveManager';
 import { canonicalJson, createEnvelope, serializeSave, sha256Hex } from '../../src/persistence/schema';
 import { MemorySaveStore } from '../../src/persistence/store';
 import { acquireWriterLock } from '../../src/platform/writerLock';
-import type { GameState } from '../../src/types/state';
+import { SCHEMA_VERSION, type GameState } from '../../src/types/state';
 
 const T0 = Date.UTC(2026, 10, 1, 8, 0, 0);
 
@@ -26,25 +25,19 @@ function advanced(state: GameState, ms: number, requestId: string): GameState {
   return r.state;
 }
 
-function manager(store = new MemorySaveStore(), readLegacy?: () => string | null) {
+function manager(store = new MemorySaveStore()) {
   const clock = fixedClock(T0);
-  return { store, clock, mgr: new SaveManager({ store, nowMs: clock.nowMs, ...(readLegacy ? { readLegacy } : {}) }) };
+  return { store, clock, mgr: new SaveManager({ store, nowMs: clock.nowMs }) };
 }
 
-const legacyV1: LegacySaveV1 = {
-  version: 1,
-  gold: 1234.5678919,
-  lastSavedAt: T0 - 3_600_000,
-  pityCount: 17,
-  upgrades: { islandCapacityLevel: 1, foodQualityLevel: 12 },
-  dragons: [
-    { uid: 'old-ember', speciesId: 'emberling', mutation: 'golden', xp: 30, location: 'island', nickname: '  Lửa  ', locked: true },
-    { uid: 'old-drop', speciesId: 'droplet', mutation: 'normal', xp: 5000, location: 'island' },
-    { uid: 'old-sprout', speciesId: 'sprout', mutation: 'crystal', xp: 12.5, location: 'storage' },
-  ],
-};
+/** Envelope của một schemaVersion bất kỳ, checksum hợp lệ (giả lập save do bản khác ghi). */
+async function envelopeAt(version: number, state: GameState = freshState()): Promise<string> {
+  const env = await createEnvelope(state, T0);
+  const s = { ...env.state, schemaVersion: version };
+  return JSON.stringify({ ...env, schemaVersion: version, state: s, checksum: await sha256Hex(canonicalJson(s)) });
+}
 
-describe('save format v3 + checksum', () => {
+describe('Dravio Save Schema v1 + checksum', () => {
   it('canonical JSON is independent of key order and skips undefined', () => {
     expect(canonicalJson({ b: 1, a: [1, { d: 2, c: undefined }] })).toBe(canonicalJson({ a: [1, { d: 2 }], b: 1 }));
   });
@@ -82,80 +75,54 @@ describe('save format v3 + checksum', () => {
     expect(await parseSaveText('[1,2]')).toMatchObject({ code: 'bad-format' });
     expect(await parseSaveText('{"hello":1}')).toMatchObject({ code: 'bad-format' });
     const env = await createEnvelope(freshState(), T0);
-    expect(await parseSaveText(JSON.stringify({ ...env, schemaVersion: 4 }))).toMatchObject({ code: 'newer-version' });
-    expect(await parseSaveText(JSON.stringify({ ...env, schemaVersion: 2 }))).toMatchObject({ code: 'unsupported-version' });
+    expect(await parseSaveText(await envelopeAt(2))).toMatchObject({ code: 'newer-version' });
+    expect(await parseSaveText(await envelopeAt(4))).toMatchObject({ code: 'newer-version' });
+    expect(await parseSaveText(await envelopeAt(0))).toMatchObject({ code: 'unsupported-version' });
+    // Envelope và state phải cùng schemaVersion.
+    expect(await parseSaveText(JSON.stringify({ ...env, schemaVersion: 4 }))).toMatchObject({ code: 'bad-format' });
+    // Object không có envelope Dravio (kể cả dạng { version: 2, ... }) không được đoán.
+    expect(await parseSaveText(JSON.stringify({ version: 2, gold: 10, dragons: [] }))).toMatchObject({ code: 'bad-format' });
     expect(await parseSaveText('"' + 'x'.repeat(MAX_SAVE_BYTES) + '"')).toMatchObject({ code: 'too-large' });
   });
 });
 
-describe('migration v1 → v2 → v3', () => {
-  it('v1 → v2 converts XP seconds to milliseconds and keeps identity', () => {
-    const v2 = migrateV1toV2(legacyV1);
-    expect(v2.version).toBe(2);
-    expect(v2.dragons.map((d) => [d.uid, d.xpMs])).toEqual([['old-ember', 30_000], ['old-drop', 5_000_000], ['old-sprout', 12_500]]);
+describe('migration framework (schemaVersion)', () => {
+  it('Dravio Save Schema v1 is the current schema and new saves use it', () => {
+    expect(SCHEMA_VERSION).toBe(1);
+    expect(freshState().schemaVersion).toBe(1);
+    expect(MIGRATION_STEPS).toEqual([]);
   });
 
-  it('v1 → v3 produces a valid state, preserving UIDs, species, mutation and safe locations', () => {
-    const m = migrateLegacy(legacyV1);
-    expect(m.ok).toBe(true);
-    if (!m.ok) return;
-    const s = m.value;
-    expect(validateGameState(s).ok).toBe(true);
-    expect(m.fromVersion).toBe(1);
-    expect(s.schemaVersion).toBe(3);
-    expect(s.dragons.map((d) => [d.uid, d.speciesId, d.mutation])).toEqual([
-      ['old-ember', 'emberling', 'golden'],
-      ['old-drop', 'droplet', 'normal'],
-      ['old-sprout', 'sprout', 'crystal'],
-    ]);
-    const [ember, drop, sprout] = s.dragons;
-    expect(ember?.location).toEqual({ kind: 'zone', zoneId: 'origin', habitatId: 'origin_meadow' });
-    // Droplet sống ở bờ ao/cửa sông — chưa mở ở G1 → kho an toàn, không sản xuất.
-    expect(drop?.location).toEqual({ kind: 'storage' });
-    expect(sprout?.location).toEqual({ kind: 'storage' });
-    expect(s.productionDragonIds).toEqual(['old-ember']);
-    expect(ember?.nickname).toBe('Lửa');
-    expect(ember?.locked).toBe(true);
-    expect(ember?.xpSec).toBe(30);
-    // XP vượt mức trưởng thành bị chặn.
-    expect(drop?.xpSec).toBeLessThanOrEqual(5000);
-    expect(s.dragons.every((d) => d.ancestry === 'unknown' && d.generation === 1 && d.registryRef === undefined)).toBe(true);
-    expect(s.goldMicro).toBe(1_234_567_891);
-    expect(Number.isSafeInteger(s.goldMicro)).toBe(true);
-    expect(s.pityCount).toBe(17);
-    expect(s.upgrades.islandCapacityLevel).toBe(1);
-    expect(s.upgrades.foodQualityLevel).toBe(10);
-    expect(m.warnings.some((w) => w.includes('foodQualityLevel'))).toBe(true);
-    expect(m.warnings.some((w) => w.includes('old-drop'))).toBe(true);
-    expect(s.clock.lastProcessedAtMs).toBe(legacyV1.lastSavedAt);
+  it('current version passes through unchanged', () => {
+    const s = freshState() as unknown as Record<string, unknown>;
+    const r = migrateState(1, s);
+    expect(r).toEqual({ ok: true, state: s, fromVersion: 1, preRelease: false });
   });
 
-  it('is deterministic (same legacy input → same v3 state)', () => {
-    expect(migrateLegacy(legacyV1)).toEqual(migrateLegacy(structuredClone(legacyV1)));
+  it('runs future steps in order and stamps schemaVersion', () => {
+    const steps: MigrationStep[] = [
+      { from: 1, to: 2, run: (st) => ({ ...st, a: 1 }) },
+      { from: 2, to: 4, run: (st) => ({ ...st, b: (st.a as number) + 1 }) },
+    ];
+    const r = migrateState(1, { schemaVersion: 1 }, steps, 4);
+    expect(r).toEqual({ ok: true, state: { schemaVersion: 4, a: 1, b: 2 }, fromVersion: 1, preRelease: false });
   });
 
-  it('rejects unknown species, duplicate UIDs and malformed data instead of guessing', () => {
-    const bad = (patch: object) => migrateLegacy({ ...legacyV1, ...patch });
-    expect(bad({ dragons: [{ ...legacyV1.dragons[0], speciesId: 'tendoryon' }] }).ok).toBe(false);
-    expect(bad({ dragons: [legacyV1.dragons[0], legacyV1.dragons[0]] }).ok).toBe(false);
-    expect(bad({ gold: -1 }).ok).toBe(false);
-    expect(bad({ dragons: [{ ...legacyV1.dragons[0], xp: 'lots' }] }).ok).toBe(false);
-    expect(migrateLegacy({ ...legacyV1, version: 2, dragons: [{ ...legacyV1.dragons[0] }] }).ok).toBe(false);
+  it('reports a missing step, a throwing step and a newer version', () => {
+    expect(migrateState(1, { schemaVersion: 1 }, [], 2)).toMatchObject({ ok: false, code: 'unsupported-version' });
+    const boom: MigrationStep[] = [{ from: 1, to: 2, run: () => { throw new Error('bad data'); } }];
+    expect(migrateState(1, { schemaVersion: 1 }, boom, 2)).toMatchObject({ ok: false, code: 'migration-failed', details: ['1 → 2: bad data'] });
+    expect(migrateState(2, { schemaVersion: 2 })).toMatchObject({ ok: false, code: 'newer-version' });
   });
 
-  it('overflow beyond Origin capacity goes to safe storage', () => {
-    const dragons = Array.from({ length: 7 }, (_, i) => ({ uid: `e${i}`, speciesId: 'emberling', mutation: 'normal', xpMs: 0, location: 'island' }));
-    const m = migrateLegacy({ version: 2, gold: 0, lastSavedAt: T0, dragons });
-    expect(m.ok).toBe(true);
-    if (!m.ok) return;
-    expect(m.value.dragons.filter((d) => d.location.kind === 'zone')).toHaveLength(5);
-    expect(m.value.dragons.filter((d) => d.location.kind === 'storage')).toHaveLength(2);
-    expect(validateGameState(m.value).ok).toBe(true);
-  });
-
-  it('parseSaveText accepts a raw legacy JSON and reports migratedFrom', async () => {
-    const r = await parseSaveText(JSON.stringify(legacyV1));
-    expect(r.ok && r.save.migratedFrom).toBe(1);
+  it('pre-release dev saves (schemaVersion 3, same shape) are kept and read as v1', async () => {
+    const s = advanced(freshState(), 5000, 'dev');
+    const r = await parseSaveText(await envelopeAt(3, s));
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.save.migratedFrom).toBe(3);
+    expect(r.save.state).toEqual({ ...s, food: { lastSpawnAtMs: null, drops: [] }, schemaVersion: 1 });
+    expect(migrateState(3, { schemaVersion: 3 })).toMatchObject({ ok: true, preRelease: true, state: { schemaVersion: 1 } });
   });
 });
 
@@ -225,8 +192,7 @@ describe('SaveManager: load, backups, one writer', () => {
 
   it('a save written by a newer version blocks writes and is never overwritten', async () => {
     const { store } = manager();
-    const env = await createEnvelope(freshState(), T0);
-    const newer = JSON.stringify({ ...env, schemaVersion: 4 });
+    const newer = await envelopeAt(2);
     store.slots.set('main', newer);
     const mgr = new SaveManager({ store, nowMs: () => T0 });
     expect((await mgr.load()).kind).toBe('newer-version');
@@ -244,11 +210,37 @@ describe('SaveManager: load, backups, one writer', () => {
     expect(await mgr.save(freshState())).toBe(true);
   });
 
-  it('migrates a legacy localStorage save when IndexedDB is empty', async () => {
-    const { mgr } = manager(new MemorySaveStore(), () => JSON.stringify(legacyV1));
+  it('a migrated save keeps its original text in a permanent archive slot', async () => {
+    const { store } = manager();
+    const original = await envelopeAt(3, freshState());
+    store.slots.set('main', original);
+    const mgr = new SaveManager({ store, nowMs: () => T0 });
     const r = await mgr.load();
-    expect(r.kind === 'loaded' && r.slot).toBe('legacy');
-    if (r.kind === 'loaded') expect(r.save.migratedFrom).toBe(1);
+    expect(r.kind === 'loaded' && r.save.migratedFrom).toBe(3);
+    if (r.kind !== 'loaded') return;
+    // Chưa ghi gì khi chỉ đọc.
+    expect(store.writes).toBe(0);
+    let s = r.save.state;
+    expect(await mgr.save(s)).toBe(true);
+    for (let i = 0; i < 3; i++) {
+      s = advanced(s, 1000, `m${i}`);
+      await mgr.save(s);
+    }
+    // Sau nhiều lần xoay, bản gốc vẫn còn nguyên trong archive; main đã là schema v1.
+    expect(store.slots.get('archive:schema-3')).toBe(original);
+    const main = await parseSaveText((await store.get('main')) ?? '');
+    expect(main.ok && main.save.state.schemaVersion).toBe(1);
+    expect(main.ok && main.save.migratedFrom).toBeNull();
+  });
+
+  it('archive is never overwritten by a later migration of the same version', async () => {
+    const { store } = manager();
+    store.slots.set('archive:schema-3', 'first');
+    store.slots.set('main', await envelopeAt(3));
+    const mgr = new SaveManager({ store, nowMs: () => T0 });
+    const r = await mgr.load();
+    if (r.kind === 'loaded') await mgr.save(r.save.state);
+    expect(store.slots.get('archive:schema-3')).toBe('first');
   });
 
   it('serialises concurrent saves (no interleaving)', async () => {

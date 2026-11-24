@@ -7,24 +7,35 @@
 export const SLOTS = ['main', 'backup1', 'backup2'] as const;
 export type SlotId = (typeof SLOTS)[number];
 
+/** Bản gốc được giữ vĩnh viễn trước khi ghi save đã migrate, ví dụ `archive:schema-3`. */
+export type ArchiveKey = `archive:${string}`;
+
+export interface ArchiveWrite {
+  key: ArchiveKey;
+  text: string;
+}
+
 export interface SaveStore {
-  get(slot: SlotId): Promise<string | null>;
-  /** Ghi `text` vào main; main cũ → backup1; backup1 cũ → backup2. Nguyên tử. */
-  rotate(text: string): Promise<void>;
+  get(slot: SlotId | ArchiveKey): Promise<string | null>;
+  /**
+   * Ghi `text` vào main; main cũ → backup1; backup1 cũ → backup2. Nguyên tử.
+   * `archive` (nếu có) được ghi trong cùng transaction và chỉ khi khóa đó chưa tồn tại.
+   */
+  rotate(text: string, archive?: ArchiveWrite): Promise<void>;
 }
 
 /** Kho trong bộ nhớ cho test và khi trình duyệt không có IndexedDB (không bền). */
 export class MemorySaveStore implements SaveStore {
-  readonly slots = new Map<SlotId, string>();
+  readonly slots = new Map<SlotId | ArchiveKey, string>();
   /** Đếm số lần ghi để test kiểm “không ghi”. */
   writes = 0;
   failNextWrite = false;
 
-  get(slot: SlotId): Promise<string | null> {
+  get(slot: SlotId | ArchiveKey): Promise<string | null> {
     return Promise.resolve(this.slots.get(slot) ?? null);
   }
 
-  rotate(text: string): Promise<void> {
+  rotate(text: string, archive?: ArchiveWrite): Promise<void> {
     if (this.failNextWrite) {
       this.failNextWrite = false;
       return Promise.reject(new Error('simulated write failure'));
@@ -34,6 +45,7 @@ export class MemorySaveStore implements SaveStore {
     if (b1 !== undefined) this.slots.set('backup2', b1);
     if (main !== undefined) this.slots.set('backup1', main);
     this.slots.set('main', text);
+    if (archive && !this.slots.has(archive.key)) this.slots.set(archive.key, archive.text);
     this.writes++;
     return Promise.resolve();
   }
@@ -66,18 +78,24 @@ export class IndexedDbSaveStore implements SaveStore {
     });
   }
 
-  async get(slot: SlotId): Promise<string | null> {
+  async get(slot: SlotId | ArchiveKey): Promise<string | null> {
     const tx = this.db.transaction(IDB_STORE, 'readonly');
     const value: unknown = await promisify(tx.objectStore(IDB_STORE).get(slot));
     return typeof value === 'string' ? value : null;
   }
 
-  rotate(text: string): Promise<void> {
+  rotate(text: string, archive?: ArchiveWrite): Promise<void> {
     return new Promise((resolve, reject) => {
       const tx = this.db.transaction(IDB_STORE, 'readwrite', { durability: 'strict' });
       const os = tx.objectStore(IDB_STORE);
       const getMain = os.get('main');
       const getB1 = os.get('backup1');
+      if (archive) {
+        const existing = os.getKey(archive.key);
+        existing.onsuccess = () => {
+          if (existing.result === undefined) os.put(archive.text, archive.key);
+        };
+      }
       getB1.onsuccess = () => {
         // Hai request get hoàn tất theo thứ tự; khi backup1 xong thì main đã có kết quả.
         const main: unknown = getMain.result;

@@ -1,7 +1,7 @@
 import type { GameState } from '../types/state';
 import { parseSaveText, previewOf, sanitizeImportedState, type ImportPreview, type ParsedSave, type SaveErrorCode } from './saveFile';
 import { serializeSave } from './schema';
-import { SLOTS, type SaveStore, type SlotId } from './store';
+import { SLOTS, type ArchiveWrite, type SaveStore, type SlotId } from './store';
 
 /**
  * Người ghi duy nhất của save (GDD 3.1 trang 18; AI_HANDOFF PR2 “one writer”).
@@ -17,7 +17,7 @@ export interface SlotFailure {
 }
 
 export type LoadOutcome =
-  | { kind: 'loaded'; save: ParsedSave; slot: SlotId | 'legacy'; failures: SlotFailure[] }
+  | { kind: 'loaded'; save: ParsedSave; slot: SlotId; failures: SlotFailure[] }
   | { kind: 'empty' }
   /** Có dữ liệu nhưng không slot nào đọc được: không tự ghi đè, chờ người chơi quyết định. */
   | { kind: 'unrecoverable'; failures: SlotFailure[] }
@@ -28,8 +28,6 @@ export type WriteBlock = 'read-only' | 'newer-version' | 'unrecoverable' | null;
 export interface SaveManagerOptions {
   store: SaveStore;
   nowMs: () => number;
-  /** Đọc save cũ (localStorage `tendorya_save_v2`) khi IndexedDB chưa có gì. Không xóa nguồn cũ. */
-  readLegacy?: () => string | null;
 }
 
 export class SaveManager {
@@ -37,6 +35,8 @@ export class SaveManager {
   private block: WriteBlock = null;
   private pendingImport: { save: ParsedSave; preview: ImportPreview } | null = null;
   private chain: Promise<unknown> = Promise.resolve();
+  /** Save gốc trước migration: ghi kèm lần lưu đầu tiên của người ghi, không bao giờ bị xoay mất. */
+  private pendingArchive: ArchiveWrite | null = null;
 
   constructor(private readonly opts: SaveManagerOptions) {}
 
@@ -60,6 +60,10 @@ export class SaveManager {
       const r = await parseSaveText(text);
       if (r.ok) {
         this.lastSaved = slot === 'main' ? { saveId: r.save.state.saveId, revision: r.save.state.revision } : null;
+        if (r.save.migratedFrom !== null) {
+          this.pendingArchive = { key: `archive:schema-${r.save.migratedFrom}`, text };
+          this.lastSaved = null;
+        }
         return { kind: 'loaded', save: r.save, slot, failures };
       }
       failures.push({ slot, code: r.code, details: r.details });
@@ -71,12 +75,6 @@ export class SaveManager {
     if (anyData) {
       this.block = 'unrecoverable';
       return { kind: 'unrecoverable', failures };
-    }
-    const legacy = this.opts.readLegacy?.() ?? null;
-    if (legacy !== null) {
-      const r = await parseSaveText(legacy);
-      if (r.ok) return { kind: 'loaded', save: r.save, slot: 'legacy', failures };
-      // Save cũ hỏng: không chặn tạo game mới vì nguồn cũ không bị ghi đè.
     }
     return { kind: 'empty' };
   }
@@ -90,7 +88,9 @@ export class SaveManager {
       if (this.block !== null && !(opts.force === true && this.block === 'unrecoverable')) return false;
       if (!opts.force && this.lastSaved?.saveId === state.saveId && this.lastSaved.revision === state.revision) return false;
       const text = await serializeSave(state, this.opts.nowMs());
-      await this.opts.store.rotate(text);
+      const archive = this.pendingArchive;
+      await this.opts.store.rotate(text, archive ?? undefined);
+      this.pendingArchive = null;
       this.lastSaved = { saveId: state.saveId, revision: state.revision };
       if (this.block === 'unrecoverable') this.block = null;
       return true;
@@ -137,7 +137,7 @@ export class SaveManager {
     return ok ? state : null;
   }
 
-  /** Xuất file JSON có checksum (envelope v3). Không cần khóa người ghi. */
+  /** Xuất file JSON có checksum (Dravio Save Schema v1). Không cần khóa người ghi. */
   exportText(state: GameState): Promise<string> {
     return serializeSave(state, this.opts.nowMs());
   }

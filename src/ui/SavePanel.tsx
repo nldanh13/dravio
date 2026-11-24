@@ -4,6 +4,7 @@ import { MICRO_PER_G } from '../data/economy';
 import { growthStage } from '../engine/economy/rates';
 import { useTranslation } from '../i18n';
 import type { GameSession } from '../platform/gameSession';
+import { SCHEMA_VERSION } from '../types/state';
 
 /** Bảng save tối thiểu của G1 PR2: trạng thái, autosave, export/import có xác nhận. */
 export function SavePanel({ session }: { session: GameSession }) {
@@ -50,6 +51,7 @@ export function SavePanel({ session }: { session: GameSession }) {
         </ul>
       )}
       {snap.loadedFrom && snap.loadedFrom !== 'main' && <p className="muted">{t(`save.loadedFrom.${snap.loadedFrom}`)}</p>}
+      {snap.migratedFrom !== null && <p className="muted">{t('save.migrated', { from: snap.migratedFrom, to: SCHEMA_VERSION })}</p>}
 
       {state && (
         <dl className="stats">
@@ -99,7 +101,7 @@ export function SavePanel({ session }: { session: GameSession }) {
             <li>{t('save.importSavedAt', { at: time(snap.importPreview.savedAtMs) })}</li>
             <li>{t('save.importGold', { g: gold(snap.importPreview.goldMicro) })}</li>
             <li>{t('save.importDragons', { n: snap.importPreview.dragonCount, species: snap.importPreview.speciesCount })}</li>
-            {snap.importPreview.migratedFrom !== null && <li>{t('save.importMigrated', { v: snap.importPreview.migratedFrom })}</li>}
+            {snap.importPreview.migratedFrom !== null && <li>{t('save.importMigrated', { from: snap.importPreview.migratedFrom, to: SCHEMA_VERSION })}</li>}
             {snap.importPreview.warnings.length > 0 && <li>{t('save.importWarnings', { n: snap.importPreview.warnings.length })}</li>}
           </ul>
           <p>{t('save.importReplaceNote')}</p>
