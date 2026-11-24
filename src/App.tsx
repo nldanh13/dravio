@@ -163,7 +163,8 @@ export function App({ session }: { session: GameSession }) {
 
 function Shell({ session, onToggle }: { session: GameSession; onToggle: () => void }) {
   const { t, n } = useTranslation();
-  const { state } = useSyncExternalStore(session.subscribe, session.getSnapshot);
+  const snap = useSyncExternalStore(session.subscribe, session.getSnapshot);
+  const { state } = snap;
   const origin = state?.zones.find((z) => z.id === 'origin');
   const population = state?.dragons.filter((d) => d.location.kind === 'zone' && d.location.zoneId === 'origin').length ?? 0;
   return (
@@ -179,7 +180,7 @@ function Shell({ session, onToggle }: { session: GameSession; onToggle: () => vo
         <div className="sanctuary-resources">
           <div className="resource-medallion">
             <span className="resource-coin" aria-hidden="true">✦</span>
-            <div><small>{t('save.gold')}</small><strong>{state ? n(state.goldMicro / MICRO_PER_G) : '—'}</strong></div>
+            <div><small>{t('save.gold')}</small><strong>{state ? n(Math.floor(state.goldMicro / 10_000) / 100) : '—'}</strong></div>
           </div>
           <div className="resource-medallion">
             <span className="resource-leaf" aria-hidden="true">❧</span>
@@ -188,6 +189,9 @@ function Shell({ session, onToggle }: { session: GameSession; onToggle: () => vo
           <button type="button" className="hud-language" onClick={onToggle}>{t('lang.switch')}</button>
         </div>
       </header>
+      {snap.status !== 'ready' && <p className="notice" role="status">{t(`save.status.${snap.status}`)}</p>}
+      {!snap.persistent && <p className="notice">{t('save.notPersistent')}</p>}
+      {snap.saveError && <p className="notice" role="alert">{t('save.writeFailed')}</p>}
       <WorldView session={session} />
       <details className="sanctuary-drawer">
         <summary>{t('zone.heading')} · {t('zone.storage')}</summary>
