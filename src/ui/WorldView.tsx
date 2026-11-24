@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { ORIGIN_HABITAT_IDS, type OriginHabitatId } from '../assets/habitats/origin/manifest';
+import { getDragonFrame } from '../assets/animations/manifest';
 import { getCommonDragonSprite } from '../assets/dragons/manifest';
 import { FOOD_ICONS } from '../assets/icons/food/manifest';
 import { DIET_IDS, type DietId } from '../data/care';
@@ -323,11 +324,12 @@ function Inspector(props: { dragon: DragonInstance; name: string; canAct: boolea
   const species = getSpecies(dragon.speciesId);
   const stage = growthStage(dragon.xpSec, species);
   const portrait = getCommonDragonSprite(dragon.speciesId, stage, dragon.mutation);
+  const portraitFrame = portrait ? getDragonFrame(portrait.speciesId, stage, dragon.mutation, 'idle') : null;
   const growth = Math.max(0, Math.min(100, dragon.xpSec / species.growthTimeSec * 100));
   return (
     <div className="inspector" aria-live="polite">
       <div className="dragon-portrait">
-        {portrait && <img src={portrait.url} alt="" width={144} height={120} />}
+        {portrait && <img src={portraitFrame?.url ?? portrait.url} onError={(e) => { if (e.currentTarget.getAttribute('src') !== portrait.url) e.currentTarget.src = portrait.url; }} alt="" width={144} height={120} />}
         <h3>{props.name}</h3>
         <span>{t(`stage.${stage}`)} · {t(`mutation.${dragon.mutation}`)}</span>
       </div>
