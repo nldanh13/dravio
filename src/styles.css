@@ -61,3 +61,12 @@ label.button.disabled { opacity: 0.5; cursor: not-allowed; }
 .tier-needs-improvement { color: #8a5a00; }
 .tier-unsuitable { color: #a12d2d; }
 .dev-tools { margin-top: 12px; border: 2px dashed #a12d2d; border-radius: 8px; padding: 8px 12px; }
+
+.world-frame { background: var(--card); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; overflow-y: hidden; }
+.world-canvas { display: block; width: 100%; min-width: 640px; aspect-ratio: 2.6 / 1; touch-action: pan-x pan-y; -webkit-tap-highlight-color: transparent; cursor: pointer; }
+.diet-picker { border: 1px solid var(--line); border-radius: 8px; margin-top: 12px; }
+label.inline { flex-direction: row; align-items: center; min-height: 44px; }
+input { min-height: 44px; font: inherit; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--fg); }
+.inspector { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; background: var(--card); margin-top: 12px; }
+.inspector h3 { margin: 4px 0; }
+button[aria-pressed='true'] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
