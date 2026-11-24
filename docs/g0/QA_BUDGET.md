@@ -35,3 +35,10 @@ G0–G1 mục tiêu chi tiền 0 nếu đã có máy và dùng asset code tự t
 ## Gate
 
 Bộ hồ sơ G0 đã đủ quyết định thiết kế để AI bắt đầu G1. G0 tích hợp chỉ đánh dấu Done sau khi module anatomy đã merge/test trên repo, tác giả xem prototype và xác nhận thiết bị/trần ngân sách. Cổng kiểm thử game/nền tảng vẫn pending. Không tuyên bố đã hoàn tất QA hoặc phát hành.
+
+## Quyết định của tác giả (25/11/2026)
+
+Phần trên giữ nguyên làm lịch sử. Tác giả đã phê duyệt:
+
+- **Thiết bị:** chấp thuận toàn bộ cấu hình mục tiêu ở bảng trên. G1 ưu tiên **Windows + Chromium**. Không mua thêm thiết bị ngay. Mỗi báo cáo kiểm thử ghi cấu hình thực tế (model/OS/trình duyệt/RAM/DPR); mô phỏng trình duyệt **không** được tính là kiểm thử native.
+- **Ngân sách (trần lập kế hoạch, không phải quyền chi):** G0–G1 2.000.000 VNĐ; G2–G4 10.000.000 VNĐ; G5–G6 12.000.000 VNĐ; tổng 24.000.000 VNĐ. Mục tiêu chi thực tế G0–G1 là 0 đồng. Không dùng dịch vụ trả phí hoặc phát sinh chi phí khi chưa được tác giả phê duyệt riêng.
