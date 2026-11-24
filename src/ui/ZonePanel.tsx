@@ -5,6 +5,7 @@ import { growthStage } from '../engine/economy/rates';
 import { speciesSuitability, suitabilityTier } from '../engine/world/habitat';
 import { DISCOVERY_IDS } from '../data/habitatUnlocks';
 import { currentProductionBudget, habitatUnlockStatus, habitatsOfZone, placementOptions, zoneOccupancy } from '../engine/world/zones';
+import { surveyRequirementMet } from '../engine/world/survey';
 import { useTranslation } from '../i18n';
 import type { GameSession } from '../platform/gameSession';
 import type { DragonInstance } from '../types/game';
@@ -98,10 +99,25 @@ export function ZonePanel({ session }: { session: GameSession }) {
                     {t('zone.locked')} · {t('zone.lockedHint')}
                   </p>
                   {status?.requires && <p className="muted">{t(`zone.requires.${status.requires}`)}</p>}
+                  {status?.requires && !status.eligible && (
+                    <>
+                      <p className="muted">{t(`zone.surveyHint.${status.requires}`)}</p>
+                      <button
+                        type="button"
+                        disabled={!canAct || !surveyRequirementMet(state, status.requires)}
+                        onClick={() => send({ type: 'surveyHabitat', habitatId: h })}
+                      >
+                        {t('zone.survey')}
+                      </button>
+                    </>
+                  )}
                   {status?.eligible && (
-                    <button type="button" disabled={!canAct} onClick={() => send({ type: 'unlockHabitat', habitatId: h })}>
-                      {t('zone.unlock')}
-                    </button>
+                    <>
+                      <p className="muted">{t('zone.discovered')}</p>
+                      <button type="button" disabled={!canAct} onClick={() => send({ type: 'unlockHabitat', habitatId: h })}>
+                        {t('zone.unlock')}
+                      </button>
+                    </>
                   )}
                 </>
               ) : list.length === 0 ? (

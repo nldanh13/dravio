@@ -172,7 +172,7 @@ describe('unlockHabitat (ADR 0009): free, condition-checked, no capacity change'
     const s = withDragons(unlock(state, 'origin_warm_rocks', 'origin_pondbank'), adult('drop', 'droplet'));
     clock.advance(100_000);
     const moved = ok(s, { type: 'moveDragon', dragonUid: firstUid(s), target: { kind: 'zone', zoneId: 'origin', habitatId: 'origin_warm_rocks' } }, clock);
-    expect(moved.state.goldMicro - s.goldMicro).toBe(1_000_000);
+    expect(moved.state.totalGoldEarnedMicro - s.totalGoldEarnedMicro).toBe(1_000_000);
     expect(isProducing(moved.state, moved.state.dragons[0] as DragonInstance)).toBe(true);
     expect(run(moved.state, { type: 'moveDragon', dragonUid: 'drop', target: meadow }, clock)).toMatchObject({ ok: false, error: { code: 'habitat-unsuitable' } });
     const placed = ok(moved.state, { type: 'moveDragon', dragonUid: 'drop', target: { kind: 'zone', zoneId: 'origin', habitatId: 'origin_pondbank' } }, clock);

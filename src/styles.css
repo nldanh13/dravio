@@ -70,3 +70,11 @@ input { min-height: 44px; font: inherit; padding: 0 12px; border-radius: 8px; bo
 .inspector { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; background: var(--card); margin-top: 12px; }
 .inspector h3 { margin: 4px 0; }
 button[aria-pressed='true'] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.profile { border-top: 1px dashed var(--line); margin-top: 8px; padding-top: 6px; }
+.profile h4 { margin: 4px 0; }
+.profile p { margin: 2px 0; }
+.tutorial-current { border-left: 3px solid var(--accent); padding-left: 10px; }
+.tutorial-steps { padding-left: 1.5em; }
+.tutorial-steps li.done { color: var(--muted, inherit); }
+.tutorial-steps li.current { font-weight: 600; }
+.achievements { padding-left: 1.2em; }

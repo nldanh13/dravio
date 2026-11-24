@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { DIET_IDS, type DietId } from '../data/care';
 import { getSpecies } from '../data/dragons';
+import { getBiology } from '../data/g0Biology';
 import { systemClock } from '../engine/core/clock';
 import type { CommandError } from '../engine/core/errors';
 import { growthStage } from '../engine/economy/rates';
@@ -153,6 +154,9 @@ export function WorldView({ session }: { session: GameSession }) {
       setNotice(t('world.petted'));
     } else setNotice(null);
   };
+  const viewProfile = (d: DragonInstance) => {
+    setError(session.send({ type: 'viewBiologyProfile', speciesId: d.speciesId }));
+  };
   const rename = (d: DragonInstance, nickname: string | null) => {
     setError(session.send({ type: 'renameDragon', dragonUid: d.uid, nickname }));
     setNotice(null);
@@ -194,16 +198,25 @@ export function WorldView({ session }: { session: GameSession }) {
         </div>
       )}
       {dragon && (
-        <Inspector key={dragon.uid} dragon={dragon} name={nameOf(dragon.uid)} canAct={canAct} onPet={() => pet(dragon)} onRename={(n) => rename(dragon, n)} onClose={() => setSelected(null)} />
+        <Inspector key={dragon.uid} dragon={dragon} name={nameOf(dragon.uid)} canAct={canAct} onPet={() => pet(dragon)} onRename={(n) => rename(dragon, n)} onProfile={() => viewProfile(dragon)} onClose={() => setSelected(null)} />
       )}
     </section>
   );
 }
 
-function Inspector(props: { dragon: DragonInstance; name: string; canAct: boolean; onPet: () => void; onRename: (n: string | null) => void; onClose: () => void }) {
+function Inspector(props: {
+  dragon: DragonInstance;
+  name: string;
+  canAct: boolean;
+  onPet: () => void;
+  onRename: (n: string | null) => void;
+  onProfile: () => void;
+  onClose: () => void;
+}) {
   const { t } = useTranslation();
   const { dragon, canAct } = props;
   const [nameDraft, setNameDraft] = useState(dragon.nickname ?? '');
+  const [profileOpen, setProfileOpen] = useState(false);
   return (
     <div className="inspector" aria-live="polite">
       <h3>
@@ -224,10 +237,22 @@ function Inspector(props: { dragon: DragonInstance; name: string; canAct: boolea
         <button type="button" disabled={!canAct} onClick={props.onPet}>
           {t('world.pet')}
         </button>
+        <button
+          type="button"
+          aria-expanded={profileOpen}
+          disabled={!canAct && !profileOpen}
+          onClick={() => {
+            if (!profileOpen) props.onProfile();
+            setProfileOpen(!profileOpen);
+          }}
+        >
+          {profileOpen ? t('profile.close') : t('profile.open')}
+        </button>
         <button type="button" onClick={props.onClose}>
           {t('world.deselect')}
         </button>
       </div>
+      {profileOpen && <BiologyProfile speciesId={dragon.speciesId} />}
       <form
         className="row compact"
         onSubmit={(e) => {
@@ -255,6 +280,27 @@ function Inspector(props: { dragon: DragonInstance; name: string; canAct: boolea
           </button>
         )}
       </form>
+    </div>
+  );
+}
+
+/** Hồ sơ sinh học đọc từ dữ liệu canonical G0 (`g0Biology.ts`), không tự suy diễn. */
+function BiologyProfile({ speciesId }: { speciesId: string }) {
+  const { t } = useTranslation();
+  const b = getBiology(speciesId);
+  return (
+    <div className="profile" role="region" aria-label={t('profile.heading', { species: t(`species.${speciesId}`) })}>
+      <h4>{t('profile.heading', { species: t(`species.${speciesId}`) })}</h4>
+      <p>{t('profile.thermal', { bands: b.thermalBands.map((x) => t(`thermal.${x}`)).join(', ') })}</p>
+      <p>{t('profile.habitats', { habitats: b.habitatRules.map((h) => t(`habitat.${h}`)).join(', ') })}</p>
+      <p>{t('profile.diet', { diets: b.dietIds.map((x) => t(`diet.${x}` as `diet.${DietId}`)).join(', ') })}</p>
+      <p className="muted">
+        {t('profile.body', {
+          respiration: t(`respiration.${b.respiration}`),
+          locomotion: b.locomotion.map((x) => t(`locomotion.${x}`)).join(', '),
+          activity: t(`activity.${b.activity}`),
+        })}
+      </p>
     </div>
   );
 }

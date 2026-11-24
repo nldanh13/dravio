@@ -4,7 +4,8 @@ import { SCHEMA_VERSION } from '../types/state';
 /**
  * Migration save Dravio theo `schemaVersion` (GDD 3.1 trang 18; ADR 0006, 0007).
  *
- * Dravio Save Schema v1 là định dạng chính thức đầu tiên; v1 → v2 thêm `discoveries` (ADR 0009).
+ * Dravio Save Schema v1 là định dạng chính thức đầu tiên; v1 → v2 thêm `discoveries` (ADR 0009);
+ * v2 → v4 thêm hướng dẫn, trứng chờ nhận, thành tựu (ADR 0013; số 3 dành riêng).
  * Khi schema đổi, thêm một bước `{ from, to, run }` + fixture save của bản trước + test;
  * save gốc luôn được lưu riêng trước khi ghi bản đã migrate (SaveManager).
  */
@@ -38,6 +39,29 @@ export const MIGRATION_STEPS: readonly MigrationStep[] = [
       }
       const discoveries = DISCOVERY_IDS.filter((id) => Object.entries(HABITAT_UNLOCK_RULES).some(([h, r]) => r.requires === id && opened.has(h)));
       return { ...state, discoveries };
+    },
+  },
+  /**
+   * v2 → v4 (ADR 0013; số 3 dành riêng): thêm tiến trình hướng dẫn, trứng chờ nhận, thành tựu.
+   * Save cũ bắt đầu hướng dẫn ở trạng thái đang chạy; các bước có điều kiện đã thỏa trong state
+   * (ví dụ sinh cảnh đã mở) được engine tự đánh dấu ở lệnh kế tiếp. Không cộng vàng ở bước migration.
+   */
+  {
+    from: 2,
+    to: 4,
+    run(state) {
+      for (const k of ['tutorial', 'pendingPack', 'unlockedAchievements', 'claimedAchievements']) {
+        if (k in state) throw new Error(`v2 state already has ${k}`);
+      }
+      const clock = state.clock as { lastProcessedAtMs?: unknown } | undefined;
+      const startedAtMs = typeof clock?.lastProcessedAtMs === 'number' ? clock.lastProcessedAtMs : 0;
+      return {
+        ...state,
+        tutorial: { status: 'active', completed: [], startedAtMs, profilesViewed: [], starterPackUsed: false },
+        pendingPack: null,
+        unlockedAchievements: [],
+        claimedAchievements: [],
+      };
     },
   },
 ];

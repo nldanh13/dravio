@@ -1,3 +1,4 @@
+import { isAchievementId } from '../../data/achievements';
 import { DIET_IDS } from '../../data/care';
 import { HABITAT_UNLOCK_RULES, isDiscoveryId } from '../../data/habitatUnlocks';
 import { DRAGON_SPECIES } from '../../data/dragons';
@@ -5,6 +6,7 @@ import { UPGRADES } from '../../data/economy';
 import { HABITAT_PROFILES, type HabitatId } from '../../data/g0Biology';
 import { P0_ZONE_CAPACITY } from '../../data/worldGraph';
 import { LOCI } from '../../data/genetics';
+import { TUTORIAL_STEP_IDS } from '../../data/tutorial';
 import type { GameState } from '../../types/state';
 import { productionBudget } from '../economy/rates';
 import { isValidGenotype } from '../genetics/alleles';
@@ -225,12 +227,62 @@ export function validateGameState(input: unknown): ValidationResult {
     errors.push('discoveries: invalid');
   }
 
+  validateProgress(s, errors);
+
   const r = s.offlineReceipt;
   if (r !== null && !(isObj(r) && isStr(r.id) && isInt(r.fromMs) && isInt(r.toMs) && r.toMs >= r.fromMs && isInt(r.goldMicro) && r.goldMicro >= 0 && Array.isArray(r.maturedIds) && typeof r.bonusClaimed === 'boolean' && isInt(r.createdAtMs))) {
     errors.push('offlineReceipt: invalid');
   }
 
   return errors.length === 0 ? { ok: true, state: input as unknown as GameState } : { ok: false, errors };
+}
+
+const uniqueStrings = (v: unknown, ok: (x: unknown) => boolean): v is string[] =>
+  Array.isArray(v) && v.every(ok) && new Set(v).size === v.length;
+
+/** Schema v4: hướng dẫn, trứng chờ nhận, thành tựu (ADR 0013). */
+function validateProgress(s: Obj, errors: string[]): void {
+  const t = s.tutorial;
+  if (!isObj(t)) {
+    errors.push('tutorial: not an object');
+  } else {
+    if (!oneOf(t.status, ['active', 'skipped', 'completed'] as const)) errors.push('tutorial.status: invalid');
+    // Bước hoàn thành theo thứ tự nên `completed` luôn là tiền tố của TUT_01…TUT_08.
+    const c = t.completed;
+    if (!Array.isArray(c) || c.length > TUTORIAL_STEP_IDS.length || !c.every((id, i) => id === TUTORIAL_STEP_IDS[i])) {
+      errors.push('tutorial.completed: not an ordered prefix of TUT_01…TUT_08');
+    } else if (t.status === 'completed' && c.length !== TUTORIAL_STEP_IDS.length) {
+      errors.push('tutorial.status: completed with steps missing');
+    }
+    if (!isInt(t.startedAtMs) || t.startedAtMs < 0) errors.push('tutorial.startedAtMs: invalid');
+    if (!uniqueStrings(t.profilesViewed, (x) => isStr(x) && SPECIES.has(x))) errors.push('tutorial.profilesViewed: invalid');
+    if (typeof t.starterPackUsed !== 'boolean') errors.push('tutorial.starterPackUsed: not boolean');
+  }
+
+  const p = s.pendingPack;
+  if (p !== null) {
+    const species = isObj(p) && isStr(p.speciesId) ? SPECIES.get(p.speciesId) : undefined;
+    if (
+      !isObj(p) ||
+      !isStr(p.id) || p.id.length === 0 || p.id.length > 64 ||
+      !isStr(p.packId) ||
+      !species ||
+      !isValidGenotype(p.genotype, species.loci) ||
+      !oneOf(p.mutation, ['normal', 'crystal', 'golden', 'prismatic'] as const) ||
+      !isInt(p.createdAtMs) || p.createdAtMs < 0 ||
+      typeof p.tutorial !== 'boolean'
+    ) {
+      errors.push('pendingPack: invalid');
+    } else if (p.tutorial && !(isObj(t) && t.starterPackUsed === true)) {
+      errors.push('pendingPack: tutorial pack without starterPackUsed');
+    }
+  }
+
+  const unlocked = s.unlockedAchievements;
+  if (!uniqueStrings(unlocked, isAchievementId)) errors.push('unlockedAchievements: invalid');
+  const claimed = s.claimedAchievements;
+  if (!uniqueStrings(claimed, isAchievementId)) errors.push('claimedAchievements: invalid');
+  else if (Array.isArray(unlocked) && !claimed.every((id) => unlocked.includes(id))) errors.push('claimedAchievements: not unlocked');
 }
 
 /** Kiểm nhanh một rồng (dùng trong test và lệnh tạo rồng sau này). */

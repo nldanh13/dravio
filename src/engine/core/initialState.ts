@@ -19,7 +19,7 @@ export const STARTING_GOLD_MICRO = 150_000_000;
 /**
  * Save mới (GDD trang 4, kịch bản S01): 150 G, một Emberling baby XP 0 ở origin_meadow,
  * đã chọn vào slot sản xuất, biến thể Normal. Origin mở (5 chỗ, chỉ đồng cỏ), Ocean/Sky khóa.
- * Trứng hướng dẫn Sprout thuộc G1 PR5 (tutorial).
+ * Hướng dẫn bắt đầu ngay (TUT_01); trứng Sproutling mua qua gói Starter hướng dẫn (ADR 0013).
  */
 export function createInitialState(opts: { saveId: string; nowMs: number; rng: Rng }): GameState {
   const { saveId, nowMs, rng } = opts;
@@ -62,6 +62,10 @@ export function createInitialState(opts: { saveId: string; nowMs: number; rng: R
     upgrades: { islandCapacityLevel: 0, foodQualityLevel: 0, foodCooldownLevel: 0, mutationLuckLevel: 0, hatchSpeedLevel: 0 },
     food: { lastSpawnAtMs: null, drops: [] },
     discoveries: [],
+    tutorial: { status: 'active', completed: [], startedAtMs: nowMs, profilesViewed: [], starterPackUsed: false },
+    pendingPack: null,
+    unlockedAchievements: [],
+    claimedAchievements: [],
     processedRequestIds: [],
     pityCount: 0,
     stats: {
