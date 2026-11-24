@@ -1,3 +1,4 @@
+import meadowRuinsUrl from '../assets/habitats/origin/ancient/meadow-ruins.svg?url&no-inline';
 import type { Clock } from '../engine/core/clock';
 import { createRng, hashSeed, type Rng } from '../engine/core/rng';
 import { getDragonEffect, type DragonEffectId } from '../assets/effects/manifest';
@@ -662,6 +663,9 @@ export class CanvasRenderer {
         const px = (this.cam.fx - SCENE.width / 2) * (1 - layer.parallax);
         const py = (this.cam.fy - SCENE.height / 2) * (1 - layer.parallax);
         const ok = this.blit(layer.url, v.ox + (tile.dx + px) * v.k, v.oy + py * v.k, layer.width * v.k, layer.height * v.k);
+        if (layerId === 'mid' && tile.id === 'origin_meadow') {
+          this.blit(meadowRuinsUrl, v.ox + (tile.dx + px) * v.k, v.oy + py * v.k, layer.width * v.k, layer.height * v.k);
+        }
         if (!ok && layerId === 'sky') {
           ctx.fillStyle = '#cfe6ef';
           ctx.fillRect(v.ox + (tile.dx + px) * v.k, v.oy + py * v.k, SCENE.width * v.k, 330 * v.k);
