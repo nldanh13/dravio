@@ -8,7 +8,7 @@ Tài liệu thiết kế nguồn: [`docs/gdd/Dravio_GDD_3.1.docx`](docs/gdd/Drav
 
 ## Trạng thái
 
-Giai đoạn **G1 — Vertical slice** (xem [`docs/ROADMAP.md`](docs/ROADMAP.md)). Đã có: engine thuần TypeScript (16 loài, sinh học G0, suitability, di truyền P0, kinh tế, RNG/clock), `GameState` + command bus, save IndexedDB (Dravio Save Schema v2, 2 backup, import/export checksum, migration), zone Khởi Nguyên với 3 microhabitat và mở khóa theo khám phá, quy tắc thời gian online/offline theo vòng đời trang, chống ghi đè save giữa nhiều tab, world graph dữ liệu. UI hiện là bảng điều khiển HTML; **chưa có Canvas renderer** (G1 PR4 phần B), tutorial (PR5), ca chăm sóc (PR6), hộ chiếu (PR7). Kiểm thử trình duyệt: Chromium headless trên Linux; **Windows + Chromium trên thiết bị thật chưa kiểm thử**.
+Giai đoạn **G1 — Vertical slice** (xem [`docs/ROADMAP.md`](docs/ROADMAP.md)). Đã có: engine thuần TypeScript (16 loài, sinh học G0, suitability, di truyền P0, kinh tế, RNG/clock), `GameState` + command bus, save IndexedDB (Dravio Save Schema v2, 2 backup, import/export checksum, migration), zone Khởi Nguyên với 3 microhabitat và mở khóa theo khám phá, quy tắc thời gian online/offline theo vòng đời trang, chống ghi đè save giữa nhiều tab, world graph dữ liệu. Cảnh 2.5D Canvas của Khu Khởi Nguyên: rồng sống theo FSM và steering, thả thức ăn, chọn, vuốt ve, đổi tên (G1 PR4); nền sinh cảnh còn tạm thời, chờ asset của AI 2. Chưa có tutorial (PR5), ca chăm sóc (PR6), hộ chiếu (PR7). Kiểm thử trình duyệt: Chromium headless trên Linux; **Windows + Chromium trên thiết bị thật chưa kiểm thử**.
 
 ## Lệnh
 
@@ -38,7 +38,8 @@ src/
     progression/ tăng trưởng, stage
   persistence/  envelope + checksum, migration, IndexedDB 3 slot, autosave, import/export
   platform/     GameSession (nối engine + save cho trình duyệt), vòng đời trang, khóa người ghi
-  ui/           bảng điều khiển React (zone, save)
+  rendering/    thế giới sống (FSM, steering), Canvas 2.5D, hợp đồng asset cho AI 2
+  ui/           React: cảnh thế giới, zone, save
   i18n/         VI/EN cùng bộ key
 tests/unit/     test các bất biến domain
 tests/fixtures/ save thật của schema cũ cho test migration
