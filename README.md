@@ -4,11 +4,11 @@
 
 Cozy Dragon Ecosystem & Sanctuary Simulation: mô phỏng hệ sinh thái rồng, di truyền, chăm sóc, cứu hộ, bảo tồn và kết nối cộng đồng. Chơi đơn offline-first; Web → Steam → Android/iOS trên cùng một lõi.
 
-Tài liệu thiết kế nguồn: [`docs/gdd/Dravio_GDD_3.1.docx`](docs/gdd/Dravio_GDD_3.1.docx). Lộ trình và hiện trạng: [`docs/ROADMAP.md`](docs/ROADMAP.md).
+Tài liệu thiết kế nguồn: [`docs/gdd/Dravio_GDD_3.1.docx`](docs/gdd/Dravio_GDD_3.1.docx). Lộ trình và hiện trạng: [`docs/ROADMAP.md`](docs/ROADMAP.md). Quyết định G0: [`docs/adr/0003-g0-decisions.md`](docs/adr/0003-g0-decisions.md), [`docs/g0/`](docs/g0/).
 
 ## Trạng thái
 
-Giai đoạn **G0 / TD-01 Core**: khung dự án và engine thuần TypeScript cho các luật đã chốt trong GDD (catalog 16 loài, di truyền P0, RNG/clock, công thức kinh tế). Chưa có gameplay, renderer hay save.
+Giai đoạn **G0 / TD-01 Core**: khung dự án, engine thuần TypeScript (catalog 16 loài với dữ liệu sinh học G0, sinh cảnh/suitability, di truyền P0, RNG/clock, công thức kinh tế) và prototype mỹ thuật Emberling. Chưa có gameplay, renderer hay save.
 
 ## Lệnh
 

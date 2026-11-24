@@ -41,3 +41,27 @@ describe('species catalog', () => {
     expect(Object.keys(en).sort()).toEqual(Object.keys(vi).sort());
   });
 });
+
+describe('economy baseline is unchanged by the G0 integration', () => {
+  it('matches the v2 table on GDD page 6 for all 16 species', () => {
+    const table = DRAGON_SPECIES.map((s) => [s.id, s.rarity, s.group, s.baseRateMicroG, s.growthTimeSec / 60, s.baseSellG, s.packEligible]);
+    expect(table).toEqual([
+      ['emberling', 'common', 'T', 25_000, 5, 75, true],
+      ['droplet', 'common', 'A', 25_000, 6, 75, true],
+      ['sprout', 'common', 'T', 27_000, 8, 80, true],
+      ['zephyr', 'common', 'V', 28_000, 8, 85, true],
+      ['steamdrake', 'rare', 'A', 70_000, 25, 350, true],
+      ['magma', 'rare', 'T', 75_000, 30, 380, true],
+      ['sparkwing', 'rare', 'V', 80_000, 35, 400, true],
+      ['frostfin', 'rare', 'A', 75_000, 30, 380, true],
+      ['mossback', 'rare', 'A', 72_000, 25, 360, true],
+      ['blossom', 'rare', 'V', 80_000, 35, 400, true],
+      ['solaris', 'epic', 'V', 180_000, 120, 1800, true],
+      ['leviathan', 'epic', 'A', 200_000, 150, 2000, true],
+      ['amberhorn', 'epic', 'T', 200_000, 150, 2000, false],
+      ['aurorawing', 'epic', 'V', 220_000, 180, 2200, false],
+      ['celestia', 'legendary', 'V', 500_000, 360, 10_000, true],
+      ['gaia', 'legendary', 'A', 550_000, 480, 11_000, true],
+    ]);
+  });
+});

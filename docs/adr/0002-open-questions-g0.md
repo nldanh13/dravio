@@ -1,6 +1,6 @@
 # ADR 0002 — Diễn giải tạm cho các điểm GDD chưa rõ (G0)
 
-Trạng thái: Đề xuất — cần tác giả GDD xác nhận
+Trạng thái: **Superseded by [ADR 0003](0003-g0-decisions.md)** (24/11/2026). Giữ lại làm lịch sử; mọi câu trả lời chính thức nằm trong ADR 0003.
 
 | # | Điểm chưa rõ | Diễn giải tạm trong code | Vị trí |
 | --- | --- | --- | --- |

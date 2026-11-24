@@ -1,24 +1,22 @@
 import type { Anatomy, BodyStyle, BreedingGroup, DragonSpecies, ElementType, Rarity, Realm } from '../types/game';
 
+import { getBiology } from './g0Biology';
+
 /**
  * Catalog 16 loài (GDD 3.1 trang 6). Giữ ID và chỉ số kinh tế baseline v2.
- * Anatomy ở đây là bản nháp suy từ cột "nhóm / sinh cảnh"; ngưỡng sinh lý chi tiết chốt ở G0.
+ * Anatomy, sinh cảnh, palette lấy từ dữ liệu G0 canonical (`g0Biology.ts`, ADR 0003);
+ * không suy ra từ nguyên tố. Nhóm sinh sản được đối chiếu với G0 khi nạp catalog.
  */
 
 const P0_LOCI = ['pigment', 'pattern', 'eye'] as const;
 
-function anatomyFor(realms: readonly Realm[], group: BreedingGroup): Anatomy {
-  const locomotion: Anatomy['locomotion'][number][] = [];
-  if (realms.includes('land')) locomotion.push('walk');
-  if (realms.includes('ocean') || group === 'A') locomotion.push('swim');
-  if (realms.includes('sky')) locomotion.push('fly');
-  return {
-    respiration: group === 'A' ? 'dual' : 'lung',
-    locomotion,
-    protection: 'scale',
-    activity: 'both',
-    draft: true,
-  };
+function biologyFor(id: string, group: BreedingGroup) {
+  const { group: g0Group, habitatRules, palette, silhouetteVi, ...anatomy } = getBiology(id);
+  if (g0Group !== group) {
+    throw new Error(`Species ${id}: group ${group} in catalog disagrees with G0 biology ${g0Group}`);
+  }
+  const fullAnatomy: Anatomy = anatomy;
+  return { anatomy: fullAnatomy, habitatRules, palette, silhouetteVi };
 }
 
 interface Row {
@@ -63,7 +61,7 @@ export const DRAGON_SPECIES: readonly DragonSpecies[] = ROWS.map((r) => ({
   group: r.group,
   realms: r.realms,
   habitatTags: r.habitatTags ?? [],
-  anatomy: anatomyFor(r.realms, r.group),
+  ...biologyFor(r.id, r.group),
   loci: P0_LOCI,
   packEligible: r.packEligible ?? true,
   baseRateMicroG: Math.round(r.rate * 1_000_000),

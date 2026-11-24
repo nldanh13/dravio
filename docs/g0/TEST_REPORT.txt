@@ -1,0 +1,7 @@
+PASS: 235 assertions (standalone G0 catalog/suitability only)
+
+Command: tsc --strict --target ES2020 --module commonjs --outDir /tmp/dravio-g0-test src/data/g0Biology.ts tests/g0/biology.smoke.ts
+Command: node /tmp/dravio-g0-test/tests/g0/biology.smoke.js
+Scope: standalone smoke; repo tests, CI, game and native not run.
+Version 5.8.3
+v22.16.0
