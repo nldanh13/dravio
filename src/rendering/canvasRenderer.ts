@@ -621,8 +621,8 @@ export class CanvasRenderer {
   }
 
   /** Vẽ ảnh tại toạ độ màn hình CSS (nếu đã tải). */
-  private blit(url: string, x: number, y: number, w: number, h: number): boolean {
-    const im = this.img(url);
+  private blit(url: string, x: number, y: number, w: number, h: number, fallbackUrl?: string): boolean {
+    const im = this.img(url) ?? (fallbackUrl ? this.img(fallbackUrl) : null);
     if (!im) return false;
     this.ctx.drawImage(im, x, y, w, h);
     return true;
@@ -662,8 +662,8 @@ export class CanvasRenderer {
         // Parallax theo camera trong cảnh: lớp xa dời theo camera một phần (1 − parallax).
         const px = (this.cam.fx - SCENE.width / 2) * (1 - layer.parallax);
         const py = (this.cam.fy - SCENE.height / 2) * (1 - layer.parallax);
-        const ok = this.blit(layer.url, v.ox + (tile.dx + px) * v.k, v.oy + py * v.k, layer.width * v.k, layer.height * v.k);
-        if (layerId === 'mid' && tile.id === 'origin_meadow') {
+        const ok = this.blit(layer.url, v.ox + (tile.dx + px) * v.k, v.oy + py * v.k, layer.width * v.k, layer.height * v.k, layer.fallbackUrl);
+        if (layerId === 'mid' && tile.id === 'origin_meadow' && !layer.fallbackUrl) {
           this.blit(meadowRuinsUrl, v.ox + (tile.dx + px) * v.k, v.oy + py * v.k, layer.width * v.k, layer.height * v.k);
         }
         if (!ok && layerId === 'sky') {
@@ -707,7 +707,7 @@ export class CanvasRenderer {
       const fg = ORIGIN_HABITATS[id].layers.find((l) => l.id === 'foreground');
       if (!fg) continue;
       const x = toScreen(v, { x: regionOf(id)?.sceneX ?? 0, y: 0 }).x;
-      this.blit(fg.url, x, v.oy, fg.width * v.k, fg.height * v.k);
+      this.blit(fg.url, x, v.oy, fg.width * v.k, fg.height * v.k, fg.fallbackUrl);
       if (!view.unlockedHabitats.includes(id)) this.drawLocked(id, view);
     }
     // 6. Ánh sáng cảnh.
@@ -734,7 +734,7 @@ export class CanvasRenderer {
     const off = regionOf(id)?.sceneX ?? 0;
     const x = toScreen(v, { x: off, y: 0 }).x;
     const ground = art.layers.find((l) => l.id === 'ground');
-    if (!ground || !this.blit(ground.url, x, v.oy, ground.width * v.k, ground.height * v.k)) {
+    if (!ground || !this.blit(ground.url, x, v.oy, ground.width * v.k, ground.height * v.k, ground.fallbackUrl)) {
       this.ctx.fillStyle = COLORS.fallback[id] ?? COLORS.lockedVeil;
       this.ctx.fillRect(x, v.oy + 300 * v.k, SCENE.width * v.k, 240 * v.k);
     }
@@ -748,7 +748,7 @@ export class CanvasRenderer {
     const p = toScreen(v, { x: off + px, y: py });
     const w = prop.width * scale * v.k;
     const h = prop.height * scale * v.k;
-    const im = this.img(prop.url);
+    const im = this.img(prop.url) ?? (prop.fallbackUrl ? this.img(prop.fallbackUrl) : null);
     if (!im) return;
     const ctx = this.ctx;
     ctx.save();
