@@ -1,0 +1,413 @@
+{
+ "tool": "Chromium (Playwright) Canvas 2D drawImage",
+ "browser": "158.0.8127.36",
+ "files": 45,
+ "failures": 0,
+ "results": [
+  {
+   "file": "src/assets/habitats/origin/fx/butterfly_a.svg",
+   "loaded": true,
+   "size": [
+    32,
+    24
+   ],
+   "coverage": 0.353
+  },
+  {
+   "file": "src/assets/habitats/origin/fx/butterfly_b.svg",
+   "loaded": true,
+   "size": [
+    32,
+    24
+   ],
+   "coverage": 0.224
+  },
+  {
+   "file": "src/assets/habitats/origin/fx/dragonfly.svg",
+   "loaded": true,
+   "size": [
+    40,
+    24
+   ],
+   "coverage": 0.453
+  },
+  {
+   "file": "src/assets/habitats/origin/fx/dust_mote.svg",
+   "loaded": true,
+   "size": [
+    12,
+    12
+   ],
+   "coverage": 0.361
+  },
+  {
+   "file": "src/assets/habitats/origin/fx/firefly.svg",
+   "loaded": true,
+   "size": [
+    16,
+    16
+   ],
+   "coverage": 0.672
+  },
+  {
+   "file": "src/assets/habitats/origin/fx/heat_haze.svg",
+   "loaded": true,
+   "size": [
+    64,
+    48
+   ],
+   "coverage": 0.15
+  },
+  {
+   "file": "src/assets/habitats/origin/fx/petal.svg",
+   "loaded": true,
+   "size": [
+    20,
+    20
+   ],
+   "coverage": 0.33
+  },
+  {
+   "file": "src/assets/habitats/origin/fx/pollen.svg",
+   "loaded": true,
+   "size": [
+    24,
+    24
+   ],
+   "coverage": 0.479
+  },
+  {
+   "file": "src/assets/habitats/origin/fx/steam_puff.svg",
+   "loaded": true,
+   "size": [
+    40,
+    40
+   ],
+   "coverage": 0.399
+  },
+  {
+   "file": "src/assets/habitats/origin/fx/water_glint.svg",
+   "loaded": true,
+   "size": [
+    32,
+    16
+   ],
+   "coverage": 0.318
+  },
+  {
+   "file": "src/assets/habitats/origin/origin_meadow/far.svg",
+   "loaded": true,
+   "size": [
+    960,
+    330
+   ],
+   "coverage": 0.4
+  },
+  {
+   "file": "src/assets/habitats/origin/origin_meadow/foreground.svg",
+   "loaded": true,
+   "size": [
+    960,
+    540
+   ],
+   "coverage": 0.018
+  },
+  {
+   "file": "src/assets/habitats/origin/origin_meadow/ground.svg",
+   "loaded": true,
+   "size": [
+    960,
+    540
+   ],
+   "coverage": 0.436
+  },
+  {
+   "file": "src/assets/habitats/origin/origin_meadow/mid.svg",
+   "loaded": true,
+   "size": [
+    960,
+    330
+   ],
+   "coverage": 0.224
+  },
+  {
+   "file": "src/assets/habitats/origin/origin_meadow/sky.svg",
+   "loaded": true,
+   "size": [
+    960,
+    330
+   ],
+   "coverage": 1
+  },
+  {
+   "file": "src/assets/habitats/origin/origin_pondbank/far.svg",
+   "loaded": true,
+   "size": [
+    960,
+    330
+   ],
+   "coverage": 0.409
+  },
+  {
+   "file": "src/assets/habitats/origin/origin_pondbank/foreground.svg",
+   "loaded": true,
+   "size": [
+    960,
+    540
+   ],
+   "coverage": 0.03
+  },
+  {
+   "file": "src/assets/habitats/origin/origin_pondbank/ground.svg",
+   "loaded": true,
+   "size": [
+    960,
+    540
+   ],
+   "coverage": 0.438
+  },
+  {
+   "file": "src/assets/habitats/origin/origin_pondbank/mid.svg",
+   "loaded": true,
+   "size": [
+    960,
+    330
+   ],
+   "coverage": 0.216
+  },
+  {
+   "file": "src/assets/habitats/origin/origin_pondbank/sky.svg",
+   "loaded": true,
+   "size": [
+    960,
+    330
+   ],
+   "coverage": 1
+  },
+  {
+   "file": "src/assets/habitats/origin/origin_warm_rocks/far.svg",
+   "loaded": true,
+   "size": [
+    960,
+    330
+   ],
+   "coverage": 0.403
+  },
+  {
+   "file": "src/assets/habitats/origin/origin_warm_rocks/foreground.svg",
+   "loaded": true,
+   "size": [
+    960,
+    540
+   ],
+   "coverage": 0.021
+  },
+  {
+   "file": "src/assets/habitats/origin/origin_warm_rocks/ground.svg",
+   "loaded": true,
+   "size": [
+    960,
+    540
+   ],
+   "coverage": 0.439
+  },
+  {
+   "file": "src/assets/habitats/origin/origin_warm_rocks/mid.svg",
+   "loaded": true,
+   "size": [
+    960,
+    330
+   ],
+   "coverage": 0.25
+  },
+  {
+   "file": "src/assets/habitats/origin/origin_warm_rocks/sky.svg",
+   "loaded": true,
+   "size": [
+    960,
+    330
+   ],
+   "coverage": 1
+  },
+  {
+   "file": "src/assets/habitats/origin/props/boulder_large.svg",
+   "loaded": true,
+   "size": [
+    160,
+    120
+   ],
+   "coverage": 0.606
+  },
+  {
+   "file": "src/assets/habitats/origin/props/boulder_small.svg",
+   "loaded": true,
+   "size": [
+    70,
+    50
+   ],
+   "coverage": 0.547
+  },
+  {
+   "file": "src/assets/habitats/origin/props/bush_berry.svg",
+   "loaded": true,
+   "size": [
+    120,
+    90
+   ],
+   "coverage": 0.507
+  },
+  {
+   "file": "src/assets/habitats/origin/props/drinking_stone.svg",
+   "loaded": true,
+   "size": [
+    90,
+    50
+   ],
+   "coverage": 0.507
+  },
+  {
+   "file": "src/assets/habitats/origin/props/dry_grass.svg",
+   "loaded": true,
+   "size": [
+    80,
+    50
+   ],
+   "coverage": 0.133
+  },
+  {
+   "file": "src/assets/habitats/origin/props/flat_warm_stone.svg",
+   "loaded": true,
+   "size": [
+    180,
+    60
+   ],
+   "coverage": 0.583
+  },
+  {
+   "file": "src/assets/habitats/origin/props/flower_patch.svg",
+   "loaded": true,
+   "size": [
+    110,
+    50
+   ],
+   "coverage": 0.361
+  },
+  {
+   "file": "src/assets/habitats/origin/props/lily_pads.svg",
+   "loaded": true,
+   "size": [
+    140,
+    40
+   ],
+   "coverage": 0.305
+  },
+  {
+   "file": "src/assets/habitats/origin/props/log_old.svg",
+   "loaded": true,
+   "size": [
+    180,
+    70
+   ],
+   "coverage": 0.529
+  },
+  {
+   "file": "src/assets/habitats/origin/props/moss_bed.svg",
+   "loaded": true,
+   "size": [
+    130,
+    44
+   ],
+   "coverage": 0.505
+  },
+  {
+   "file": "src/assets/habitats/origin/props/mud_wallow.svg",
+   "loaded": true,
+   "size": [
+    150,
+    40
+   ],
+   "coverage": 0.548
+  },
+  {
+   "file": "src/assets/habitats/origin/props/reeds_cluster.svg",
+   "loaded": true,
+   "size": [
+    90,
+    120
+   ],
+   "coverage": 0.375
+  },
+  {
+   "file": "src/assets/habitats/origin/props/rock_spire.svg",
+   "loaded": true,
+   "size": [
+    110,
+    200
+   ],
+   "coverage": 0.481
+  },
+  {
+   "file": "src/assets/habitats/origin/props/stump.svg",
+   "loaded": true,
+   "size": [
+    90,
+    70
+   ],
+   "coverage": 0.417
+  },
+  {
+   "file": "src/assets/habitats/origin/props/tree_round.svg",
+   "loaded": true,
+   "size": [
+    200,
+    260
+   ],
+   "coverage": 0.406
+  },
+  {
+   "file": "src/assets/habitats/origin/props/warm_vent.svg",
+   "loaded": true,
+   "size": [
+    90,
+    60
+   ],
+   "coverage": 0.417
+  },
+  {
+   "file": "src/assets/habitats/origin/undiscovered/marker_aquatic.svg",
+   "loaded": true,
+   "size": [
+    96,
+    128
+   ],
+   "coverage": 0.414
+  },
+  {
+   "file": "src/assets/habitats/origin/undiscovered/marker_generic.svg",
+   "loaded": true,
+   "size": [
+    96,
+    128
+   ],
+   "coverage": 0.414
+  },
+  {
+   "file": "src/assets/habitats/origin/undiscovered/marker_thermal.svg",
+   "loaded": true,
+   "size": [
+    96,
+    128
+   ],
+   "coverage": 0.414
+  },
+  {
+   "file": "src/assets/habitats/origin/undiscovered/mist.svg",
+   "loaded": true,
+   "size": [
+    960,
+    540
+   ],
+   "coverage": 1
+  }
+ ]
+}
