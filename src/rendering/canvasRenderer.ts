@@ -843,7 +843,7 @@ export class CanvasRenderer {
       ctx.stroke();
     }
     if (!vis || !vis.frame) return;
-    const im = this.img(vis.frame.url);
+    const im = this.img(vis.frame.url) ?? (vis.frame.fallbackUrl ? this.img(vis.frame.fallbackUrl) : null);
     if (!im) return;
     // Bơi: phần dưới mực nước bị che, đường nước của khung trùng mặt hồ.
     const wl = vis.frame.attach.waterline;
