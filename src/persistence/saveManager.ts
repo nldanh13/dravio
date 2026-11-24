@@ -1,7 +1,7 @@
 import type { GameState } from '../types/state';
 import { parseSaveText, previewOf, sanitizeImportedState, type ImportPreview, type ParsedSave, type SaveErrorCode } from './saveFile';
 import { serializeSave } from './schema';
-import { SLOTS, type ArchiveWrite, type SaveStore, type SlotId } from './store';
+import { SLOTS, SaveConflictError, type ArchiveWrite, type SaveStore, type SlotId } from './store';
 
 /**
  * Người ghi duy nhất của save (GDD 3.1 trang 18; AI_HANDOFF PR2 “one writer”).
@@ -23,7 +23,8 @@ export type LoadOutcome =
   | { kind: 'unrecoverable'; failures: SlotFailure[] }
   | { kind: 'newer-version'; failures: SlotFailure[] };
 
-export type WriteBlock = 'read-only' | 'newer-version' | 'unrecoverable' | null;
+/** `conflict`: tab khác đã ghi save sau lần đọc của phiên này (ADR 0010) — phiên chuyển sang chỉ xem. */
+export type WriteBlock = 'read-only' | 'newer-version' | 'unrecoverable' | 'conflict' | null;
 
 export interface SaveManagerOptions {
   store: SaveStore;
@@ -37,6 +38,8 @@ export class SaveManager {
   private chain: Promise<unknown> = Promise.resolve();
   /** Save gốc trước migration: ghi kèm lần lưu đầu tiên của người ghi, không bao giờ bị xoay mất. */
   private pendingArchive: ArchiveWrite | null = null;
+  /** Nội dung `main` phiên này biết gần nhất (đọc lúc load hoặc tự ghi). `undefined` = chưa load. */
+  private knownMain: string | null | undefined = undefined;
 
   constructor(private readonly opts: SaveManagerOptions) {}
 
@@ -53,6 +56,7 @@ export class SaveManager {
   async load(): Promise<LoadOutcome> {
     const failures: SlotFailure[] = [];
     let anyData = false;
+    this.knownMain = await this.opts.store.get('main');
     for (const slot of SLOTS) {
       const text = await this.opts.store.get(slot);
       if (text === null) continue;
@@ -89,7 +93,19 @@ export class SaveManager {
       if (!opts.force && this.lastSaved?.saveId === state.saveId && this.lastSaved.revision === state.revision) return false;
       const text = await serializeSave(state, this.opts.nowMs());
       const archive = this.pendingArchive;
-      await this.opts.store.rotate(text, archive ?? undefined);
+      try {
+        await this.opts.store.rotate(text, {
+          ...(archive ? { archive } : {}),
+          ...(this.knownMain !== undefined ? { expectMain: this.knownMain } : {}),
+        });
+      } catch (e) {
+        if (e instanceof SaveConflictError) {
+          this.block = 'conflict';
+          return false;
+        }
+        throw e;
+      }
+      this.knownMain = text;
       this.pendingArchive = null;
       this.lastSaved = { saveId: state.saveId, revision: state.revision };
       if (this.block === 'unrecoverable') this.block = null;

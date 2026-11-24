@@ -15,13 +15,31 @@ export interface ArchiveWrite {
   text: string;
 }
 
+export interface RotateOptions {
+  archive?: ArchiveWrite;
+  /**
+   * Compare-and-swap (ADR 0010): nếu đặt, chỉ ghi khi `main` hiện tại đúng bằng giá trị này
+   * (`null` = chưa có main). Khác → không ghi gì và trả `SaveConflictError`.
+   * Chặn hai tab ghi đè nhau kể cả khi không có Web Locks.
+   */
+  expectMain?: string | null;
+}
+
+/** `main` đã bị nơi khác (tab khác) ghi kể từ lần đọc/ghi gần nhất của phiên này. */
+export class SaveConflictError extends Error {
+  constructor() {
+    super('save main slot was changed by another writer');
+    this.name = 'SaveConflictError';
+  }
+}
+
 export interface SaveStore {
   get(slot: SlotId | ArchiveKey): Promise<string | null>;
   /**
    * Ghi `text` vào main; main cũ → backup1; backup1 cũ → backup2. Nguyên tử.
    * `archive` (nếu có) được ghi trong cùng transaction và chỉ khi khóa đó chưa tồn tại.
    */
-  rotate(text: string, archive?: ArchiveWrite): Promise<void>;
+  rotate(text: string, opts?: RotateOptions): Promise<void>;
 }
 
 /** Kho trong bộ nhớ cho test và khi trình duyệt không có IndexedDB (không bền). */
@@ -35,7 +53,11 @@ export class MemorySaveStore implements SaveStore {
     return Promise.resolve(this.slots.get(slot) ?? null);
   }
 
-  rotate(text: string, archive?: ArchiveWrite): Promise<void> {
+  rotate(text: string, opts: RotateOptions = {}): Promise<void> {
+    const { archive } = opts;
+    if (opts.expectMain !== undefined && (this.slots.get('main') ?? null) !== opts.expectMain) {
+      return Promise.reject(new SaveConflictError());
+    }
     if (this.failNextWrite) {
       this.failNextWrite = false;
       return Promise.reject(new Error('simulated write failure'));
@@ -84,29 +106,34 @@ export class IndexedDbSaveStore implements SaveStore {
     return typeof value === 'string' ? value : null;
   }
 
-  rotate(text: string, archive?: ArchiveWrite): Promise<void> {
+  rotate(text: string, opts: RotateOptions = {}): Promise<void> {
+    const { archive } = opts;
     return new Promise((resolve, reject) => {
       const tx = this.db.transaction(IDB_STORE, 'readwrite', { durability: 'strict' });
       const os = tx.objectStore(IDB_STORE);
+      let conflict = false;
       const getMain = os.get('main');
       const getB1 = os.get('backup1');
-      if (archive) {
-        const existing = os.getKey(archive.key);
-        existing.onsuccess = () => {
-          if (existing.result === undefined) os.put(archive.text, archive.key);
-        };
-      }
-      getB1.onsuccess = () => {
-        // Hai request get hoàn tất theo thứ tự; khi backup1 xong thì main đã có kết quả.
+      const existing = archive ? os.getKey(archive.key) : null;
+      // Các request trong một transaction hoàn tất theo thứ tự gửi: khi request cuối xong, mọi kết quả đã có.
+      const last = existing ?? getB1;
+      last.onsuccess = () => {
         const main: unknown = getMain.result;
+        const current = typeof main === 'string' ? main : null;
+        if (opts.expectMain !== undefined && current !== opts.expectMain) {
+          conflict = true;
+          tx.abort();
+          return;
+        }
         const b1: unknown = getB1.result;
         if (typeof b1 === 'string') os.put(b1, 'backup2');
-        if (typeof main === 'string') os.put(main, 'backup1');
+        if (current !== null) os.put(current, 'backup1');
         os.put(text, 'main');
+        if (archive && existing?.result === undefined) os.put(archive.text, archive.key);
       };
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error ?? new Error('IndexedDB transaction failed'));
-      tx.onabort = () => reject(tx.error ?? new Error('IndexedDB transaction aborted'));
+      tx.onabort = () => reject(conflict ? new SaveConflictError() : (tx.error ?? new Error('IndexedDB transaction aborted')));
     });
   }
 

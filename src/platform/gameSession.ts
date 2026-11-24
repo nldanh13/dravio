@@ -10,7 +10,8 @@ import type { ImportPreview, SaveErrorCode } from '../persistence/saveFile';
 import { SaveManager, type SlotFailure } from '../persistence/saveManager';
 import { IndexedDbSaveStore, MemorySaveStore, type SaveStore } from '../persistence/store';
 import type { GameState } from '../types/state';
-import { onPageHide } from './lifecycle';
+import { isPageVisible, onPageLifecycle } from './lifecycle';
+import { TICK_MS, advanceModeFor } from './timePolicy';
 import { acquireWriterLock, type WriterLock } from './writerLock';
 
 /**
@@ -21,7 +22,8 @@ import { acquireWriterLock, type WriterLock } from './writerLock';
 /** Lệnh từ UI, requestId do phiên tự gán. */
 export type CommandInput = Command extends infer C ? (C extends Command ? Omit<C, 'requestId'> : never) : never;
 
-export type SessionStatus = 'loading' | 'ready' | 'read-only' | 'newer-version' | 'unrecoverable';
+/** `conflict`: tab khác đã ghi save sau khi tab này mở (ADR 0010) — tab này dừng và chỉ xem. */
+export type SessionStatus = 'loading' | 'ready' | 'read-only' | 'newer-version' | 'unrecoverable' | 'conflict';
 
 export interface SessionSnapshot {
   status: SessionStatus;
@@ -39,7 +41,6 @@ export interface SessionSnapshot {
   importError: SaveErrorCode | null;
 }
 
-const TICK_MS = 1000;
 
 function newRequestId(): string {
   return globalThis.crypto.randomUUID();
@@ -67,6 +68,8 @@ export class GameSession {
   private unbindHide: (() => void) | null = null;
   /** Đang thay save bằng file import: dừng tick và autosave để không ghi đè save mới. */
   private swapping = false;
+  /** Trang đang ẩn: không tick online; phần thời gian này quyết toán offline khi hiện lại. */
+  private hidden = false;
 
   constructor(private readonly clock: Clock = systemClock) {}
 
@@ -116,6 +119,7 @@ export class GameSession {
     }
     // Thời gian vắng mặt tính offline (75 %, chặn 24 h) trước khi chạy online.
     state = this.apply(state, 'offline');
+    this.hidden = !isPageVisible();
     this.set({ status: 'ready', state });
     await this.saveNow();
     this.run();
@@ -134,19 +138,51 @@ export class GameSession {
   private run(): void {
     const manager = this.manager;
     if (!manager) return;
-    this.tickHandle = setInterval(() => {
-      const s = this.snap.state;
-      if (s && this.snap.status === 'ready' && !this.swapping) this.set({ state: this.apply(s, 'online') });
-    }, TICK_MS);
+    this.tickHandle = setInterval(() => this.tick(), TICK_MS);
     this.autosave = createAutosave({
-      save: (s) => manager.save(s),
+      save: async (s) => {
+        const ok = await manager.save(s);
+        this.checkConflict();
+        return ok;
+      },
       getState: () => (this.snap.status === 'ready' && !this.swapping ? this.snap.state : null),
       timer: { setInterval: (fn, ms) => setInterval(fn, ms), clearInterval: (h) => clearInterval(h as ReturnType<typeof setInterval>) },
       onSaved: () => this.set({ lastSavedAtMs: this.clock.nowMs(), saveError: false }),
       onError: () => this.set({ saveError: true }),
     });
     this.autosave.start();
-    this.unbindHide = onPageHide(() => void this.autosave?.flush());
+    this.unbindHide = onPageLifecycle({ onHide: () => this.onHide(), onShow: () => this.onShow() });
+  }
+
+  /** Tick 1 Hz: online nếu trang hiện và không có khoảng trống lớn (máy ngủ, tab treo) — ADR 0010. */
+  private tick(): void {
+    const s = this.snap.state;
+    if (!s || this.snap.status !== 'ready' || this.swapping || this.hidden) return;
+    const mode = advanceModeFor(s.clock.lastProcessedAtMs, this.clock.nowMs(), true);
+    this.set({ state: this.apply(s, mode) });
+  }
+
+  /** Ẩn/thu nhỏ/đóng băng/đóng: quyết toán phần online tới lúc này rồi lưu ngay. */
+  private onHide(): void {
+    if (this.hidden) {
+      void this.autosave?.flush();
+      return;
+    }
+    const s = this.snap.state;
+    if (s && this.snap.status === 'ready' && !this.swapping) {
+      const mode = advanceModeFor(s.clock.lastProcessedAtMs, this.clock.nowMs(), true);
+      this.set({ state: this.apply(s, mode) });
+    }
+    this.hidden = true;
+    void this.autosave?.flush();
+  }
+
+  /** Hiện lại: phần thời gian ẩn tính offline (75 %, receipt nếu > 60 s), rồi tiếp tục tick online. */
+  private onShow(): void {
+    if (!this.hidden) return;
+    this.hidden = false;
+    const s = this.snap.state;
+    if (s && this.snap.status === 'ready' && !this.swapping) this.set({ state: this.apply(s, 'offline') });
   }
 
   async saveNow(): Promise<void> {
@@ -154,9 +190,25 @@ export class GameSession {
     if (!this.manager || !s || this.snap.status !== 'ready') return;
     try {
       if (await this.manager.save(s)) this.set({ lastSavedAtMs: this.clock.nowMs(), saveError: false });
+      this.checkConflict();
     } catch {
       this.set({ saveError: true });
     }
+  }
+
+  /** Save bị tab khác ghi (CAS thất bại): dừng thời gian và autosave, chuyển sang chỉ xem. Không ghi đè. */
+  private checkConflict(): void {
+    if (this.manager?.writeBlock !== 'conflict' || this.snap.status === 'conflict') return;
+    this.stopLoops();
+    this.set({ status: 'conflict' });
+  }
+
+  private stopLoops(): void {
+    if (this.tickHandle !== null) clearInterval(this.tickHandle);
+    this.tickHandle = null;
+    this.autosave?.stop();
+    this.unbindHide?.();
+    this.unbindHide = null;
   }
 
   /** Bắt đầu lại khi mọi slot hỏng (người chơi đã xác nhận). Dữ liệu hỏng được đẩy xuống backup1. */
@@ -228,10 +280,7 @@ export class GameSession {
   }
 
   dispose(): void {
-    if (this.tickHandle !== null) clearInterval(this.tickHandle);
-    this.tickHandle = null;
-    this.autosave?.stop();
-    this.unbindHide?.();
+    this.stopLoops();
     this.lock?.release();
   }
 }

@@ -8,7 +8,7 @@ Tài liệu thiết kế nguồn: [`docs/gdd/Dravio_GDD_3.1.docx`](docs/gdd/Drav
 
 ## Trạng thái
 
-Giai đoạn **G0 / TD-01 Core**: khung dự án, engine thuần TypeScript (catalog 16 loài với dữ liệu sinh học G0, sinh cảnh/suitability, di truyền P0, RNG/clock, công thức kinh tế) và prototype mỹ thuật Emberling. Chưa có gameplay, renderer hay save.
+Giai đoạn **G1 — Vertical slice** (xem [`docs/ROADMAP.md`](docs/ROADMAP.md)). Đã có: engine thuần TypeScript (16 loài, sinh học G0, suitability, di truyền P0, kinh tế, RNG/clock), `GameState` + command bus, save IndexedDB (Dravio Save Schema v2, 2 backup, import/export checksum, migration), zone Khởi Nguyên với 3 microhabitat và mở khóa theo khám phá, quy tắc thời gian online/offline theo vòng đời trang, chống ghi đè save giữa nhiều tab, world graph dữ liệu. UI hiện là bảng điều khiển HTML; **chưa có Canvas renderer** (G1 PR4 phần B), tutorial (PR5), ca chăm sóc (PR6), hộ chiếu (PR7). Kiểm thử trình duyệt: Chromium headless trên Linux; **Windows + Chromium trên thiết bị thật chưa kiểm thử**.
 
 ## Lệnh
 
@@ -26,15 +26,22 @@ Các lệnh mục tiêu khác trong GDD (`test:e2e`, `simulate:economy`, `cap:sy
 
 ```
 src/
-  types/        hợp đồng kiểu dữ liệu (Phụ lục C)
-  data/         catalog bất biến: loài, locus, gói, nâng cấp, phí lai
+  types/        hợp đồng kiểu dữ liệu (Phụ lục C), GameState
+  data/         catalog bất biến: loài, sinh học G0, locus, gói, nâng cấp, chăm sóc, mở khóa sinh cảnh, world graph
   engine/
-    core/       RNG có seed, clock + quy tắc offline
+    core/       RNG có seed, clock, command bus, lỗi có kiểu, domain events, validate runtime
     genetics/   allele, kiểu hình, luật tương thích, preview/roll lai
     economy/    tốc độ vàng, giá bán, biến thể + pity, gói trứng
+    world/      suitability, zone, bố trí, ngân sách sản xuất, mở khóa sinh cảnh
+    biology/    bond (vuốt ve)
+    inventory/  tên rồng
+    progression/ tăng trưởng, stage
+  persistence/  envelope + checksum, migration, IndexedDB 3 slot, autosave, import/export
+  platform/     GameSession (nối engine + save cho trình duyệt), vòng đời trang, khóa người ghi
+  ui/           bảng điều khiển React (zone, save)
   i18n/         VI/EN cùng bộ key
-  App.tsx       màn hình minh họa catalog + preview lai
 tests/unit/     test các bất biến domain
+tests/fixtures/ save thật của schema cũ cho test migration
 docs/           GDD, roadmap, ADR
 ```
 

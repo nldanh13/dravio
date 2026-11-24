@@ -1,12 +1,14 @@
 import { DIET_IDS } from '../../data/care';
-import { isDiscoveryId } from '../../data/habitatUnlocks';
+import { HABITAT_UNLOCK_RULES, isDiscoveryId } from '../../data/habitatUnlocks';
 import { DRAGON_SPECIES } from '../../data/dragons';
 import { UPGRADES } from '../../data/economy';
-import { HABITAT_PROFILES } from '../../data/g0Biology';
+import { HABITAT_PROFILES, type HabitatId } from '../../data/g0Biology';
+import { P0_ZONE_CAPACITY } from '../../data/worldGraph';
 import { LOCI } from '../../data/genetics';
 import type { GameState } from '../../types/state';
 import { productionBudget } from '../economy/rates';
 import { isValidGenotype } from '../genetics/alleles';
+import { speciesSuitability } from '../world/habitat';
 
 /**
  * Kiểm tra runtime GameState (GDD Phụ lục C.2): enum, số hữu hạn, giới hạn, UID duy nhất,
@@ -110,10 +112,22 @@ export function validateGameState(input: unknown): ValidationResult {
       seen.add(z.id);
       if (!oneOf(z.realm, ['land', 'ocean', 'sky'] as const)) errors.push(`zones[${i}].realm: invalid`);
       if (typeof z.unlocked !== 'boolean') errors.push(`zones[${i}].unlocked: invalid`);
-      if (!isInt(z.capacity) || z.capacity < 0 || z.capacity > 25) errors.push(`zones[${i}].capacity: out of range`);
+      // P0: mỗi zone đúng 5 chỗ vật lý; nâng sức chứa theo zone chưa có trong P0 (ADR 0010).
+      if (z.capacity !== P0_ZONE_CAPACITY) errors.push(`zones[${i}].capacity: must be ${P0_ZONE_CAPACITY} in P0`);
       if (!isInt(z.recovery) || z.recovery < 0 || z.recovery > 100) errors.push(`zones[${i}].recovery: out of range`);
       if (!Array.isArray(z.unlockedHabitatIds) || !z.unlockedHabitatIds.every((h) => oneOf(h, HABITAT_IDS) && HABITAT_PROFILES[h as keyof typeof HABITAT_PROFILES].zoneId === z.id)) {
         errors.push(`zones[${i}].unlockedHabitatIds: invalid`);
+      }
+      else {
+        const habitats = z.unlockedHabitatIds as string[];
+        if (new Set(habitats).size !== habitats.length) errors.push(`zones[${i}].unlockedHabitatIds: duplicates`);
+        if (z.unlocked === false && habitats.length > 0) errors.push(`zones[${i}]: locked zone has unlocked habitats`);
+        if (z.id === 'origin' && z.unlocked === true && !habitats.includes('origin_meadow')) errors.push(`zones[${i}]: origin_meadow must be unlocked`);
+        const discoveries = Array.isArray(s.discoveries) ? (s.discoveries as unknown[]) : [];
+        for (const h of habitats) {
+          const rule = (HABITAT_UNLOCK_RULES as Record<string, { requires: string | null } | undefined>)[h];
+          if (rule?.requires && !discoveries.includes(rule.requires)) errors.push(`zones[${i}].unlockedHabitatIds: ${h} requires ${rule.requires}`);
+        }
       }
       for (const k of ['decorationIds', 'activeDecorationIds'] as const) {
         if (!Array.isArray(z[k]) || !(z[k] as unknown[]).every(isStr)) errors.push(`zones[${i}].${k}: invalid`);
@@ -126,6 +140,16 @@ export function validateGameState(input: unknown): ValidationResult {
         const count = s.dragons.filter((d) => isObj(d) && isObj(d.location) && d.location.kind === 'zone' && d.location.zoneId === z.id).length;
         if (count > z.capacity) errors.push(`zones.${String(z.id)}: ${count} dragons exceed capacity ${z.capacity}`);
       }
+      // Rồng đặt trong zone phải ở zone + microhabitat đã mở và hợp sinh học (suitability ≥ 50).
+      s.dragons.forEach((d, i) => {
+        if (!isObj(d) || !isObj(d.location) || d.location.kind !== 'zone' || !isStr(d.speciesId) || !SPECIES.has(d.speciesId)) return;
+        const loc = d.location;
+        const zone = (s.zones as unknown[]).find((z) => isObj(z) && z.id === loc.zoneId);
+        if (!isObj(zone) || !oneOf(loc.habitatId, HABITAT_IDS)) return;
+        if (zone.unlocked !== true) errors.push(`dragons[${i}].location: zone ${String(loc.zoneId)} is locked`);
+        else if (!Array.isArray(zone.unlockedHabitatIds) || !zone.unlockedHabitatIds.includes(loc.habitatId)) errors.push(`dragons[${i}].location: habitat ${loc.habitatId} is locked`);
+        else if (!speciesSuitability(d.speciesId, loc.habitatId as HabitatId).allowed) errors.push(`dragons[${i}].location: habitat ${loc.habitatId} unsuitable for ${d.speciesId}`);
+      });
     }
   }
 
@@ -141,7 +165,13 @@ export function validateGameState(input: unknown): ValidationResult {
   if (!Array.isArray(s.productionDragonIds) || !s.productionDragonIds.every(isStr)) errors.push('productionDragonIds: invalid');
   else {
     if (new Set(s.productionDragonIds).size !== s.productionDragonIds.length) errors.push('productionDragonIds: duplicates');
-    for (const id of s.productionDragonIds) if (!uids.has(id)) errors.push(`productionDragonIds: unknown dragon ${id}`);
+    const byUid = new Map(Array.isArray(s.dragons) ? s.dragons.filter((d): d is Obj => isObj(d) && isStr(d.uid)).map((d) => [d.uid as string, d]) : []);
+    for (const id of s.productionDragonIds) {
+      const d = byUid.get(id);
+      if (!d) errors.push(`productionDragonIds: unknown dragon ${id}`);
+      // Chỉ rồng đang đặt trong zone mới được chọn sản xuất (setProductionSlot: not-placed).
+      else if (!isObj(d.location) || d.location.kind !== 'zone') errors.push(`productionDragonIds: dragon ${id} is not placed in a zone`);
+    }
     const level = isObj(upgrades) && isInt(upgrades.islandCapacityLevel) ? upgrades.islandCapacityLevel : 0;
     if (s.productionDragonIds.length > productionBudget(level)) errors.push('productionDragonIds: exceeds production budget');
   }
@@ -157,6 +187,7 @@ export function validateGameState(input: unknown): ValidationResult {
         errors.push(`food.drops[${i}]: invalid`);
         return;
       }
+      if (HABITAT_PROFILES[f.habitatId as HabitatId].zoneId !== f.zoneId) errors.push(`food.drops[${i}]: habitat not in zone`);
       if (ids.has(f.id)) errors.push(`food.drops[${i}].id: duplicate`);
       ids.add(f.id);
     });
