@@ -1,0 +1,14 @@
+.dragon-inspection { margin:14px 0; padding:12px; border:1px solid #bda16b; border-radius:14px; background:#f5efe0; color:#423522; }
+.dragon-inspection h4 { margin:0 0 4px; font:700 1.15rem Georgia,serif; color:#476037; }
+.dragon-inspection .muted { color:#705d43; }
+.inspection-stage { position:relative; margin:12px 0; overflow:hidden; border-radius:12px; border:1px solid #c7b17f; background:radial-gradient(ellipse at 50% 68%,#e5d5a1 0%,#ebdfb9 35%,#a8bb83 85%); }
+.inspection-stage::before { content:''; position:absolute; width:48%; height:12%; left:26%; top:76%; border-radius:50%; background:#5e60413b; filter:blur(7px); pointer-events:none; }
+.inspection-canvas { position:relative; display:block; width:100%; height:clamp(210px,40vw,380px); touch-action:none; cursor:grab; }
+.inspection-canvas:active { cursor:grabbing; }
+.inspection-hidden { visibility:hidden; }
+.inspection-fallback { position:absolute; inset:0; display:grid; place-content:center; text-align:center; padding:8px; }
+.inspection-fallback img { margin:auto; max-width:100%; object-fit:contain; }
+.inspection-controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.inspection-controls label { flex:1 1 120px; min-width:0; }
+.inspection-controls input[type=range] { padding:0; width:100%; accent-color:#638745; }
+.inspection-controls button { color:#423522; background:linear-gradient(#fff7df,#e5c992); border:1px solid #b59a63; }
