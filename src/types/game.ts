@@ -61,7 +61,7 @@ export interface DragonSpecies {
 }
 
 export type Location =
-  | { kind: 'zone'; zoneId: string }
+  | { kind: 'zone'; zoneId: string; habitatId?: string }
   | { kind: 'storage' }
   | { kind: 'shelter'; zoneId: string }
   | { kind: 'care'; caseId: string }
@@ -78,7 +78,16 @@ export interface DragonInstance {
   location: Location;
   hatchedAtMs: number;
   personality: Personality;
+  /** Gắn bó 0–100, số nguyên; không giảm khi offline. */
   bond: number;
+  /** Ngày UTC (YYYY-MM-DD) của bộ đếm bondDaily. */
+  bondDay?: string;
+  /** Bond đã nhận trong bondDay (tối đa 10/ngày UTC/rồng). */
+  bondDaily?: number;
+  /** Lần cuối nhận XP từ thức ăn (ms). */
+  lastFeedXpAtMs?: number;
+  /** Lần cuối được vuốt ve (ms). */
+  lastPetAtMs?: number;
   parentIds: readonly [string, string] | null;
   /** Ông bà đã biết (nếu có), dùng để kiểm tra huyết thống. */
   grandparentIds?: readonly string[];

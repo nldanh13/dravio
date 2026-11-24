@@ -6,7 +6,7 @@ Cập nhật: 24/11/2026 (sau khi tích hợp G0 Decision Pack). Nguồn: GDD 3.
 
 | Epic | Phạm vi P0 trong GDD | Đã có | Còn thiếu |
 | --- | --- | --- | --- |
-| TD-01 Core | repository, schema, pure engine, commands, RNG/clock, save | Repo, TS strict, CI, RNG có seed, clock + cap 24h + high-water mark, kiểu dữ liệu lõi | `GameState`, hệ command (requestId, lỗi có kiểu), scheduler/domain events, persistence IndexedDB + migration + backup, validate runtime |
+| TD-01 Core | repository, schema, pure engine, commands, RNG/clock, save | Repo, TS strict, CI, RNG có seed, clock + cap 24h + high-water mark, `GameState`, command bus (requestId, lỗi có kiểu), domain events, validate runtime | Scheduler cho jobs, persistence IndexedDB + migration + backup |
 | TD-02 World | graph, 3 realm, suitability, capacity, renderer | 7 microhabitat, `suitability` 0–100 với hard gate | Graph vùng, `ZoneState`, sức chứa, Canvas renderer |
 | TD-03 Dragons | 16 catalog, behavior, feeding, phenotype, inventory | Catalog 16 loài (ID + kinh tế v2), anatomy/diet/sinh cảnh G0, kiểu hình và stage dẫn xuất, sprite Emberling prototype | FSM/utility hành vi, cho ăn, bond, kho, sprite 15 loài còn lại |
 | TD-04 Genetics | recipes, preview, breeding, lineage, pity | Luật tương thích, huyết thống, preview = phân phối engine, roll lai, biến thể + pity 200, phí/thời gian ấp | Tổ ấp (`BreedingEgg`, gõ/boost, cooldown 10 phút), phả hệ đầy đủ, UI Punnett |
@@ -33,7 +33,7 @@ Nguồn: G0 Decision Pack 1.0 (`docs/g0/`, ADR 0003). Chỉ đánh dấu những
 
 ### G1 — Vertical slice (1 vùng đất, 4 Common)
 Thứ tự PR đề xuất, mỗi PR một lát cắt có test:
-1. `GameState` + command bus (`advanceTime`, `feed`, `pet`, `renameDragon`) + validate runtime
+1. [x] `GameState` + command bus (`advanceTime`, `feed` + `consumeFood`, `pet`, `renameDragon`) + validate runtime + domain events — ADR 0004, `tests/unit/gameState.test.ts`. Chưa có: trứng tutorial, nhận bonus offline (PR5)
 2. Persistence: IndexedDB, autosave 30s, export/import JSON + checksum, backup
 3. Zone đất Khởi Nguyên: suitability, sức chứa 5, ngân sách sản xuất
 4. Canvas renderer 2.5D + steering + FSM hành vi cơ bản; thả thức ăn (0,8s / 12s / XP mỗi 8s)
