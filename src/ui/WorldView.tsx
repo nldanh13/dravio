@@ -1,3 +1,4 @@
+import { DragonInspection } from './DragonInspection';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { DIET_IDS, type DietId } from '../data/care';
 import { getSpecies } from '../data/dragons';
@@ -217,6 +218,7 @@ function Inspector(props: {
   const { dragon, canAct } = props;
   const [nameDraft, setNameDraft] = useState(dragon.nickname ?? '');
   const [profileOpen, setProfileOpen] = useState(false);
+  const [inspectionOpen, setInspectionOpen] = useState(false);
   return (
     <div className="inspector" aria-live="polite">
       <h3>
@@ -253,6 +255,14 @@ function Inspector(props: {
         </button>
       </div>
       {profileOpen && <BiologyProfile speciesId={dragon.speciesId} />}
+      {dragon.speciesId === 'emberling' && (
+        <>
+          <button type="button" aria-expanded={inspectionOpen} onClick={() => setInspectionOpen((v) => !v)}>
+            {t(inspectionOpen ? 'inspect3d.close' : 'inspect3d.open')}
+          </button>
+          {inspectionOpen && <DragonInspection />}
+        </>
+      )}
       <form
         className="row compact"
         onSubmit={(e) => {
