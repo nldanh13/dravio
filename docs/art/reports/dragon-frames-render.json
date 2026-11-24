@@ -1,0 +1,5035 @@
+{
+ "tool": "Chromium (Playwright) Canvas 2D drawImage",
+ "browser": "158.0.8127.36",
+ "files": 457,
+ "failures": 0,
+ "results": [
+  {
+   "file": "src/assets/animations/frames/emberling/adult_crystal_blink.svg",
+   "loaded": true,
+   "opaquePx": 16226,
+   "bbox": [
+    8,
+    47,
+    218,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_crystal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 16226,
+   "bbox": [
+    8,
+    47,
+    218,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_crystal_happy.svg",
+   "loaded": true,
+   "opaquePx": 16226,
+   "bbox": [
+    8,
+    47,
+    218,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_crystal_idle.svg",
+   "loaded": true,
+   "opaquePx": 16226,
+   "bbox": [
+    8,
+    47,
+    218,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_crystal_injured.svg",
+   "loaded": true,
+   "opaquePx": 16226,
+   "bbox": [
+    8,
+    47,
+    218,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_golden_blink.svg",
+   "loaded": true,
+   "opaquePx": 16586,
+   "bbox": [
+    8,
+    43,
+    215,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_golden_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 16586,
+   "bbox": [
+    8,
+    43,
+    215,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_golden_happy.svg",
+   "loaded": true,
+   "opaquePx": 16586,
+   "bbox": [
+    8,
+    43,
+    215,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_golden_idle.svg",
+   "loaded": true,
+   "opaquePx": 16586,
+   "bbox": [
+    8,
+    43,
+    215,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_golden_injured.svg",
+   "loaded": true,
+   "opaquePx": 16586,
+   "bbox": [
+    8,
+    43,
+    215,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_normal_blink.svg",
+   "loaded": true,
+   "opaquePx": 14264,
+   "bbox": [
+    8,
+    47,
+    203,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_normal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 14264,
+   "bbox": [
+    8,
+    47,
+    203,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_normal_happy.svg",
+   "loaded": true,
+   "opaquePx": 14264,
+   "bbox": [
+    8,
+    47,
+    203,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_normal_idle.svg",
+   "loaded": true,
+   "opaquePx": 14264,
+   "bbox": [
+    8,
+    47,
+    203,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_normal_injured.svg",
+   "loaded": true,
+   "opaquePx": 14264,
+   "bbox": [
+    8,
+    47,
+    203,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_prismatic_blink.svg",
+   "loaded": true,
+   "opaquePx": 16329,
+   "bbox": [
+    8,
+    44,
+    222,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_prismatic_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 16329,
+   "bbox": [
+    8,
+    44,
+    222,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_prismatic_happy.svg",
+   "loaded": true,
+   "opaquePx": 16329,
+   "bbox": [
+    8,
+    44,
+    222,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_prismatic_idle.svg",
+   "loaded": true,
+   "opaquePx": 16329,
+   "bbox": [
+    8,
+    44,
+    222,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/adult_prismatic_injured.svg",
+   "loaded": true,
+   "opaquePx": 16329,
+   "bbox": [
+    8,
+    44,
+    222,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_crystal_blink.svg",
+   "loaded": true,
+   "opaquePx": 7332,
+   "bbox": [
+    61,
+    91,
+    187,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_crystal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 7332,
+   "bbox": [
+    61,
+    91,
+    187,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_crystal_happy.svg",
+   "loaded": true,
+   "opaquePx": 7332,
+   "bbox": [
+    61,
+    91,
+    187,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_crystal_idle.svg",
+   "loaded": true,
+   "opaquePx": 7332,
+   "bbox": [
+    61,
+    91,
+    187,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_crystal_injured.svg",
+   "loaded": true,
+   "opaquePx": 7332,
+   "bbox": [
+    61,
+    91,
+    187,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_golden_blink.svg",
+   "loaded": true,
+   "opaquePx": 7622,
+   "bbox": [
+    61,
+    83,
+    184,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_golden_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 7622,
+   "bbox": [
+    61,
+    83,
+    184,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_golden_happy.svg",
+   "loaded": true,
+   "opaquePx": 7622,
+   "bbox": [
+    61,
+    83,
+    184,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_golden_idle.svg",
+   "loaded": true,
+   "opaquePx": 7622,
+   "bbox": [
+    61,
+    83,
+    184,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_golden_injured.svg",
+   "loaded": true,
+   "opaquePx": 7622,
+   "bbox": [
+    61,
+    83,
+    184,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_normal_blink.svg",
+   "loaded": true,
+   "opaquePx": 5490,
+   "bbox": [
+    61,
+    98,
+    176,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_normal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 5490,
+   "bbox": [
+    61,
+    98,
+    176,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_normal_happy.svg",
+   "loaded": true,
+   "opaquePx": 5490,
+   "bbox": [
+    61,
+    98,
+    176,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_normal_idle.svg",
+   "loaded": true,
+   "opaquePx": 5490,
+   "bbox": [
+    61,
+    98,
+    176,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_normal_injured.svg",
+   "loaded": true,
+   "opaquePx": 5490,
+   "bbox": [
+    61,
+    98,
+    176,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_prismatic_blink.svg",
+   "loaded": true,
+   "opaquePx": 7396,
+   "bbox": [
+    61,
+    84,
+    189,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_prismatic_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 7396,
+   "bbox": [
+    61,
+    84,
+    189,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_prismatic_happy.svg",
+   "loaded": true,
+   "opaquePx": 7396,
+   "bbox": [
+    61,
+    84,
+    189,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_prismatic_idle.svg",
+   "loaded": true,
+   "opaquePx": 7396,
+   "bbox": [
+    61,
+    84,
+    189,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/baby_prismatic_injured.svg",
+   "loaded": true,
+   "opaquePx": 7396,
+   "bbox": [
+    61,
+    84,
+    189,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_crystal_blink.svg",
+   "loaded": true,
+   "opaquePx": 11092,
+   "bbox": [
+    36,
+    71,
+    203,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_crystal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 11092,
+   "bbox": [
+    36,
+    71,
+    203,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_crystal_happy.svg",
+   "loaded": true,
+   "opaquePx": 11092,
+   "bbox": [
+    36,
+    71,
+    203,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_crystal_idle.svg",
+   "loaded": true,
+   "opaquePx": 11092,
+   "bbox": [
+    36,
+    71,
+    203,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_crystal_injured.svg",
+   "loaded": true,
+   "opaquePx": 11092,
+   "bbox": [
+    36,
+    71,
+    203,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_golden_blink.svg",
+   "loaded": true,
+   "opaquePx": 11494,
+   "bbox": [
+    36,
+    62,
+    200,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_golden_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 11494,
+   "bbox": [
+    36,
+    62,
+    200,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_golden_happy.svg",
+   "loaded": true,
+   "opaquePx": 11494,
+   "bbox": [
+    36,
+    62,
+    200,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_golden_idle.svg",
+   "loaded": true,
+   "opaquePx": 11494,
+   "bbox": [
+    36,
+    62,
+    200,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_golden_injured.svg",
+   "loaded": true,
+   "opaquePx": 11494,
+   "bbox": [
+    36,
+    62,
+    200,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_normal_blink.svg",
+   "loaded": true,
+   "opaquePx": 9201,
+   "bbox": [
+    36,
+    71,
+    191,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_normal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 9201,
+   "bbox": [
+    36,
+    71,
+    191,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_normal_happy.svg",
+   "loaded": true,
+   "opaquePx": 9201,
+   "bbox": [
+    36,
+    71,
+    191,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_normal_idle.svg",
+   "loaded": true,
+   "opaquePx": 9201,
+   "bbox": [
+    36,
+    71,
+    191,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_normal_injured.svg",
+   "loaded": true,
+   "opaquePx": 9201,
+   "bbox": [
+    36,
+    71,
+    191,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_prismatic_blink.svg",
+   "loaded": true,
+   "opaquePx": 11186,
+   "bbox": [
+    36,
+    63,
+    207,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_prismatic_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 11186,
+   "bbox": [
+    36,
+    63,
+    207,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_prismatic_happy.svg",
+   "loaded": true,
+   "opaquePx": 11186,
+   "bbox": [
+    36,
+    63,
+    207,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_prismatic_idle.svg",
+   "loaded": true,
+   "opaquePx": 11186,
+   "bbox": [
+    36,
+    63,
+    207,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/emberling/juvenile_prismatic_injured.svg",
+   "loaded": true,
+   "opaquePx": 11186,
+   "bbox": [
+    36,
+    63,
+    207,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_crystal_blink.svg",
+   "loaded": true,
+   "opaquePx": 14080,
+   "bbox": [
+    11,
+    68,
+    217,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_crystal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 13793,
+   "bbox": [
+    11,
+    80,
+    221,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_crystal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 13866,
+   "bbox": [
+    11,
+    78,
+    221,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_crystal_happy.svg",
+   "loaded": true,
+   "opaquePx": 14080,
+   "bbox": [
+    11,
+    68,
+    217,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_crystal_idle.svg",
+   "loaded": true,
+   "opaquePx": 14080,
+   "bbox": [
+    11,
+    68,
+    217,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_crystal_injured.svg",
+   "loaded": true,
+   "opaquePx": 13761,
+   "bbox": [
+    11,
+    76,
+    217,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_crystal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 13607,
+   "bbox": [
+    11,
+    71,
+    213,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_crystal_swim_a.svg",
+   "loaded": true,
+   "opaquePx": 13810,
+   "bbox": [
+    11,
+    68,
+    217,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_crystal_swim_b.svg",
+   "loaded": true,
+   "opaquePx": 13720,
+   "bbox": [
+    11,
+    68,
+    217,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_crystal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 14046,
+   "bbox": [
+    11,
+    68,
+    217,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_crystal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 13951,
+   "bbox": [
+    11,
+    68,
+    217,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_golden_blink.svg",
+   "loaded": true,
+   "opaquePx": 14979,
+   "bbox": [
+    11,
+    49,
+    215,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_golden_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 14687,
+   "bbox": [
+    11,
+    60,
+    220,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_golden_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 14752,
+   "bbox": [
+    11,
+    58,
+    220,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_golden_happy.svg",
+   "loaded": true,
+   "opaquePx": 14979,
+   "bbox": [
+    11,
+    49,
+    215,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_golden_idle.svg",
+   "loaded": true,
+   "opaquePx": 14979,
+   "bbox": [
+    11,
+    49,
+    215,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_golden_injured.svg",
+   "loaded": true,
+   "opaquePx": 14646,
+   "bbox": [
+    11,
+    56,
+    215,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_golden_sleep.svg",
+   "loaded": true,
+   "opaquePx": 14486,
+   "bbox": [
+    11,
+    53,
+    211,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_golden_swim_a.svg",
+   "loaded": true,
+   "opaquePx": 14709,
+   "bbox": [
+    11,
+    49,
+    215,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_golden_swim_b.svg",
+   "loaded": true,
+   "opaquePx": 14619,
+   "bbox": [
+    11,
+    49,
+    215,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_golden_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 14945,
+   "bbox": [
+    11,
+    49,
+    215,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_golden_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 14850,
+   "bbox": [
+    11,
+    49,
+    215,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_normal_blink.svg",
+   "loaded": true,
+   "opaquePx": 12045,
+   "bbox": [
+    11,
+    72,
+    202,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_normal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 11757,
+   "bbox": [
+    11,
+    83,
+    206,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_normal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 11827,
+   "bbox": [
+    11,
+    82,
+    206,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_normal_happy.svg",
+   "loaded": true,
+   "opaquePx": 12045,
+   "bbox": [
+    11,
+    72,
+    202,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_normal_idle.svg",
+   "loaded": true,
+   "opaquePx": 12045,
+   "bbox": [
+    11,
+    72,
+    202,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_normal_injured.svg",
+   "loaded": true,
+   "opaquePx": 11724,
+   "bbox": [
+    11,
+    80,
+    202,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_normal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 11570,
+   "bbox": [
+    11,
+    76,
+    198,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_normal_swim_a.svg",
+   "loaded": true,
+   "opaquePx": 11775,
+   "bbox": [
+    11,
+    72,
+    202,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_normal_swim_b.svg",
+   "loaded": true,
+   "opaquePx": 11685,
+   "bbox": [
+    11,
+    72,
+    202,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_normal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 12011,
+   "bbox": [
+    11,
+    72,
+    202,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_normal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 11916,
+   "bbox": [
+    11,
+    72,
+    202,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_prismatic_blink.svg",
+   "loaded": true,
+   "opaquePx": 14187,
+   "bbox": [
+    11,
+    67,
+    217,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_prismatic_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 13909,
+   "bbox": [
+    11,
+    79,
+    222,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_prismatic_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 13976,
+   "bbox": [
+    11,
+    76,
+    222,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_prismatic_happy.svg",
+   "loaded": true,
+   "opaquePx": 14187,
+   "bbox": [
+    11,
+    67,
+    217,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_prismatic_idle.svg",
+   "loaded": true,
+   "opaquePx": 14187,
+   "bbox": [
+    11,
+    67,
+    217,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_prismatic_injured.svg",
+   "loaded": true,
+   "opaquePx": 13870,
+   "bbox": [
+    11,
+    74,
+    218,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_prismatic_sleep.svg",
+   "loaded": true,
+   "opaquePx": 13713,
+   "bbox": [
+    11,
+    70,
+    213,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_prismatic_swim_a.svg",
+   "loaded": true,
+   "opaquePx": 13917,
+   "bbox": [
+    11,
+    67,
+    217,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_prismatic_swim_b.svg",
+   "loaded": true,
+   "opaquePx": 13827,
+   "bbox": [
+    11,
+    67,
+    217,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_prismatic_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 14153,
+   "bbox": [
+    11,
+    67,
+    217,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/adult_prismatic_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 14058,
+   "bbox": [
+    11,
+    67,
+    217,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_crystal_blink.svg",
+   "loaded": true,
+   "opaquePx": 6166,
+   "bbox": [
+    74,
+    99,
+    185,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_crystal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 6069,
+   "bbox": [
+    74,
+    108,
+    188,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_crystal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 6103,
+   "bbox": [
+    74,
+    107,
+    188,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_crystal_happy.svg",
+   "loaded": true,
+   "opaquePx": 6167,
+   "bbox": [
+    74,
+    99,
+    185,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_crystal_idle.svg",
+   "loaded": true,
+   "opaquePx": 6166,
+   "bbox": [
+    74,
+    99,
+    185,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_crystal_injured.svg",
+   "loaded": true,
+   "opaquePx": 6032,
+   "bbox": [
+    74,
+    105,
+    185,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_crystal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 5867,
+   "bbox": [
+    74,
+    102,
+    182,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_crystal_swim_a.svg",
+   "loaded": true,
+   "opaquePx": 6008,
+   "bbox": [
+    74,
+    99,
+    185,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_crystal_swim_b.svg",
+   "loaded": true,
+   "opaquePx": 5974,
+   "bbox": [
+    74,
+    99,
+    185,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_crystal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 6172,
+   "bbox": [
+    74,
+    99,
+    185,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_crystal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 6100,
+   "bbox": [
+    74,
+    99,
+    185,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_golden_blink.svg",
+   "loaded": true,
+   "opaquePx": 6706,
+   "bbox": [
+    74,
+    91,
+    184,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_golden_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 6590,
+   "bbox": [
+    74,
+    98,
+    188,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_golden_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 6622,
+   "bbox": [
+    74,
+    98,
+    188,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_golden_happy.svg",
+   "loaded": true,
+   "opaquePx": 6707,
+   "bbox": [
+    74,
+    91,
+    184,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_golden_idle.svg",
+   "loaded": true,
+   "opaquePx": 6706,
+   "bbox": [
+    74,
+    91,
+    184,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_golden_injured.svg",
+   "loaded": true,
+   "opaquePx": 6564,
+   "bbox": [
+    74,
+    96,
+    184,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_golden_sleep.svg",
+   "loaded": true,
+   "opaquePx": 6398,
+   "bbox": [
+    74,
+    94,
+    181,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_golden_swim_a.svg",
+   "loaded": true,
+   "opaquePx": 6548,
+   "bbox": [
+    74,
+    91,
+    184,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_golden_swim_b.svg",
+   "loaded": true,
+   "opaquePx": 6513,
+   "bbox": [
+    74,
+    91,
+    184,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_golden_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 6712,
+   "bbox": [
+    74,
+    91,
+    184,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_golden_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 6640,
+   "bbox": [
+    74,
+    91,
+    184,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_normal_blink.svg",
+   "loaded": true,
+   "opaquePx": 4296,
+   "bbox": [
+    74,
+    107,
+    175,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_normal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 4200,
+   "bbox": [
+    74,
+    115,
+    179,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_normal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 4230,
+   "bbox": [
+    74,
+    114,
+    179,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_normal_happy.svg",
+   "loaded": true,
+   "opaquePx": 4297,
+   "bbox": [
+    74,
+    107,
+    175,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_normal_idle.svg",
+   "loaded": true,
+   "opaquePx": 4296,
+   "bbox": [
+    74,
+    107,
+    175,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_normal_injured.svg",
+   "loaded": true,
+   "opaquePx": 4165,
+   "bbox": [
+    74,
+    113,
+    175,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_normal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 4000,
+   "bbox": [
+    74,
+    110,
+    173,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_normal_swim_a.svg",
+   "loaded": true,
+   "opaquePx": 4138,
+   "bbox": [
+    74,
+    107,
+    175,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_normal_swim_b.svg",
+   "loaded": true,
+   "opaquePx": 4103,
+   "bbox": [
+    74,
+    107,
+    175,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_normal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 4302,
+   "bbox": [
+    74,
+    107,
+    175,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_normal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 4230,
+   "bbox": [
+    74,
+    107,
+    175,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_prismatic_blink.svg",
+   "loaded": true,
+   "opaquePx": 6221,
+   "bbox": [
+    74,
+    99,
+    185,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_prismatic_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 6121,
+   "bbox": [
+    74,
+    107,
+    188,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_prismatic_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 6156,
+   "bbox": [
+    74,
+    106,
+    188,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_prismatic_happy.svg",
+   "loaded": true,
+   "opaquePx": 6222,
+   "bbox": [
+    74,
+    99,
+    185,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_prismatic_idle.svg",
+   "loaded": true,
+   "opaquePx": 6221,
+   "bbox": [
+    74,
+    99,
+    185,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_prismatic_injured.svg",
+   "loaded": true,
+   "opaquePx": 6089,
+   "bbox": [
+    74,
+    104,
+    185,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_prismatic_sleep.svg",
+   "loaded": true,
+   "opaquePx": 5925,
+   "bbox": [
+    74,
+    102,
+    182,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_prismatic_swim_a.svg",
+   "loaded": true,
+   "opaquePx": 6063,
+   "bbox": [
+    74,
+    99,
+    185,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_prismatic_swim_b.svg",
+   "loaded": true,
+   "opaquePx": 6028,
+   "bbox": [
+    74,
+    99,
+    185,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_prismatic_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 6227,
+   "bbox": [
+    74,
+    99,
+    185,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/baby_prismatic_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 6155,
+   "bbox": [
+    74,
+    99,
+    185,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_crystal_blink.svg",
+   "loaded": true,
+   "opaquePx": 9475,
+   "bbox": [
+    44,
+    83,
+    201,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_crystal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 9326,
+   "bbox": [
+    44,
+    93,
+    205,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_crystal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 9369,
+   "bbox": [
+    44,
+    91,
+    205,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_crystal_happy.svg",
+   "loaded": true,
+   "opaquePx": 9477,
+   "bbox": [
+    44,
+    83,
+    201,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_crystal_idle.svg",
+   "loaded": true,
+   "opaquePx": 9475,
+   "bbox": [
+    44,
+    83,
+    201,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_crystal_injured.svg",
+   "loaded": true,
+   "opaquePx": 9284,
+   "bbox": [
+    44,
+    90,
+    201,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_crystal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 9104,
+   "bbox": [
+    44,
+    86,
+    198,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_crystal_swim_a.svg",
+   "loaded": true,
+   "opaquePx": 9278,
+   "bbox": [
+    44,
+    83,
+    201,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_crystal_swim_b.svg",
+   "loaded": true,
+   "opaquePx": 9224,
+   "bbox": [
+    44,
+    83,
+    201,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_crystal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 9486,
+   "bbox": [
+    44,
+    83,
+    201,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_crystal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 9396,
+   "bbox": [
+    44,
+    83,
+    201,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_golden_blink.svg",
+   "loaded": true,
+   "opaquePx": 10169,
+   "bbox": [
+    44,
+    71,
+    200,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_golden_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 10030,
+   "bbox": [
+    44,
+    82,
+    204,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_golden_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 10068,
+   "bbox": [
+    44,
+    80,
+    204,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_golden_happy.svg",
+   "loaded": true,
+   "opaquePx": 10171,
+   "bbox": [
+    44,
+    71,
+    200,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_golden_idle.svg",
+   "loaded": true,
+   "opaquePx": 10169,
+   "bbox": [
+    44,
+    71,
+    200,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_golden_injured.svg",
+   "loaded": true,
+   "opaquePx": 9971,
+   "bbox": [
+    44,
+    79,
+    200,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_golden_sleep.svg",
+   "loaded": true,
+   "opaquePx": 9790,
+   "bbox": [
+    44,
+    75,
+    197,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_golden_swim_a.svg",
+   "loaded": true,
+   "opaquePx": 9972,
+   "bbox": [
+    44,
+    71,
+    200,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_golden_swim_b.svg",
+   "loaded": true,
+   "opaquePx": 9918,
+   "bbox": [
+    44,
+    71,
+    200,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_golden_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 10180,
+   "bbox": [
+    44,
+    71,
+    200,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_golden_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 10090,
+   "bbox": [
+    44,
+    71,
+    200,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_normal_blink.svg",
+   "loaded": true,
+   "opaquePx": 7514,
+   "bbox": [
+    44,
+    91,
+    188,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_normal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 7365,
+   "bbox": [
+    44,
+    101,
+    193,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_normal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 7408,
+   "bbox": [
+    44,
+    99,
+    193,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_normal_happy.svg",
+   "loaded": true,
+   "opaquePx": 7516,
+   "bbox": [
+    44,
+    91,
+    188,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_normal_idle.svg",
+   "loaded": true,
+   "opaquePx": 7514,
+   "bbox": [
+    44,
+    91,
+    188,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_normal_injured.svg",
+   "loaded": true,
+   "opaquePx": 7325,
+   "bbox": [
+    44,
+    98,
+    188,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_normal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 7141,
+   "bbox": [
+    44,
+    95,
+    186,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_normal_swim_a.svg",
+   "loaded": true,
+   "opaquePx": 7317,
+   "bbox": [
+    44,
+    91,
+    188,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_normal_swim_b.svg",
+   "loaded": true,
+   "opaquePx": 7263,
+   "bbox": [
+    44,
+    91,
+    188,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_normal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 7525,
+   "bbox": [
+    44,
+    91,
+    188,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_normal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 7435,
+   "bbox": [
+    44,
+    91,
+    188,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_prismatic_blink.svg",
+   "loaded": true,
+   "opaquePx": 9551,
+   "bbox": [
+    44,
+    83,
+    202,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_prismatic_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 9397,
+   "bbox": [
+    44,
+    92,
+    206,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_prismatic_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 9443,
+   "bbox": [
+    44,
+    90,
+    206,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_prismatic_happy.svg",
+   "loaded": true,
+   "opaquePx": 9553,
+   "bbox": [
+    44,
+    83,
+    202,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_prismatic_idle.svg",
+   "loaded": true,
+   "opaquePx": 9551,
+   "bbox": [
+    44,
+    83,
+    202,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_prismatic_injured.svg",
+   "loaded": true,
+   "opaquePx": 9364,
+   "bbox": [
+    44,
+    89,
+    202,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_prismatic_sleep.svg",
+   "loaded": true,
+   "opaquePx": 9174,
+   "bbox": [
+    44,
+    85,
+    198,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_prismatic_swim_a.svg",
+   "loaded": true,
+   "opaquePx": 9354,
+   "bbox": [
+    44,
+    83,
+    202,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_prismatic_swim_b.svg",
+   "loaded": true,
+   "opaquePx": 9300,
+   "bbox": [
+    44,
+    83,
+    202,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_prismatic_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 9562,
+   "bbox": [
+    44,
+    83,
+    202,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/droplet/juvenile_prismatic_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 9472,
+   "bbox": [
+    44,
+    83,
+    202,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_crystal_blink.svg",
+   "loaded": true,
+   "opaquePx": 14058,
+   "bbox": [
+    20,
+    33,
+    211,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_crystal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 13891,
+   "bbox": [
+    20,
+    44,
+    217,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_crystal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 13924,
+   "bbox": [
+    20,
+    42,
+    217,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_crystal_happy.svg",
+   "loaded": true,
+   "opaquePx": 14059,
+   "bbox": [
+    20,
+    33,
+    211,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_crystal_idle.svg",
+   "loaded": true,
+   "opaquePx": 14058,
+   "bbox": [
+    20,
+    33,
+    211,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_crystal_injured.svg",
+   "loaded": true,
+   "opaquePx": 13715,
+   "bbox": [
+    20,
+    42,
+    211,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_crystal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 13427,
+   "bbox": [
+    20,
+    39,
+    207,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_crystal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 14110,
+   "bbox": [
+    20,
+    33,
+    211,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_crystal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 14039,
+   "bbox": [
+    20,
+    33,
+    211,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_golden_blink.svg",
+   "loaded": true,
+   "opaquePx": 14673,
+   "bbox": [
+    20,
+    18,
+    210,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_golden_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 14524,
+   "bbox": [
+    20,
+    29,
+    215,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_golden_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 14558,
+   "bbox": [
+    20,
+    27,
+    215,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_golden_happy.svg",
+   "loaded": true,
+   "opaquePx": 14674,
+   "bbox": [
+    20,
+    18,
+    210,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_golden_idle.svg",
+   "loaded": true,
+   "opaquePx": 14673,
+   "bbox": [
+    20,
+    18,
+    210,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_golden_injured.svg",
+   "loaded": true,
+   "opaquePx": 14347,
+   "bbox": [
+    20,
+    27,
+    210,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_golden_sleep.svg",
+   "loaded": true,
+   "opaquePx": 14048,
+   "bbox": [
+    20,
+    24,
+    206,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_golden_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 14725,
+   "bbox": [
+    20,
+    18,
+    210,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_golden_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 14653,
+   "bbox": [
+    20,
+    18,
+    210,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_normal_blink.svg",
+   "loaded": true,
+   "opaquePx": 12036,
+   "bbox": [
+    20,
+    33,
+    193,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_normal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 11868,
+   "bbox": [
+    20,
+    44,
+    198,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_normal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 11900,
+   "bbox": [
+    20,
+    42,
+    198,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_normal_happy.svg",
+   "loaded": true,
+   "opaquePx": 12037,
+   "bbox": [
+    20,
+    33,
+    193,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_normal_idle.svg",
+   "loaded": true,
+   "opaquePx": 12036,
+   "bbox": [
+    20,
+    33,
+    193,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_normal_injured.svg",
+   "loaded": true,
+   "opaquePx": 11694,
+   "bbox": [
+    20,
+    42,
+    193,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_normal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 11401,
+   "bbox": [
+    20,
+    39,
+    189,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_normal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 12088,
+   "bbox": [
+    20,
+    33,
+    193,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_normal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 12017,
+   "bbox": [
+    20,
+    33,
+    193,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_prismatic_blink.svg",
+   "loaded": true,
+   "opaquePx": 14157,
+   "bbox": [
+    20,
+    33,
+    212,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_prismatic_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 13988,
+   "bbox": [
+    20,
+    44,
+    218,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_prismatic_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 14020,
+   "bbox": [
+    20,
+    42,
+    218,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_prismatic_happy.svg",
+   "loaded": true,
+   "opaquePx": 14158,
+   "bbox": [
+    20,
+    33,
+    212,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_prismatic_idle.svg",
+   "loaded": true,
+   "opaquePx": 14157,
+   "bbox": [
+    20,
+    33,
+    212,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_prismatic_injured.svg",
+   "loaded": true,
+   "opaquePx": 13816,
+   "bbox": [
+    20,
+    42,
+    212,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_prismatic_sleep.svg",
+   "loaded": true,
+   "opaquePx": 13517,
+   "bbox": [
+    20,
+    39,
+    208,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_prismatic_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 14209,
+   "bbox": [
+    20,
+    33,
+    212,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/adult_prismatic_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 14138,
+   "bbox": [
+    20,
+    33,
+    212,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_crystal_blink.svg",
+   "loaded": true,
+   "opaquePx": 6360,
+   "bbox": [
+    68,
+    94,
+    183,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_crystal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 6275,
+   "bbox": [
+    68,
+    102,
+    187,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_crystal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 6307,
+   "bbox": [
+    68,
+    100,
+    187,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_crystal_happy.svg",
+   "loaded": true,
+   "opaquePx": 6360,
+   "bbox": [
+    68,
+    94,
+    183,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_crystal_idle.svg",
+   "loaded": true,
+   "opaquePx": 6360,
+   "bbox": [
+    68,
+    94,
+    183,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_crystal_injured.svg",
+   "loaded": true,
+   "opaquePx": 6223,
+   "bbox": [
+    68,
+    99,
+    184,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_crystal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 6056,
+   "bbox": [
+    68,
+    97,
+    181,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_crystal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 6379,
+   "bbox": [
+    68,
+    94,
+    183,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_crystal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 6307,
+   "bbox": [
+    68,
+    94,
+    183,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_golden_blink.svg",
+   "loaded": true,
+   "opaquePx": 6732,
+   "bbox": [
+    68,
+    84,
+    183,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_golden_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 6642,
+   "bbox": [
+    68,
+    92,
+    186,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_golden_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 6663,
+   "bbox": [
+    68,
+    91,
+    186,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_golden_happy.svg",
+   "loaded": true,
+   "opaquePx": 6732,
+   "bbox": [
+    68,
+    84,
+    183,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_golden_idle.svg",
+   "loaded": true,
+   "opaquePx": 6732,
+   "bbox": [
+    68,
+    84,
+    183,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_golden_injured.svg",
+   "loaded": true,
+   "opaquePx": 6589,
+   "bbox": [
+    68,
+    90,
+    183,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_golden_sleep.svg",
+   "loaded": true,
+   "opaquePx": 6413,
+   "bbox": [
+    68,
+    87,
+    180,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_golden_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 6751,
+   "bbox": [
+    68,
+    84,
+    183,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_golden_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 6688,
+   "bbox": [
+    68,
+    84,
+    183,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_normal_blink.svg",
+   "loaded": true,
+   "opaquePx": 4501,
+   "bbox": [
+    68,
+    94,
+    172,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_normal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 4418,
+   "bbox": [
+    68,
+    102,
+    175,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_normal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 4445,
+   "bbox": [
+    68,
+    100,
+    175,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_normal_happy.svg",
+   "loaded": true,
+   "opaquePx": 4501,
+   "bbox": [
+    68,
+    94,
+    172,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_normal_idle.svg",
+   "loaded": true,
+   "opaquePx": 4501,
+   "bbox": [
+    68,
+    94,
+    172,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_normal_injured.svg",
+   "loaded": true,
+   "opaquePx": 4363,
+   "bbox": [
+    68,
+    99,
+    172,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_normal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 4186,
+   "bbox": [
+    68,
+    97,
+    169,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_normal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 4520,
+   "bbox": [
+    68,
+    94,
+    172,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_normal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 4484,
+   "bbox": [
+    68,
+    94,
+    172,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_prismatic_blink.svg",
+   "loaded": true,
+   "opaquePx": 6401,
+   "bbox": [
+    68,
+    94,
+    184,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_prismatic_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 6316,
+   "bbox": [
+    68,
+    102,
+    188,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_prismatic_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 6348,
+   "bbox": [
+    68,
+    100,
+    188,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_prismatic_happy.svg",
+   "loaded": true,
+   "opaquePx": 6401,
+   "bbox": [
+    68,
+    94,
+    184,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_prismatic_idle.svg",
+   "loaded": true,
+   "opaquePx": 6401,
+   "bbox": [
+    68,
+    94,
+    184,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_prismatic_injured.svg",
+   "loaded": true,
+   "opaquePx": 6264,
+   "bbox": [
+    68,
+    99,
+    184,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_prismatic_sleep.svg",
+   "loaded": true,
+   "opaquePx": 6097,
+   "bbox": [
+    68,
+    97,
+    181,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_prismatic_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 6420,
+   "bbox": [
+    68,
+    94,
+    184,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/baby_prismatic_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 6348,
+   "bbox": [
+    68,
+    94,
+    184,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_crystal_blink.svg",
+   "loaded": true,
+   "opaquePx": 9803,
+   "bbox": [
+    44,
+    62,
+    199,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_crystal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 9669,
+   "bbox": [
+    44,
+    72,
+    203,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_crystal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 9705,
+   "bbox": [
+    44,
+    70,
+    203,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_crystal_happy.svg",
+   "loaded": true,
+   "opaquePx": 9803,
+   "bbox": [
+    44,
+    62,
+    199,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_crystal_idle.svg",
+   "loaded": true,
+   "opaquePx": 9803,
+   "bbox": [
+    44,
+    62,
+    199,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_crystal_injured.svg",
+   "loaded": true,
+   "opaquePx": 9561,
+   "bbox": [
+    44,
+    69,
+    199,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_crystal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 9365,
+   "bbox": [
+    44,
+    67,
+    195,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_crystal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 9853,
+   "bbox": [
+    44,
+    62,
+    199,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_crystal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 9783,
+   "bbox": [
+    44,
+    62,
+    199,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_golden_blink.svg",
+   "loaded": true,
+   "opaquePx": 10232,
+   "bbox": [
+    44,
+    53,
+    198,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_golden_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 10101,
+   "bbox": [
+    44,
+    64,
+    202,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_golden_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 10135,
+   "bbox": [
+    44,
+    62,
+    202,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_golden_happy.svg",
+   "loaded": true,
+   "opaquePx": 10232,
+   "bbox": [
+    44,
+    53,
+    198,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_golden_idle.svg",
+   "loaded": true,
+   "opaquePx": 10232,
+   "bbox": [
+    44,
+    53,
+    198,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_golden_injured.svg",
+   "loaded": true,
+   "opaquePx": 9989,
+   "bbox": [
+    44,
+    61,
+    198,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_golden_sleep.svg",
+   "loaded": true,
+   "opaquePx": 9792,
+   "bbox": [
+    44,
+    58,
+    194,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_golden_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 10282,
+   "bbox": [
+    44,
+    53,
+    198,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_golden_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 10199,
+   "bbox": [
+    44,
+    53,
+    198,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_normal_blink.svg",
+   "loaded": true,
+   "opaquePx": 7853,
+   "bbox": [
+    44,
+    62,
+    183,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_normal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 7721,
+   "bbox": [
+    44,
+    72,
+    188,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_normal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 7755,
+   "bbox": [
+    44,
+    70,
+    188,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_normal_happy.svg",
+   "loaded": true,
+   "opaquePx": 7853,
+   "bbox": [
+    44,
+    62,
+    183,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_normal_idle.svg",
+   "loaded": true,
+   "opaquePx": 7853,
+   "bbox": [
+    44,
+    62,
+    183,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_normal_injured.svg",
+   "loaded": true,
+   "opaquePx": 7610,
+   "bbox": [
+    44,
+    69,
+    183,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_normal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 7417,
+   "bbox": [
+    44,
+    67,
+    180,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_normal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 7903,
+   "bbox": [
+    44,
+    62,
+    183,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_normal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 7850,
+   "bbox": [
+    44,
+    62,
+    183,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_prismatic_blink.svg",
+   "loaded": true,
+   "opaquePx": 9876,
+   "bbox": [
+    44,
+    62,
+    199,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_prismatic_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 9742,
+   "bbox": [
+    44,
+    72,
+    203,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_prismatic_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 9780,
+   "bbox": [
+    44,
+    70,
+    203,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_prismatic_happy.svg",
+   "loaded": true,
+   "opaquePx": 9876,
+   "bbox": [
+    44,
+    62,
+    199,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_prismatic_idle.svg",
+   "loaded": true,
+   "opaquePx": 9876,
+   "bbox": [
+    44,
+    62,
+    199,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_prismatic_injured.svg",
+   "loaded": true,
+   "opaquePx": 9628,
+   "bbox": [
+    44,
+    69,
+    199,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_prismatic_sleep.svg",
+   "loaded": true,
+   "opaquePx": 9433,
+   "bbox": [
+    44,
+    67,
+    196,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_prismatic_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 9926,
+   "bbox": [
+    44,
+    62,
+    199,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/sprout/juvenile_prismatic_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 9842,
+   "bbox": [
+    44,
+    62,
+    199,
+    171
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_crystal_blink.svg",
+   "loaded": true,
+   "opaquePx": 17161,
+   "bbox": [
+    2,
+    46,
+    203,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_crystal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 17052,
+   "bbox": [
+    2,
+    46,
+    208,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_crystal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 17076,
+   "bbox": [
+    2,
+    46,
+    208,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_crystal_fly_down.svg",
+   "loaded": true,
+   "opaquePx": 12326,
+   "bbox": [
+    7,
+    52,
+    203,
+    165
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_crystal_fly_up.svg",
+   "loaded": true,
+   "opaquePx": 16874,
+   "bbox": [
+    18,
+    3,
+    203,
+    165
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_crystal_happy.svg",
+   "loaded": true,
+   "opaquePx": 17161,
+   "bbox": [
+    2,
+    46,
+    203,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_crystal_idle.svg",
+   "loaded": true,
+   "opaquePx": 17161,
+   "bbox": [
+    2,
+    46,
+    203,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_crystal_injured.svg",
+   "loaded": true,
+   "opaquePx": 16830,
+   "bbox": [
+    2,
+    49,
+    203,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_crystal_land.svg",
+   "loaded": true,
+   "opaquePx": 17167,
+   "bbox": [
+    18,
+    3,
+    203,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_crystal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 16355,
+   "bbox": [
+    2,
+    54,
+    200,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_crystal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 17083,
+   "bbox": [
+    2,
+    46,
+    203,
+    169
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_crystal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 17171,
+   "bbox": [
+    2,
+    46,
+    203,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_golden_blink.svg",
+   "loaded": true,
+   "opaquePx": 17926,
+   "bbox": [
+    3,
+    36,
+    203,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_golden_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 17809,
+   "bbox": [
+    3,
+    46,
+    207,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_golden_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 17835,
+   "bbox": [
+    3,
+    45,
+    207,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_golden_fly_down.svg",
+   "loaded": true,
+   "opaquePx": 13069,
+   "bbox": [
+    8,
+    36,
+    203,
+    165
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_golden_fly_up.svg",
+   "loaded": true,
+   "opaquePx": 17625,
+   "bbox": [
+    18,
+    0,
+    203,
+    165
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_golden_happy.svg",
+   "loaded": true,
+   "opaquePx": 17926,
+   "bbox": [
+    3,
+    36,
+    203,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_golden_idle.svg",
+   "loaded": true,
+   "opaquePx": 17926,
+   "bbox": [
+    3,
+    36,
+    203,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_golden_injured.svg",
+   "loaded": true,
+   "opaquePx": 17595,
+   "bbox": [
+    3,
+    49,
+    203,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_golden_land.svg",
+   "loaded": true,
+   "opaquePx": 17918,
+   "bbox": [
+    18,
+    0,
+    203,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_golden_sleep.svg",
+   "loaded": true,
+   "opaquePx": 17121,
+   "bbox": [
+    3,
+    50,
+    198,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_golden_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 17848,
+   "bbox": [
+    3,
+    36,
+    203,
+    169
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_golden_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 17936,
+   "bbox": [
+    3,
+    36,
+    203,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_normal_blink.svg",
+   "loaded": true,
+   "opaquePx": 15121,
+   "bbox": [
+    18,
+    46,
+    186,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_normal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 15013,
+   "bbox": [
+    18,
+    46,
+    190,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_normal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 15037,
+   "bbox": [
+    18,
+    46,
+    190,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_normal_fly_down.svg",
+   "loaded": true,
+   "opaquePx": 10316,
+   "bbox": [
+    18,
+    52,
+    186,
+    165
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_normal_fly_up.svg",
+   "loaded": true,
+   "opaquePx": 14849,
+   "bbox": [
+    18,
+    12,
+    186,
+    165
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_normal_happy.svg",
+   "loaded": true,
+   "opaquePx": 15121,
+   "bbox": [
+    18,
+    46,
+    186,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_normal_idle.svg",
+   "loaded": true,
+   "opaquePx": 15121,
+   "bbox": [
+    18,
+    46,
+    186,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_normal_injured.svg",
+   "loaded": true,
+   "opaquePx": 14794,
+   "bbox": [
+    18,
+    52,
+    186,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_normal_land.svg",
+   "loaded": true,
+   "opaquePx": 15142,
+   "bbox": [
+    18,
+    12,
+    186,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_normal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 14322,
+   "bbox": [
+    18,
+    57,
+    181,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_normal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 15043,
+   "bbox": [
+    18,
+    46,
+    186,
+    169
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_normal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 15131,
+   "bbox": [
+    18,
+    46,
+    186,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_prismatic_blink.svg",
+   "loaded": true,
+   "opaquePx": 17272,
+   "bbox": [
+    1,
+    46,
+    204,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_prismatic_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 17165,
+   "bbox": [
+    1,
+    46,
+    209,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_prismatic_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 17186,
+   "bbox": [
+    1,
+    46,
+    209,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_prismatic_fly_down.svg",
+   "loaded": true,
+   "opaquePx": 12411,
+   "bbox": [
+    6,
+    52,
+    204,
+    165
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_prismatic_fly_up.svg",
+   "loaded": true,
+   "opaquePx": 16967,
+   "bbox": [
+    18,
+    2,
+    204,
+    165
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_prismatic_happy.svg",
+   "loaded": true,
+   "opaquePx": 17272,
+   "bbox": [
+    1,
+    46,
+    204,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_prismatic_idle.svg",
+   "loaded": true,
+   "opaquePx": 17272,
+   "bbox": [
+    1,
+    46,
+    204,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_prismatic_injured.svg",
+   "loaded": true,
+   "opaquePx": 16941,
+   "bbox": [
+    1,
+    49,
+    204,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_prismatic_land.svg",
+   "loaded": true,
+   "opaquePx": 17260,
+   "bbox": [
+    18,
+    2,
+    204,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_prismatic_sleep.svg",
+   "loaded": true,
+   "opaquePx": 16467,
+   "bbox": [
+    1,
+    53,
+    200,
+    172
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_prismatic_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 17194,
+   "bbox": [
+    1,
+    46,
+    204,
+    169
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/adult_prismatic_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 17282,
+   "bbox": [
+    1,
+    46,
+    204,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_crystal_blink.svg",
+   "loaded": true,
+   "opaquePx": 6572,
+   "bbox": [
+    65,
+    98,
+    179,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_crystal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 6553,
+   "bbox": [
+    65,
+    107,
+    183,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_crystal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 6562,
+   "bbox": [
+    65,
+    105,
+    183,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_crystal_fly_down.svg",
+   "loaded": true,
+   "opaquePx": 5984,
+   "bbox": [
+    65,
+    98,
+    179,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_crystal_fly_up.svg",
+   "loaded": true,
+   "opaquePx": 6509,
+   "bbox": [
+    65,
+    98,
+    179,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_crystal_happy.svg",
+   "loaded": true,
+   "opaquePx": 6572,
+   "bbox": [
+    65,
+    98,
+    179,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_crystal_idle.svg",
+   "loaded": true,
+   "opaquePx": 6572,
+   "bbox": [
+    65,
+    98,
+    179,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_crystal_injured.svg",
+   "loaded": true,
+   "opaquePx": 6427,
+   "bbox": [
+    65,
+    106,
+    179,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_crystal_land.svg",
+   "loaded": true,
+   "opaquePx": 6554,
+   "bbox": [
+    65,
+    98,
+    179,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_crystal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 6217,
+   "bbox": [
+    65,
+    104,
+    176,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_crystal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 6493,
+   "bbox": [
+    65,
+    98,
+    179,
+    169
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_crystal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 6574,
+   "bbox": [
+    65,
+    98,
+    179,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_golden_blink.svg",
+   "loaded": true,
+   "opaquePx": 7028,
+   "bbox": [
+    65,
+    84,
+    178,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_golden_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 7036,
+   "bbox": [
+    65,
+    93,
+    182,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_golden_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 7044,
+   "bbox": [
+    65,
+    91,
+    182,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_golden_fly_down.svg",
+   "loaded": true,
+   "opaquePx": 6448,
+   "bbox": [
+    65,
+    84,
+    178,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_golden_fly_up.svg",
+   "loaded": true,
+   "opaquePx": 6971,
+   "bbox": [
+    65,
+    84,
+    178,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_golden_happy.svg",
+   "loaded": true,
+   "opaquePx": 7028,
+   "bbox": [
+    65,
+    84,
+    178,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_golden_idle.svg",
+   "loaded": true,
+   "opaquePx": 7028,
+   "bbox": [
+    65,
+    84,
+    178,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_golden_injured.svg",
+   "loaded": true,
+   "opaquePx": 6906,
+   "bbox": [
+    65,
+    92,
+    178,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_golden_land.svg",
+   "loaded": true,
+   "opaquePx": 7016,
+   "bbox": [
+    65,
+    84,
+    178,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_golden_sleep.svg",
+   "loaded": true,
+   "opaquePx": 6694,
+   "bbox": [
+    65,
+    91,
+    176,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_golden_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 6949,
+   "bbox": [
+    65,
+    84,
+    178,
+    169
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_golden_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 7030,
+   "bbox": [
+    65,
+    84,
+    178,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_normal_blink.svg",
+   "loaded": true,
+   "opaquePx": 4696,
+   "bbox": [
+    65,
+    98,
+    168,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_normal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 4679,
+   "bbox": [
+    65,
+    107,
+    172,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_normal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 4687,
+   "bbox": [
+    65,
+    105,
+    172,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_normal_fly_down.svg",
+   "loaded": true,
+   "opaquePx": 4114,
+   "bbox": [
+    65,
+    98,
+    168,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_normal_fly_up.svg",
+   "loaded": true,
+   "opaquePx": 4638,
+   "bbox": [
+    65,
+    98,
+    168,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_normal_happy.svg",
+   "loaded": true,
+   "opaquePx": 4696,
+   "bbox": [
+    65,
+    98,
+    168,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_normal_idle.svg",
+   "loaded": true,
+   "opaquePx": 4696,
+   "bbox": [
+    65,
+    98,
+    168,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_normal_injured.svg",
+   "loaded": true,
+   "opaquePx": 4547,
+   "bbox": [
+    65,
+    106,
+    168,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_normal_land.svg",
+   "loaded": true,
+   "opaquePx": 4683,
+   "bbox": [
+    65,
+    98,
+    168,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_normal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 4335,
+   "bbox": [
+    65,
+    104,
+    165,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_normal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 4617,
+   "bbox": [
+    65,
+    98,
+    168,
+    169
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_normal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 4698,
+   "bbox": [
+    65,
+    98,
+    168,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_prismatic_blink.svg",
+   "loaded": true,
+   "opaquePx": 6621,
+   "bbox": [
+    65,
+    98,
+    180,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_prismatic_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 6604,
+   "bbox": [
+    65,
+    107,
+    183,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_prismatic_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 6614,
+   "bbox": [
+    65,
+    105,
+    183,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_prismatic_fly_down.svg",
+   "loaded": true,
+   "opaquePx": 6039,
+   "bbox": [
+    65,
+    98,
+    180,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_prismatic_fly_up.svg",
+   "loaded": true,
+   "opaquePx": 6563,
+   "bbox": [
+    65,
+    98,
+    180,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_prismatic_happy.svg",
+   "loaded": true,
+   "opaquePx": 6621,
+   "bbox": [
+    65,
+    98,
+    180,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_prismatic_idle.svg",
+   "loaded": true,
+   "opaquePx": 6621,
+   "bbox": [
+    65,
+    98,
+    180,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_prismatic_injured.svg",
+   "loaded": true,
+   "opaquePx": 6468,
+   "bbox": [
+    65,
+    106,
+    180,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_prismatic_land.svg",
+   "loaded": true,
+   "opaquePx": 6608,
+   "bbox": [
+    65,
+    98,
+    180,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_prismatic_sleep.svg",
+   "loaded": true,
+   "opaquePx": 6260,
+   "bbox": [
+    65,
+    104,
+    177,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_prismatic_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 6542,
+   "bbox": [
+    65,
+    98,
+    180,
+    169
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/baby_prismatic_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 6623,
+   "bbox": [
+    65,
+    98,
+    180,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_crystal_blink.svg",
+   "loaded": true,
+   "opaquePx": 10948,
+   "bbox": [
+    41,
+    75,
+    192,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_crystal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 10883,
+   "bbox": [
+    41,
+    77,
+    196,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_crystal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 10901,
+   "bbox": [
+    41,
+    77,
+    196,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_crystal_fly_down.svg",
+   "loaded": true,
+   "opaquePx": 8789,
+   "bbox": [
+    41,
+    75,
+    192,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_crystal_fly_up.svg",
+   "loaded": true,
+   "opaquePx": 10824,
+   "bbox": [
+    41,
+    49,
+    192,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_crystal_happy.svg",
+   "loaded": true,
+   "opaquePx": 10948,
+   "bbox": [
+    41,
+    75,
+    192,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_crystal_idle.svg",
+   "loaded": true,
+   "opaquePx": 10948,
+   "bbox": [
+    41,
+    75,
+    192,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_crystal_injured.svg",
+   "loaded": true,
+   "opaquePx": 10728,
+   "bbox": [
+    41,
+    82,
+    191,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_crystal_land.svg",
+   "loaded": true,
+   "opaquePx": 10977,
+   "bbox": [
+    41,
+    49,
+    192,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_crystal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 10371,
+   "bbox": [
+    41,
+    85,
+    188,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_crystal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 10864,
+   "bbox": [
+    41,
+    75,
+    192,
+    169
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_crystal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 10952,
+   "bbox": [
+    41,
+    75,
+    192,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_golden_blink.svg",
+   "loaded": true,
+   "opaquePx": 11570,
+   "bbox": [
+    41,
+    59,
+    190,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_golden_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 11506,
+   "bbox": [
+    41,
+    69,
+    195,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_golden_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 11526,
+   "bbox": [
+    41,
+    68,
+    195,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_golden_fly_down.svg",
+   "loaded": true,
+   "opaquePx": 9398,
+   "bbox": [
+    41,
+    59,
+    190,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_golden_fly_up.svg",
+   "loaded": true,
+   "opaquePx": 11444,
+   "bbox": [
+    41,
+    50,
+    190,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_golden_happy.svg",
+   "loaded": true,
+   "opaquePx": 11570,
+   "bbox": [
+    41,
+    59,
+    190,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_golden_idle.svg",
+   "loaded": true,
+   "opaquePx": 11570,
+   "bbox": [
+    41,
+    59,
+    190,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_golden_injured.svg",
+   "loaded": true,
+   "opaquePx": 11352,
+   "bbox": [
+    41,
+    68,
+    190,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_golden_land.svg",
+   "loaded": true,
+   "opaquePx": 11597,
+   "bbox": [
+    41,
+    50,
+    190,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_golden_sleep.svg",
+   "loaded": true,
+   "opaquePx": 10992,
+   "bbox": [
+    41,
+    68,
+    188,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_golden_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 11486,
+   "bbox": [
+    41,
+    59,
+    190,
+    169
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_golden_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 11574,
+   "bbox": [
+    41,
+    59,
+    190,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_normal_blink.svg",
+   "loaded": true,
+   "opaquePx": 8988,
+   "bbox": [
+    41,
+    75,
+    177,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_normal_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 8923,
+   "bbox": [
+    41,
+    80,
+    181,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_normal_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 8941,
+   "bbox": [
+    41,
+    80,
+    181,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_normal_fly_down.svg",
+   "loaded": true,
+   "opaquePx": 6896,
+   "bbox": [
+    41,
+    75,
+    177,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_normal_fly_up.svg",
+   "loaded": true,
+   "opaquePx": 8865,
+   "bbox": [
+    41,
+    60,
+    177,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_normal_happy.svg",
+   "loaded": true,
+   "opaquePx": 8988,
+   "bbox": [
+    41,
+    75,
+    177,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_normal_idle.svg",
+   "loaded": true,
+   "opaquePx": 8988,
+   "bbox": [
+    41,
+    75,
+    177,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_normal_injured.svg",
+   "loaded": true,
+   "opaquePx": 8771,
+   "bbox": [
+    41,
+    83,
+    177,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_normal_land.svg",
+   "loaded": true,
+   "opaquePx": 9018,
+   "bbox": [
+    41,
+    60,
+    177,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_normal_sleep.svg",
+   "loaded": true,
+   "opaquePx": 8409,
+   "bbox": [
+    41,
+    85,
+    173,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_normal_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 8904,
+   "bbox": [
+    41,
+    75,
+    177,
+    169
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_normal_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 8992,
+   "bbox": [
+    41,
+    75,
+    177,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_prismatic_blink.svg",
+   "loaded": true,
+   "opaquePx": 11034,
+   "bbox": [
+    41,
+    75,
+    192,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_prismatic_eat_a.svg",
+   "loaded": true,
+   "opaquePx": 10962,
+   "bbox": [
+    41,
+    77,
+    197,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_prismatic_eat_b.svg",
+   "loaded": true,
+   "opaquePx": 10983,
+   "bbox": [
+    41,
+    77,
+    197,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_prismatic_fly_down.svg",
+   "loaded": true,
+   "opaquePx": 8844,
+   "bbox": [
+    41,
+    75,
+    192,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_prismatic_fly_up.svg",
+   "loaded": true,
+   "opaquePx": 10905,
+   "bbox": [
+    41,
+    48,
+    192,
+    170
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_prismatic_happy.svg",
+   "loaded": true,
+   "opaquePx": 11034,
+   "bbox": [
+    41,
+    75,
+    192,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_prismatic_idle.svg",
+   "loaded": true,
+   "opaquePx": 11034,
+   "bbox": [
+    41,
+    75,
+    192,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_prismatic_injured.svg",
+   "loaded": true,
+   "opaquePx": 10820,
+   "bbox": [
+    41,
+    81,
+    192,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_prismatic_land.svg",
+   "loaded": true,
+   "opaquePx": 11058,
+   "bbox": [
+    41,
+    48,
+    192,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_prismatic_sleep.svg",
+   "loaded": true,
+   "opaquePx": 10448,
+   "bbox": [
+    41,
+    84,
+    189,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_prismatic_walk_a.svg",
+   "loaded": true,
+   "opaquePx": 10950,
+   "bbox": [
+    41,
+    75,
+    192,
+    169
+   ]
+  },
+  {
+   "file": "src/assets/animations/frames/zephyr/juvenile_prismatic_walk_b.svg",
+   "loaded": true,
+   "opaquePx": 11038,
+   "bbox": [
+    41,
+    75,
+    192,
+    173
+   ]
+  },
+  {
+   "file": "src/assets/effects/dragon/bandage.svg",
+   "loaded": true,
+   "opaquePx": 3082,
+   "bbox": [
+    2,
+    4,
+    46,
+    28
+   ]
+  },
+  {
+   "file": "src/assets/effects/dragon/bubbles.svg",
+   "loaded": true,
+   "opaquePx": 1224,
+   "bbox": [
+    5,
+    5,
+    28,
+    45
+   ]
+  },
+  {
+   "file": "src/assets/effects/dragon/care_leaf.svg",
+   "loaded": true,
+   "opaquePx": 5936,
+   "bbox": [
+    3,
+    3,
+    46,
+    46
+   ]
+  },
+  {
+   "file": "src/assets/effects/dragon/crumbs.svg",
+   "loaded": true,
+   "opaquePx": 875,
+   "bbox": [
+    7,
+    9,
+    39,
+    30
+   ]
+  },
+  {
+   "file": "src/assets/effects/dragon/dust.svg",
+   "loaded": true,
+   "opaquePx": 3157,
+   "bbox": [
+    9,
+    7,
+    55,
+    31
+   ]
+  },
+  {
+   "file": "src/assets/effects/dragon/happy_burst.svg",
+   "loaded": true,
+   "opaquePx": 1830,
+   "bbox": [
+    5,
+    4,
+    59,
+    55
+   ]
+  },
+  {
+   "file": "src/assets/effects/dragon/heart.svg",
+   "loaded": true,
+   "opaquePx": 1751,
+   "bbox": [
+    12,
+    12,
+    37,
+    36
+   ]
+  },
+  {
+   "file": "src/assets/effects/dragon/recovery_glow.svg",
+   "loaded": true,
+   "opaquePx": 6620,
+   "bbox": [
+    7,
+    2,
+    91,
+    92
+   ]
+  },
+  {
+   "file": "src/assets/effects/dragon/ripple.svg",
+   "loaded": true,
+   "opaquePx": 4643,
+   "bbox": [
+    5,
+    5,
+    124,
+    28
+   ]
+  },
+  {
+   "file": "src/assets/effects/dragon/shadow.svg",
+   "loaded": true,
+   "opaquePx": 7238,
+   "bbox": [
+    2,
+    3,
+    126,
+    21
+   ]
+  },
+  {
+   "file": "src/assets/effects/dragon/water_surface.svg",
+   "loaded": true,
+   "opaquePx": 58904,
+   "bbox": [
+    0,
+    4,
+    256,
+    64
+   ]
+  },
+  {
+   "file": "src/assets/effects/dragon/wind.svg",
+   "loaded": true,
+   "opaquePx": 2023,
+   "bbox": [
+    1,
+    0,
+    62,
+    42
+   ]
+  },
+  {
+   "file": "src/assets/effects/dragon/zzz.svg",
+   "loaded": true,
+   "opaquePx": 1492,
+   "bbox": [
+    6,
+    7,
+    50,
+    53
+   ]
+  }
+ ]
+}

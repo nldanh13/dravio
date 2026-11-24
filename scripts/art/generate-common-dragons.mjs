@@ -16,12 +16,13 @@
  *  - Không script, không tham chiếu ngoài; id nội bộ có tiền tố duy nhất.
  *  - Không dùng Math.random: hình học hoàn toàn xác định.
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const OUT = join(ROOT, 'src', 'assets', 'dragons', 'common');
+const FRAMES_OUT = join(ROOT, 'src', 'assets', 'animations', 'frames');
 
 /** Khung chung với Emberling G0: 240×200, điểm neo chân (120,170). */
 const W = 240;
@@ -77,6 +78,82 @@ function veinD(x, y, deg, len) {
   return `M${pt(x, y)} L${pt(x + len * 0.78 * Math.cos(rad(deg)), y + len * 0.78 * Math.sin(rad(deg)))}`;
 }
 
+// ---------------------------------------------------------------- poses
+/**
+ * Tư thế khung hoạt ảnh (PR2). `idle` không đổi hình học so với sprite gốc.
+ * lie: 0..1 hạ thân xuống đất; head: [dx,dy] dời đầu; gait: ±1 bước chân;
+ * swim: ±1 đuôi đập; wings: up/down (loài bay); tuck: co chân khi bay.
+ */
+const POSES = {
+  idle: {},
+  blink: { eyes: 'closed' },
+  happy: { eyes: 'happy', mouth: 'grin' },
+  eat_a: { head: [5, 12], mouth: 'open' },
+  eat_b: { head: [5, 10], mouth: 'chew' },
+  walk_a: { gait: 1 },
+  walk_b: { gait: -1 },
+  sleep: { lie: 1, head: [-4, 4], eyes: 'closed', mouth: 'rest' },
+  injured: { lie: 0.5, head: [0, 8], eyes: 'sad', mouth: 'rest' },
+  swim_a: { swim: 1 },
+  swim_b: { swim: -1 },
+  fly_up: { wings: 'up', tuck: true },
+  fly_down: { wings: 'down', tuck: true },
+  land: { wings: 'up' },
+};
+const COMMON_POSES = ['idle', 'blink', 'happy', 'eat_a', 'eat_b', 'walk_a', 'walk_b', 'sleep', 'injured'];
+// Chỉ sinh tư thế mà catalog sinh học cho phép: swim ⇔ Droplet, fly ⇔ Zephyr.
+const SPECIES_POSES = {
+  droplet: [...COMMON_POSES, 'swim_a', 'swim_b'],
+  sprout: COMMON_POSES,
+  zephyr: [...COMMON_POSES, 'fly_up', 'fly_down', 'land'],
+};
+
+function posed(base, pose) {
+  const p = { ...base };
+  if (pose.lie) {
+    const dy = (GROUND - 2 - (base.by + base.bry)) * pose.lie;
+    p.by += dy;
+    p.hy += dy * 0.85;
+  }
+  if (pose.head) {
+    p.hx += pose.head[0];
+    p.hy += pose.head[1];
+  }
+  return p;
+}
+/** Bước chân: chân sau gần lùi, chân trước gần tiến (gait=1) và nhấc lên; chân xa ngược pha. */
+function gaitOf(pose, i, near) {
+  const g = pose.gait ?? 0;
+  if (!g) return { dx: 0, lift: 0 };
+  const dir = (i === 0 ? -1 : 1) * (near ? 1 : -1) * g;
+  return { dx: dir * 6, lift: dir > 0 ? 5 : 0 };
+}
+const legsHidden = (pose) => pose.lie === 1 || pose.swim || pose.tuck;
+
+function eyeShapes(ex, ey, rx, ry, mode) {
+  const line = { fill: 'none', stroke: INK, 'stroke-width': 2.6, 'stroke-linecap': 'round' };
+  if (mode === 'closed') return [path(`M${pt(ex - rx - 1, ey)} Q${pt(ex, ey + ry * 0.75)} ${pt(ex + rx + 1, ey)}`, line)];
+  if (mode === 'happy') return [path(`M${pt(ex - rx - 1, ey + 2)} Q${pt(ex, ey - ry)} ${pt(ex + rx + 1, ey + 2)}`, line)];
+  if (mode === 'sad') {
+    return [
+      path(`M${pt(ex - rx, ey - 1)} A${r1(rx)} ${r1(ry)} 0 0 0 ${pt(ex + rx, ey - 1)}Z`, { fill: INK }),
+      circle(ex + 2, ey + 2, 1.6, { fill: '#FFFFFF' }),
+      path(`M${pt(ex - rx - 2, ey - 2)} L${pt(ex + rx + 2, ey - 5)}`, { ...line, 'stroke-width': 2.2 }),
+    ];
+  }
+  return null;
+}
+const MOUTH_DARK = '#6E3B48';
+function mouthShapes(mode, L, C, R) {
+  const [lx, ly] = L;
+  const [rx, ry] = R;
+  if (mode === 'open') return [el(ellipse((lx + rx) / 2 + 2, (ly + ry) / 2 + 3, Math.abs(rx - lx) * 0.26, 4.6, { fill: MOUTH_DARK, 'stroke-width': 1.6 }), false)];
+  if (mode === 'chew') return [el(path(`M${pt(lx + (rx - lx) * 0.35, ly + 1)} Q${pt(C[0], C[1] - 1)} ${pt(rx, ry)}`, { fill: 'none', 'stroke-width': 1.8 }), false)];
+  if (mode === 'grin') return [el(path(`M${pt(lx, ly)} Q${pt(C[0], C[1] + (C[1] - ly) * 1.6)} ${pt(rx, ry)}Z`, { fill: MOUTH_DARK, 'stroke-width': 1.6 }), false)];
+  if (mode === 'rest') return [el(path(`M${pt(lx + (rx - lx) * 0.3, ly + 2)} L${pt(rx - 2, ry + 1)}`, { fill: 'none', 'stroke-width': 1.8 }), false)];
+  return [el(path(`M${pt(lx, ly)} Q${pt(C[0], C[1])} ${pt(rx, ry)}`, { fill: 'none', 'stroke-width': 1.8 }), false)];
+}
+
 // ------------------------------------------------------------- DROPLET
 // Lưỡng cư (A): thân thấp tròn, vây tai dạng tua, đuôi dẹt mái chèo, màng chân.
 const DROPLET = {
@@ -92,8 +169,8 @@ function webFoot(x, y, fill, stroke) {
   return path(d, { fill, stroke, 'stroke-width': 2, 'data-part': 'webbed-foot' });
 }
 
-function droplet(stage) {
-  const p = DROPLET[stage];
+function droplet(stage, pose = POSES.idle) {
+  const p = posed(DROPLET[stage], pose);
   const c = PALETTES.droplet;
   const body = [];
   const pattern = [];
@@ -103,9 +180,10 @@ function droplet(stage) {
   // Đuôi mái chèo (dẹt theo chiều dọc) + màng vây đuôi.
   const x0 = bx - brx + 14;
   const L = p.tail;
+  const tl = (pose.swim ?? 0) * -9;
   const tailD = (k) =>
-    `M${pt(x0, by - 14 - k * 0.5)} Q${pt(x0 - L * 0.5, by - 17 - k)} ${pt(x0 - L, by - 15 - k)}` +
-    ` C${pt(x0 - L - 13 - k, by - 14 - k)} ${pt(x0 - L - 11 - k, by + 4 + k)} ${pt(x0 - L + 2, by + 3 + k * 0.6)}` +
+    `M${pt(x0, by - 14 - k * 0.5)} Q${pt(x0 - L * 0.5, by - 17 - k + tl * 0.4)} ${pt(x0 - L, by - 15 - k + tl)}` +
+    ` C${pt(x0 - L - 13 - k, by - 14 - k + tl)} ${pt(x0 - L - 11 - k, by + 4 + k + tl)} ${pt(x0 - L + 2, by + 3 + k * 0.6 + tl)}` +
     ` Q${pt(x0 - L * 0.4, by + 15 + k * 0.5)} ${pt(x0, by + 14)}Z`;
   if (stage !== 'baby') body.push(el(path(tailD(stage === 'adult' ? 7 : 4), { fill: c.accent, 'data-part': 'tail-fin' })));
   body.push(el(path(tailD(0), { fill: c.primary, 'data-part': 'paddle-tail' })));
@@ -124,17 +202,32 @@ function droplet(stage) {
     d += ` L${pt(xe, by)} L${pt(xs, by)}Z`;
     body.push(el(path(d, { fill: c.accent, 'data-part': 'dorsal-fin' })));
   }
-  // Chân xa (tối hơn).
-  for (const lx of [bx - 30, bx + 22]) {
-    body.push(el(path(`M${pt(lx - 8, by + 6)} L${pt(lx - 8, GROUND - 6)} Q${pt(lx + 1, GROUND)} ${pt(lx + 9, GROUND - 6)} L${pt(lx + 8, by + 6)}Z`, { fill: c.secondary })));
+  // Chân xa (tối hơn). Khi bơi: chân co, màng chân xuôi về sau bụng.
+  if (pose.swim) {
+    body.push(el(webFoot(bx - 34, by + bry - 4, c.accent, c.secondary)));
+    body.push(el(webFoot(bx + 4, by + bry - 2, c.accent, c.secondary)));
+  } else if (!legsHidden(pose)) {
+    [bx - 30, bx + 22].forEach((x, i) => {
+      const { dx, lift } = gaitOf(pose, i, false);
+      const lx = x + dx;
+      const g = GROUND - lift;
+      body.push(el(path(`M${pt(lx - 8, by + 6)} L${pt(lx - 8, g - 6)} Q${pt(lx + 1, g)} ${pt(lx + 9, g - 6)} L${pt(lx + 8, by + 6)}Z`, { fill: c.secondary })));
+    });
   }
   // Thân + bụng.
   body.push(el(ellipse(bx, by, brx, bry, { fill: c.primary })));
   body.push(el(ellipse(bx + 12, by + 9, brx * 0.55, bry * 0.5, { fill: c.belly, stroke: 'none' })));
   // Chân gần + màng chân.
-  for (const lx of [bx - 22, bx + 30]) {
-    body.push(el(path(`M${pt(lx - 9, by + 6)} L${pt(lx - 9, GROUND - 9)} Q${pt(lx, GROUND - 3)} ${pt(lx + 9, GROUND - 9)} L${pt(lx + 9, by + 6)}Z`, { fill: c.primary })));
-    body.push(el(webFoot(lx, GROUND - 1, c.accent, c.secondary)));
+  if (pose.lie === 1) {
+    body.push(el(webFoot(bx + brx * 0.7, GROUND - 1, c.accent, c.secondary)));
+  } else if (!legsHidden(pose)) {
+    [bx - 22, bx + 30].forEach((x, i) => {
+      const { dx, lift } = gaitOf(pose, i, true);
+      const lx = x + dx;
+      const g = GROUND - lift;
+      body.push(el(path(`M${pt(lx - 9, by + 6)} L${pt(lx - 9, g - 9)} Q${pt(lx, g - 3)} ${pt(lx + 9, g - 9)} L${pt(lx + 9, by + 6)}Z`, { fill: c.primary })));
+      body.push(el(webFoot(lx, g - 1, c.accent, c.secondary)));
+    });
   }
   // Vây tai (tua) phía sau đầu.
   const ax = hx - hrx * 0.45;
@@ -148,7 +241,9 @@ function droplet(stage) {
   body.push(el(ellipse(hx, hy, hrx, hry, { fill: c.primary })));
   body.push(el(ellipse(hx + hrx * 0.6, hy + hry * 0.4, hrx * 0.62, hry * 0.42, { fill: c.belly })));
   body.push(el(circle(hx + hrx * 1.08, hy + hry * 0.12, 1.9, { fill: c.secondary, stroke: 'none' }), false));
-  body.push(el(path(`M${pt(hx + hrx * 0.38, hy + hry * 0.52)} Q${pt(hx + hrx * 0.78, hy + hry * 0.78)} ${pt(hx + hrx * 1.1, hy + hry * 0.44)}`, { fill: 'none', 'stroke-width': 1.8 }), false));
+  const mL = [hx + hrx * 0.38, hy + hry * 0.52];
+  const mR = [hx + hrx * 1.1, hy + hry * 0.44];
+  body.push(...mouthShapes(pose.mouth, mL, [hx + hrx * 0.78, hy + hry * 0.78], mR));
 
   // Pattern (kiểu hình di truyền — tham chiếu "medium"): đốm lưng + vệt giọt trên trán.
   const spots = [
@@ -165,12 +260,17 @@ function droplet(stage) {
   // Mắt to tròn.
   const ex = hx + hrx * 0.25;
   const ey = hy - hry * 0.14;
-  eye.push(ellipse(ex, ey, p.eye[0], p.eye[1], { fill: INK }));
-  eye.push(circle(ex + 2.2, ey - 3, 2.4, { fill: '#FFFFFF' }));
-  eye.push(circle(ex - 2, ey + 3, 1.1, { fill: '#FFFFFF' }));
+  const shut = eyeShapes(ex, ey, p.eye[0], p.eye[1], pose.eyes);
+  if (shut) eye.push(...shut);
+  else {
+    eye.push(ellipse(ex, ey, p.eye[0], p.eye[1], { fill: INK }));
+    eye.push(circle(ex + 2.2, ey - 3, 2.4, { fill: '#FFFFFF' }));
+    eye.push(circle(ex - 2, ey + 3, 1.1, { fill: '#FFFFFF' }));
+  }
 
   return {
     outline: c.secondary,
+    attach: { head: [hx, hy - hry], mouth: [(mL[0] + mR[0]) / 2, (mL[1] + mR[1]) / 2], body: [bx, by], tail: [x0 - L, by - 6 + tl], waterline: [bx, by - bry * 0.2] },
     body,
     pattern,
     eye,
@@ -192,8 +292,8 @@ const SPROUT = {
 };
 const SPROUT_LEAF = '#A9D08E';
 
-function sprout(stage) {
-  const p = SPROUT[stage];
+function sprout(stage, pose = POSES.idle) {
+  const p = posed(SPROUT[stage], pose);
   const c = PALETTES.sprout;
   const body = [];
   const pattern = [];
@@ -217,29 +317,43 @@ function sprout(stage) {
     body.push(el(path(veinD(x, y, deg, 19), { fill: 'none', 'stroke-width': 1.3 }), false));
   }
   // Chân xa.
-  for (const lx of [bx - 28, bx + 24]) {
-    body.push(el(path(`M${pt(lx - 10, by + 8)} L${pt(lx - 10, GROUND - 5)} Q${pt(lx + 1, GROUND + 1)} ${pt(lx + 12, GROUND - 5)} L${pt(lx + 10, by + 8)}Z`, { fill: c.secondary })));
+  if (!legsHidden(pose)) {
+    [bx - 28, bx + 24].forEach((x, i) => {
+      const { dx, lift } = gaitOf(pose, i, false);
+      const lx = x + dx;
+      const g = GROUND - lift;
+      body.push(el(path(`M${pt(lx - 10, by + 8)} L${pt(lx - 10, g - 5)} Q${pt(lx + 1, g + 1)} ${pt(lx + 12, g - 5)} L${pt(lx + 10, by + 8)}Z`, { fill: c.secondary })));
+    });
   }
   body.push(el(ellipse(bx, by, brx, bry, { fill: c.primary })));
   body.push(el(ellipse(bx + 13, by + 10, brx * 0.52, bry * 0.52, { fill: c.belly, stroke: 'none' })));
   // Chân gần, dày; móng xẻng (đào đất) ở chân trước.
-  const near = [bx - 20, bx + 30];
-  near.forEach((lx, i) => {
-    body.push(el(path(`M${pt(lx - 12, by + 8)} L${pt(lx - 12, GROUND - 9)} Q${pt(lx - 13, GROUND + 1)} ${pt(lx, GROUND)} Q${pt(lx + 15, GROUND + 1)} ${pt(lx + 13, GROUND - 9)} L${pt(lx + 12, by + 6)}Z`, { fill: c.primary })));
+  const near = pose.lie === 1 ? [] : [bx - 20, bx + 30];
+  near.forEach((x, i) => {
+    const { dx: gx, lift } = gaitOf(pose, i, true);
+    const lx = x + gx;
+    const g = GROUND - lift;
+    body.push(el(path(`M${pt(lx - 12, by + 8)} L${pt(lx - 12, g - 9)} Q${pt(lx - 13, g + 1)} ${pt(lx, g)} Q${pt(lx + 15, g + 1)} ${pt(lx + 13, g - 9)} L${pt(lx + 12, by + 6)}Z`, { fill: c.primary })));
     const front = i === 1;
     if ((front && p.claws >= 1) || p.claws >= 2) {
       for (const [dx, dy] of [[4, 0], [9, -1], [13, -3]]) {
-        body.push(el(path(`M${pt(lx + dx - 2.4, GROUND - 3 + dy)} l2.4 4.4 l2.4 -4.4Z`, { fill: c.accent, 'stroke-width': 1.2, 'data-part': 'digging-claw' })));
+        body.push(el(path(`M${pt(lx + dx - 2.4, g - 3 + dy)} l2.4 4.4 l2.4 -4.4Z`, { fill: c.accent, 'stroke-width': 1.2, 'data-part': 'digging-claw' })));
       }
     }
   });
+  if (pose.lie === 1) {
+    // Nằm: hai bàn chân trước thò ra dưới cằm.
+    body.push(el(ellipse(bx + brx * 0.8, GROUND - 4, 11, 6, { fill: c.primary })));
+  }
   // Tai lá rủ ra sau.
   body.push(el(path(leafD(hx - r * 0.6, hy - r * 0.35, -172, r * 0.62, r * 0.13), { fill: SPROUT_LEAF })));
   // Đầu tròn, mõm ngắn.
   body.push(el(circle(hx, hy, r, { fill: c.primary })));
   body.push(el(ellipse(hx + r * 0.62, hy + r * 0.42, r * 0.56, r * 0.42, { fill: c.belly })));
   body.push(el(circle(hx + r * 1.05, hy + r * 0.28, 1.8, { fill: c.secondary, stroke: 'none' }), false));
-  body.push(el(path(`M${pt(hx + r * 0.55, hy + r * 0.62)} Q${pt(hx + r * 0.8, hy + r * 0.8)} ${pt(hx + r * 1.02, hy + r * 0.58)}`, { fill: 'none', 'stroke-width': 1.8 }), false));
+  const mL = [hx + r * 0.55, hy + r * 0.62];
+  const mR = [hx + r * 1.02, hy + r * 0.58];
+  body.push(...mouthShapes(pose.mouth, mL, [hx + r * 0.8, hy + r * 0.8], mR));
   // Mầm lá trên đỉnh đầu.
   const sx = hx - r * 0.12;
   const sy = hy - r * 0.92;
@@ -274,11 +388,16 @@ function sprout(stage) {
 
   const ex = hx + r * 0.3;
   const ey = hy - r * 0.06;
-  eye.push(ellipse(ex, ey, p.eye[0], p.eye[1], { fill: INK }));
-  eye.push(circle(ex + 2, ey - 2.8, 2.3, { fill: '#FFFFFF' }));
+  const shut = eyeShapes(ex, ey, p.eye[0], p.eye[1], pose.eyes);
+  if (shut) eye.push(...shut);
+  else {
+    eye.push(ellipse(ex, ey, p.eye[0], p.eye[1], { fill: INK }));
+    eye.push(circle(ex + 2, ey - 2.8, 2.3, { fill: '#FFFFFF' }));
+  }
 
   return {
     outline: c.secondary,
+    attach: { head: [topX, topY - 8], mouth: [(mL[0] + mR[0]) / 2, (mL[1] + mR[1]) / 2], body: [bx, by], tail: [tx, ty] },
     body,
     pattern,
     eye,
@@ -333,8 +452,8 @@ function covertD(sx, sy, w) {
   return `M${pt(S[0], S[1])} Q${pt(S[0] + (W1[0] - S[0]) * 0.1, W1[1] + 6)} ${pt(W1[0], W1[1])} Q${pt(W1[0] + (Tc[0] - W1[0]) * 0.5, W1[1] - 4)} ${pt(Tc[0], Tc[1])} Q${pt((Tc[0] + S[0]) / 2 - 2, (Tc[1] + S[1]) / 2 + 12)} ${pt(S[0], S[1])}Z`;
 }
 
-function zephyr(stage) {
-  const p = ZEPHYR[stage];
+function zephyr(stage, pose = POSES.idle) {
+  const p = posed(ZEPHYR[stage], pose);
   const c = PALETTES.zephyr;
   const body = [];
   const pattern = [];
@@ -342,9 +461,14 @@ function zephyr(stage) {
   const { bx, by, brx, bry, hx, hy, r } = p;
   const sx = bx + 2;
   const sy = by - bry * 0.55;
+  const w = p.wing;
+  const wing =
+    pose.wings === 'up' ? [w[0] * 0.15, w[1] * 1.5, w[2] * 0.62, w[3] * 2]
+      : pose.wings === 'down' ? [w[0] * 1.3, -w[1] * 0.05, w[2] * 0.95, -w[3] * 1.05]
+        : w;
 
   // Cánh xa (tối, lệch lên phải để tạo chiều sâu).
-  const far = wingD(sx + 14, sy - 8, p.wing.map((v) => v * 0.9), p.feathers);
+  const far = wingD(sx + 14, sy - 8, wing.map((v) => v * 0.9), p.feathers);
   body.push(el(path(far.d, { fill: c.secondary, 'data-part': 'wing' })));
   // Đuôi mây.
   const tipX = bx - brx - p.tail * 0.55;
@@ -357,17 +481,29 @@ function zephyr(stage) {
   ].slice(0, p.puffs);
   for (const [x, y, rr] of puffs) body.push(el(circle(x, y, rr * (stage === 'baby' ? 0.85 : 1), { fill: c.belly, 'data-part': 'cloud-tail' })));
   // Chân xa (chân đậu) — nét hai lớp.
-  const leg = (lx, color) => {
-    const d = `M${pt(lx, by + 18)} L${pt(lx + 3, GROUND - 4)} M${pt(lx + 3, GROUND - 4)} L${pt(lx + 13, GROUND - 1)} M${pt(lx + 3, GROUND - 4)} L${pt(lx + 9, GROUND + 1)} M${pt(lx + 3, GROUND - 4)} L${pt(lx - 6, GROUND - 1)}`;
+  const leg = (x, color, i, near) => {
+    if (pose.lie === 1) return;
+    let d;
+    if (pose.tuck) {
+      // Bay: co chân về sau, ngón khép.
+      const kx = x - 10;
+      const ky = by + 32;
+      d = `M${pt(x, by + 18)} L${pt(kx, ky)} M${pt(kx, ky)} L${pt(kx - 7, ky + 3)} M${pt(kx, ky)} L${pt(kx - 4, ky + 6)}`;
+    } else {
+      const { dx, lift } = gaitOf(pose, i, near);
+      const lx = x + dx;
+      const g = GROUND - lift;
+      d = `M${pt(x, by + 18)} L${pt(lx + 3, g - 4)} M${pt(lx + 3, g - 4)} L${pt(lx + 13, g - 1)} M${pt(lx + 3, g - 4)} L${pt(lx + 9, g + 1)} M${pt(lx + 3, g - 4)} L${pt(lx - 6, g - 1)}`;
+    }
     body.push(el(path(d, { fill: 'none', 'stroke-width': 7.5 }), false));
     body.push(el(path(d, { fill: 'none', stroke: color, 'stroke-width': 4, 'data-part': 'perching-foot' }), false));
   };
-  leg(bx - 12, '#D9BE78');
+  leg(bx - 12, '#D9BE78', 0, false);
   // Thân đứng nghiêng, ngực lông.
   body.push(el(ellipse(bx, by, brx, bry, { fill: c.primary, transform: `rotate(-14 ${r1(bx)} ${r1(by)})` })));
   body.push(el(ellipse(bx + 12, by + 6, brx * 0.52, bry * 0.66, { fill: c.belly, stroke: 'none', transform: `rotate(-14 ${r1(bx)} ${r1(by)})` })));
   // Đùi lông + chân gần.
-  leg(bx + 6, c.accent);
+  leg(bx + 6, c.accent, 1, true);
   body.push(el(ellipse(bx + 4, by + 16, 12, 13, { fill: c.primary })));
   // Cổ (elip nghiêng nối thân và đầu).
   const nx = (bx + brx * 0.35 + hx) / 2;
@@ -387,11 +523,13 @@ function zephyr(stage) {
   body.push(el(circle(hx, hy, r, { fill: c.primary })));
   body.push(el(ellipse(hx + r * 0.72, hy + r * 0.32, r * 0.5, r * 0.36, { fill: c.belly })));
   body.push(el(circle(hx + r * 1.1, hy + r * 0.18, 1.7, { fill: c.secondary, stroke: 'none' }), false));
-  body.push(el(path(`M${pt(hx + r * 0.6, hy + r * 0.52)} Q${pt(hx + r * 0.85, hy + r * 0.66)} ${pt(hx + r * 1.08, hy + r * 0.46)}`, { fill: 'none', 'stroke-width': 1.8 }), false));
+  const mL = [hx + r * 0.6, hy + r * 0.52];
+  const mR = [hx + r * 1.08, hy + r * 0.46];
+  body.push(...mouthShapes(pose.mouth, mL, [hx + r * 0.85, hy + r * 0.66], mR));
   // Cánh gần (trên thân) với dải lông phủ màu nhấn và cuống lông bay.
-  const near = wingD(sx, sy, p.wing, p.feathers);
+  const near = wingD(sx, sy, wing, p.feathers);
   body.push(el(path(near.d, { fill: c.primary, 'data-part': 'wing' })));
-  body.push(el(path(covertD(sx, sy, p.wing), { fill: c.accent, 'stroke-width': 1.8 })));
+  body.push(el(path(covertD(sx, sy, wing), { fill: c.accent, 'stroke-width': 1.8 })));
   for (const [x, y] of near.joints) {
     const qx = x + (near.W1[0] - x) * 0.32;
     const qy = y + (near.W1[1] - y) * 0.32;
@@ -400,27 +538,32 @@ function zephyr(stage) {
 
   // Pattern: vạch chữ V trên lông phủ cánh.
   for (let i = 0; i < p.chevrons; i++) {
-    const x = sx + p.wing[0] * 0.55 - i * 9;
-    const y = sy + p.wing[1] * 0.45 + 6 + i * 2;
+    const x = sx + wing[0] * 0.55 - i * 9;
+    const y = sy + wing[1] * 0.45 + 6 + i * 2;
     pattern.push(path(`M${pt(x - 4, y - 4)} L${pt(x, y)} L${pt(x + 4, y - 4)}`, { fill: 'none', stroke: c.secondary, 'stroke-width': 2, opacity: 0.6 }));
   }
 
   const ex = hx + r * 0.25;
   const ey = hy - r * 0.12;
-  eye.push(ellipse(ex, ey, p.eye[0], p.eye[1], { fill: INK }));
-  eye.push(circle(ex + 2.2, ey - 3, 2.4, { fill: '#FFFFFF' }));
-  eye.push(circle(ex - 1.8, ey + 3.2, 1, { fill: '#FFFFFF' }));
+  const shut = eyeShapes(ex, ey, p.eye[0], p.eye[1], pose.eyes);
+  if (shut) eye.push(...shut);
+  else {
+    eye.push(ellipse(ex, ey, p.eye[0], p.eye[1], { fill: INK }));
+    eye.push(circle(ex + 2.2, ey - 3, 2.4, { fill: '#FFFFFF' }));
+    eye.push(circle(ex - 1.8, ey + 3.2, 1, { fill: '#FFFFFF' }));
+  }
 
   return {
     outline: c.secondary,
+    attach: { head: [hx, hy - r], mouth: [(mL[0] + mR[0]) / 2, (mL[1] + mR[1]) / 2], body: [bx, by], tail: [tipX - 8, tipY] },
     body,
     pattern,
     eye,
     fx: {
       halo: [hx + 2, hy - r - 12, r * 0.85],
-      facets: [[bx + 2, by + 4], [bx - 12, by - 6], [sx + p.wing[2] * 0.5, sy + p.wing[3] * 0.45], [tipX - 8, tipY]],
-      sparkles: [[hx + r + 16, hy - 6], [sx + p.wing[2] - 10, sy + p.wing[3] - 8]],
-      streak: `M${pt(sx - 4, sy - 4)} Q${pt(sx + p.wing[0], sy + p.wing[1] * 0.6)} ${pt(sx + p.wing[2] * 0.7, sy + p.wing[3] * 0.9)}`,
+      facets: [[bx + 2, by + 4], [bx - 12, by - 6], [sx + wing[2] * 0.5, sy + wing[3] * 0.45], [tipX - 8, tipY]],
+      sparkles: [[hx + r + 16, hy - 6], [sx + wing[2] - 10, sy + wing[3] - 8]],
+      streak: `M${pt(sx - 4, sy - 4)} Q${pt(sx + wing[0], sy + wing[1] * 0.6)} ${pt(sx + wing[2] * 0.7, sy + wing[3] * 0.9)}`,
     },
   };
 }
@@ -471,14 +614,16 @@ function aetherFx(mutation, fx, idp) {
 // ------------------------------------------------------------- assemble
 const BUILDERS = { droplet, sprout, zephyr };
 
-function svgFor(speciesId, stage, mutation) {
+/** Sprite gốc (poseId null, có bóng) hoặc khung hoạt ảnh (không bóng — renderer vẽ bóng riêng). */
+function svgFor(speciesId, stage, mutation, poseId = null) {
   const s = STAGE_SCALE[stage];
   const tf = `translate(${r1(ANCHOR.x * (1 - s))} ${r1(ANCHOR.y * (1 - s))}) scale(${s})`;
-  const art = BUILDERS[speciesId](stage);
-  const idp = `dv-${speciesId}-${stage}-${mutation}`;
+  const art = BUILDERS[speciesId](stage, POSES[poseId ?? 'idle']);
+  const idp = poseId ? `dv-${speciesId}-${stage}-${mutation}-${poseId}` : `dv-${speciesId}-${stage}-${mutation}`;
   const stroke = `stroke="${art.outline}" stroke-width="2.7" stroke-linejoin="round" stroke-linecap="round"`;
   const parts = [];
-  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-species="${speciesId}" data-stage="${stage}" data-mutation="${mutation}" data-asset-status="prototype">`);
+  const poseAttr = poseId ? ` data-pose="${poseId}"` : '';
+  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" data-species="${speciesId}" data-stage="${stage}" data-mutation="${mutation}"${poseAttr} data-asset-status="prototype">`);
   if (mutation !== 'normal') {
     const sil = art.body.filter((e) => e.clip).map((e) => e.markup).join('');
     let defs = `<clipPath id="${idp}-sil">${sil}</clipPath>`;
@@ -487,7 +632,7 @@ function svgFor(speciesId, stage, mutation) {
     }
     parts.push(`<defs>${defs}</defs>`);
   }
-  parts.push(`<g data-layer="shadow">${ellipse(ANCHOR.x, 175, 62 * s, 9 * s, { fill: '#293F45', opacity: 0.13 })}</g>`);
+  if (!poseId) parts.push(`<g data-layer="shadow">${ellipse(ANCHOR.x, 175, 62 * s, 9 * s, { fill: '#293F45', opacity: 0.13 })}</g>`);
   parts.push(`<g data-layer="body" transform="${tf}" ${stroke}>${art.body.map((e) => e.markup).join('')}</g>`);
   parts.push(`<g data-layer="pattern" transform="${tf}">${art.pattern.join('')}</g>`);
   if (mutation !== 'normal') {
@@ -504,15 +649,85 @@ function svgFor(speciesId, stage, mutation) {
   return parts.join('');
 }
 
+const toView = (stage, [x, y]) => {
+  const s = STAGE_SCALE[stage];
+  return [Math.round((ANCHOR.x * (1 - s) + x * s) * 10) / 10, Math.round((ANCHOR.y * (1 - s) + y * s) * 10) / 10];
+};
+
 let count = 0;
+let frames = 0;
+const attach = {};
 for (const speciesId of Object.keys(BUILDERS)) {
+  attach[speciesId] = {};
   for (const stage of STAGES) {
+    attach[speciesId][stage] = {};
     for (const mutation of MUTATIONS) {
       const file = join(OUT, speciesId, `${stage}_${mutation}.svg`);
       mkdirSync(dirname(file), { recursive: true });
       writeFileSync(file, `${svgFor(speciesId, stage, mutation)}\n`);
       count++;
+      for (const poseId of SPECIES_POSES[speciesId]) {
+        const f = join(FRAMES_OUT, speciesId, `${stage}_${mutation}_${poseId}.svg`);
+        mkdirSync(dirname(f), { recursive: true });
+        writeFileSync(f, `${svgFor(speciesId, stage, mutation, poseId)}\n`);
+        frames++;
+      }
+    }
+    for (const poseId of SPECIES_POSES[speciesId]) {
+      const a = BUILDERS[speciesId](stage, POSES[poseId]).attach;
+      attach[speciesId][stage][poseId] = Object.fromEntries(Object.entries(a).map(([k, v]) => [k, toView(stage, v)]));
     }
   }
 }
-console.log(`Generated ${count} SVG sprites in ${OUT}`);
+
+// ------------------------------------------------- Emberling (dẫn xuất)
+// Không sửa file G0: đọc bản gốc, bỏ bóng, thay mắt/miệng, ghi thành khung mới.
+// Emberling là bản vẽ phẳng nên chỉ có các tư thế thay mắt/miệng; dáng đi/ngủ dùng
+// track transform (xem src/assets/animations/dragonAnimations.ts). Rig đầy đủ ở G3.
+const EMBER_POSES = ['idle', 'blink', 'happy', 'eat_a', 'injured'];
+const EMBER_EYE = /<ellipse cx="170" cy="94" rx="[\d.]+" ry="[\d.]+" fill="#3A303A" stroke="none"\/><circle cx="172" cy="91" r="2.3" fill="white" stroke="none"\/>/;
+const EMBER_HEAD_R = { baby: 31, juvenile: 28, adult: 25 };
+const EMBER_TAIL = { baby: 45, juvenile: 33, adult: 20 };
+function emberFrame(stage, mutation, poseId) {
+  const srcFile = join(ROOT, 'src', 'assets', 'g0', 'emberling', `${stage}_${mutation}.svg`);
+  let s = readFileSync(srcFile, 'utf8').trim();
+  const idp = `dv-emberling-${stage}-${mutation}-${poseId}`;
+  s = s.replace(/<ellipse cx="120" cy="175"[^>]*\/>/, '');
+  s = s.replaceAll('id="rainbow"', `id="${idp}-rainbow"`).replaceAll('url(#rainbow)', `url(#${idp}-rainbow)`);
+  s = s.replace('viewBox="0 0 240 200">', `viewBox="0 0 240 200" data-species="emberling" data-stage="${stage}" data-mutation="${mutation}" data-pose="${poseId}" data-asset-status="prototype" data-derived-from="src/assets/g0/emberling/${stage}_${mutation}.svg">`);
+  if (!EMBER_EYE.test(s)) throw new Error(`Emberling eye not found in ${srcFile}`);
+  const mode = { blink: 'closed', happy: 'happy', injured: 'sad' }[poseId];
+  if (mode) s = s.replace(EMBER_EYE, eyeShapes(170, 94, 6.2, 7.6, mode).join('').replaceAll('fill="#3A303A"', `fill="${INK}"`));
+  const mouth = '<path d="M178 116 Q186 121 193 115" fill="none" stroke-width="1.8"/>';
+  if (poseId === 'happy') s = s.replace(mouth, `<path d="M178 115 Q186 128 193 114Z" fill="${MOUTH_DARK}" stroke-width="1.6"/>`);
+  if (poseId === 'eat_a') s = s.replace(mouth, `<ellipse cx="186" cy="118" rx="5.5" ry="4.6" fill="${MOUTH_DARK}" stroke-width="1.6"/>`);
+  return `${s}\n`;
+}
+attach.emberling = {};
+for (const stage of STAGES) {
+  attach.emberling[stage] = {};
+  for (const mutation of MUTATIONS) {
+    for (const poseId of EMBER_POSES) {
+      const f = join(FRAMES_OUT, 'emberling', `${stage}_${mutation}_${poseId}.svg`);
+      mkdirSync(dirname(f), { recursive: true });
+      writeFileSync(f, emberFrame(stage, mutation, poseId));
+      frames++;
+    }
+  }
+  for (const poseId of EMBER_POSES) {
+    const r = EMBER_HEAD_R[stage];
+    attach.emberling[stage][poseId] = {
+      head: toView(stage, [160, 96 - r]),
+      mouth: toView(stage, [186, 117]),
+      body: toView(stage, [111, 126]),
+      tail: toView(stage, [EMBER_TAIL[stage], 92]),
+    };
+  }
+}
+
+const poseIndex = Object.fromEntries([...Object.entries(SPECIES_POSES), ['emberling', EMBER_POSES]]);
+writeFileSync(
+  join(ROOT, 'src', 'assets', 'animations', 'frame-data.json'),
+  `${JSON.stringify({ note: 'Sinh bởi scripts/art/generate-common-dragons.mjs — không sửa tay. Toạ độ theo viewBox 240×200, đã áp tỉ lệ stage.', poses: poseIndex, attach }, null, 1)}\n`,
+);
+console.log(`Generated ${count} SVG sprites in ${OUT} and ${frames} animation frames in ${FRAMES_OUT}`);
