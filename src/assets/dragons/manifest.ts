@@ -79,7 +79,7 @@ const COMMON_G1: DragonAssetSource = {
   origin: 'Dravio G1 — vector tự tạo, sinh tất định bởi scripts/art/generate-common-dragons.mjs; không dùng tài nguyên bên thứ ba',
   license: 'Thuộc dự án Dravio',
   tier: 'prototype',
-  review: 'pending-author-review',
+  review: 'approved-prototype',
 };
 
 const emberlingFiles = import.meta.glob<string>('../g0/emberling/{baby,juvenile,adult}_*.svg', {

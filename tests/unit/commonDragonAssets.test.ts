@@ -65,9 +65,10 @@ describe('Common dragon sprite set (48)', () => {
     expect(ember).toHaveLength(12);
     for (const e of ember) {
       expect(G0_SPRITES.find((g) => g.stage === e.stage && g.mutation === e.mutation)?.url).toBe(e.url);
-      expect(e.source.review).toBe('approved-prototype');
+      expect(e.source.origin).toContain('G0');
     }
-    expect(COMMON_DRAGON_SPRITES.filter((s) => s.source.review === 'pending-author-review')).toHaveLength(36);
+    // Tác giả duyệt 36 sprite mới làm prototype G1 (ADR 0008); vẫn chưa phải production.
+    expect(COMMON_DRAGON_SPRITES.every((s) => s.source.review === 'approved-prototype' && s.source.tier === 'prototype')).toBe(true);
   });
 
   it('new SVGs are well-formed, self-contained and in the shared 240×200 frame', () => {

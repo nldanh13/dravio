@@ -58,7 +58,7 @@ function sheetHtml({ sizes, gray }) {
   ].join('');
   let h = `<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dravio Common Sprites</title><style>${css}</style></head><body>`;
   h += '<h1>Dravio — 48 sprite Common (prototype G1)</h1>';
-  h += '<p class="note">4 loài × 3 giai đoạn × 4 biến thể Aether. Emberling là prototype G0 đã duyệt (giữ nguyên); Droplet, Sproutling, Zephyr là prototype G1 chờ tác giả duyệt. Huy hiệu ◆/◎/★ là tín hiệu không dựa vào màu. Không phải art thương mại cuối cùng (G3).</p>';
+  h += '<p class="note">4 loài × 3 giai đoạn × 4 biến thể Aether. Emberling là prototype G0 đã duyệt (giữ nguyên); Droplet, Sproutling, Zephyr là prototype G1 đã được tác giả duyệt (ADR 0008). Huy hiệu ◆/◎/★ là tín hiệu không dựa vào màu. Không phải art thương mại cuối cùng (G3).</p>';
   for (const size of sizes) {
     for (const g of gray ? [false, true] : [false]) {
       h += `<h2>${size}px${g ? ' — thang xám' : ''}</h2>`;
