@@ -15,6 +15,7 @@ import { LivingWorld } from '../rendering/livingWorld';
 import type { DragonInstance } from '../types/game';
 import type { GameSettings } from '../types/state';
 import { shouldFeedOnSpace, timeOfDayFor } from './sceneInput';
+import { FOCUS_ZOOM, ZOOM_MAX, ZOOM_MIN, type CameraMode } from '../rendering/camera';
 
 /**
  * Cảnh Khu Khởi Nguyên + bảng thông tin rồng (G1 PR4; tích hợp asset ADR 0012).
@@ -37,6 +38,8 @@ export function WorldView({ session }: { session: GameSession }) {
   const [notice, setNotice] = useState<string | null>(null);
   const [hour, setHour] = useState(() => new Date(systemClock.nowMs()).getHours());
   const worldRef = useRef<LivingWorld | null>(null);
+  const rendererRef = useRef<CanvasRenderer | null>(null);
+  const [cam, setCam] = useState<{ mode: CameraMode; zoom: number }>({ mode: 'overview', zoom: 1 });
 
   const viewRef = useRef<RenderView | null>(null);
   const actRef = useRef({ diet, canAct: false, habitat });
@@ -105,6 +108,7 @@ export function WorldView({ session }: { session: GameSession }) {
       clock: systemClock,
       getView: () => viewRef.current as RenderView,
       onSelect: (uid) => setSelected(uid),
+      onCamera: (c) => setCam(c),
       onGroundTap: (habitatId, pos) => {
         if (!actRef.current.canAct) return;
         world.noteDrop(habitatId, pos);
@@ -114,13 +118,16 @@ export function WorldView({ session }: { session: GameSession }) {
         setNotice(null);
       },
     });
+    rendererRef.current = renderer;
     renderer.start();
     // Số đo hiệu năng chỉ đọc (dùng để đo FPS/bộ nhớ trên bản build thật). Vị trí rồng chỉ lộ ở bản dev cho test e2e.
     const probe = canvas as HTMLCanvasElement & { dravioStats?: () => unknown; dravioAgents?: () => unknown };
     probe.dravioStats = () => renderer.stats();
     if (import.meta.env.DEV) {
       probe.dravioAgents = () =>
-        [...world.agents.values()].map((a) => ({ uid: a.uid, habitatId: a.habitatId, state: a.state, anim: a.anim.state, z: a.z, stage: a.stage, mutation: a.mutation, box: renderer.bounds(a) }));
+        [...world.agents.values()].map((a) => ({ uid: a.uid, habitatId: a.habitatId, state: a.state, anim: a.anim.state, pos: a.pos, z: a.z, stage: a.stage, mutation: a.mutation, box: renderer.bounds(a) }));
+      (probe as typeof probe & { dravioFood?: () => unknown; dravioCamera?: () => unknown }).dravioFood = () => [...world.food.values()].map((f) => ({ id: f.id, habitatId: f.habitatId, pos: f.pos }));
+      (probe as typeof probe & { dravioCamera?: () => unknown }).dravioCamera = () => renderer.camera;
     }
     return () => {
       alive = false;
@@ -128,6 +135,7 @@ export function WorldView({ session }: { session: GameSession }) {
       renderer.dispose();
       images.dispose();
       worldRef.current = null;
+      rendererRef.current = null;
       delete probe.dravioStats;
       delete probe.dravioAgents;
     };
@@ -142,7 +150,12 @@ export function WorldView({ session }: { session: GameSession }) {
   const dropFood = () => {
     const { canAct, habitat: h, diet: d } = actRef.current;
     if (!canAct) return;
+    // Ưu tiên chỗ gần rồng phù hợp (ăn được nhóm này, hết cooldown); không có thì engine thả ngẫu nhiên.
+    const world = worldRef.current;
+    const pos = world?.suggestDrop(h, d, systemClock.nowMs()) ?? null;
+    if (world && pos) world.noteDrop(h, pos);
     const err = session.send({ type: 'feed', dietId: d, zoneId: 'origin', habitatId: h });
+    if (err && world && pos) world.cancelDrop(h);
     setError(err);
     setNotice(null);
   };
@@ -189,6 +202,8 @@ export function WorldView({ session }: { session: GameSession }) {
     setNotice(null);
   };
   const idx = ORIGIN_HABITAT_IDS.indexOf(habitat);
+  const countAt = (h: OriginHabitatId) => placed.filter((d) => d.location.kind === 'zone' && d.location.habitatId === h).length;
+  const selectedHere = dragon && dragon.location.kind === 'zone' && dragon.location.habitatId === habitat;
   const go = (i: number) => {
     const next = ORIGIN_HABITAT_IDS[Math.max(0, Math.min(ORIGIN_HABITAT_IDS.length - 1, i))];
     if (next) setHabitat(next);
@@ -212,13 +227,30 @@ export function WorldView({ session }: { session: GameSession }) {
         </button>
         {ORIGIN_HABITAT_IDS.map((h) => (
           <button key={h} type="button" aria-pressed={habitat === h} onClick={() => setHabitat(h)}>
-            {t(`habitat.${h}`)} {unlocked?.includes(h) ? '' : t('world.lockedTag')}
+            {t(`habitat.${h}`)} {unlocked?.includes(h) ? t('world.dragonCount', { n: countAt(h) }) : t('world.lockedTag')}
           </button>
         ))}
         <button type="button" onClick={() => go(idx + 1)} disabled={idx >= ORIGIN_HABITAT_IDS.length - 1} aria-label={t('world.next')}>
           ▶
         </button>
       </nav>
+      <div className="row compact camera-controls" role="group" aria-label={t('world.camera')}>
+        <button type="button" aria-pressed={cam.mode === 'overview'} onClick={() => rendererRef.current?.overview()}>
+          {t('world.overview')}
+        </button>
+        <button type="button" aria-pressed={cam.mode === 'focus'} disabled={!selectedHere} onClick={() => selected && rendererRef.current?.focus(selected)}>
+          {t('world.focus', { x: FOCUS_ZOOM })}
+        </button>
+        <button type="button" aria-label={t('world.zoomOut')} disabled={cam.zoom <= ZOOM_MIN + 1e-6} onClick={() => rendererRef.current?.zoomAt(null, cam.zoom - 0.5)}>
+          −
+        </button>
+        <span className="muted" aria-live="polite">
+          {t('world.zoomLevel', { x: cam.zoom.toFixed(1) })}
+        </span>
+        <button type="button" aria-label={t('world.zoomIn')} disabled={cam.zoom >= ZOOM_MAX - 1e-6} onClick={() => rendererRef.current?.zoomAt(null, cam.zoom + 0.5)}>
+          +
+        </button>
+      </div>
       <div className="world-frame" ref={sceneRef}>
         <canvas
           ref={canvasRef}

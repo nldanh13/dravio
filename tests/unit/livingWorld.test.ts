@@ -10,9 +10,13 @@ import {
   PET_MS,
   PRACTICE_FLIGHT_COOLDOWN_MS,
   STEER_STEP_MS,
+  FOOD_REACT_MARGIN_S,
+  HURRY_FACTOR,
   blockingObstacles,
   blocksWater,
   clipSpeed,
+  crossesWater,
+  walkPathLength,
   flightAltitude,
   type Agent,
 } from '../../src/rendering/livingWorld';
@@ -384,5 +388,61 @@ describe('living world: FSM + steering by anatomy (display-only)', () => {
     expect(world.agents.get('e1')!.anim.state).toBe('recovery');
     run(world, 2000);
     expect(world.agents.get('e1')!.care).toBeNull();
+  });
+
+  it('seekFood only targets food it can reach (real path, incl. around the pond) before the 12 s TTL runs out', () => {
+    const pond = regionOf('origin_pondbank')!;
+    const walker = { mobility: { walk: true, swim: false, fly: false } };
+    const left = { x: pond.x0 + 150, y: 400 };
+    const right = { x: pond.x0 + 800, y: 400 };
+    expect(crossesWater(pond, left, right)).toBe(true);
+    const around = walkPathLength(walker, pond, left, right);
+    expect(around).toBeGreaterThan(Math.hypot(right.x - left.x, right.y - left.y));
+    expect(walkPathLength({ mobility: { walk: true, swim: true, fly: false } }, pond, left, right)).toBeCloseTo(650, 6);
+
+    // Sproutling (không bơi) ở bờ hồ, thức ăn ở bờ bên kia: quá xa cho thời gian còn lại → bỏ qua; gần → đi tới.
+    const calls: string[] = [];
+    const world = new LivingWorld({ consume: (f) => (calls.push(f), 'ok'), seed: 'reach' });
+    world.sync(stateWith([adult('s1', 'sprout', { location: at('origin_pondbank'), personality: 'calm' })]));
+    const a = world.agents.get('s1')!;
+    a.pos = { ...left };
+    const v = clipSpeed('sprout', 'adult', 'walk') * HURRY_FACTOR;
+    const farTime = around / v;
+    world.noteDrop('origin_pondbank', right);
+    const ttl = Math.max(1000, Math.floor((farTime - FOOD_REACT_MARGIN_S - 0.5) * 1000));
+    const far = { id: 'far', dietId: 'leaf' as const, zoneId: 'origin', habitatId: 'origin_pondbank', spawnedAtMs: T0, expiresAtMs: T0 + ttl };
+    world.sync(stateWith([adult('s1', 'sprout', { location: at('origin_pondbank'), personality: 'calm' })], [far]));
+    run(world, 3000, T0);
+    expect(a.state).not.toBe('seekFood');
+    expect(world.etaSeconds(a, pond, right)).toBeCloseTo(walkPathLength(walker, pond, a.pos, right) / v, 6);
+    const nearPos = { x: left.x + 60, y: 470 };
+    world.noteDrop('origin_pondbank', nearPos);
+    const near = { id: 'near', dietId: 'leaf' as const, zoneId: 'origin', habitatId: 'origin_pondbank', spawnedAtMs: T0, expiresAtMs: T0 + 12_000 };
+    world.sync(stateWith([adult('s1', 'sprout', { location: at('origin_pondbank'), personality: 'calm' })], [far, near]));
+    run(world, 8000, T0 + 100);
+    expect(calls).toEqual(['near']);
+  });
+
+  it('Space drop suggestion lands near a dragon that eats that food and is off cooldown; none → null', () => {
+    const world = new LivingWorld({ consume: () => 'ok', seed: 'space' });
+    world.sync(
+      stateWith([
+        adult('e1', 'emberling', { location: at('origin_meadow') }),
+        adult('s1', 'sprout', { location: at('origin_meadow'), lastFeedXpAtMs: T0 }),
+      ]),
+    );
+    const meadow = regionOf('origin_meadow')!;
+    const e = world.agents.get('e1')!;
+    const fruit = world.suggestDrop('origin_meadow', 'fruit', T0 + 1000)!;
+    expect(Math.hypot(fruit.x - e.pos.x, fruit.y - e.pos.y)).toBeLessThanOrEqual(121);
+    expect(fruit.x).toBeGreaterThanOrEqual(meadow.x0);
+    expect(fruit.y).toBeGreaterThanOrEqual(meadow.y0);
+    // Lá: chỉ Sproutling ăn, nhưng đang cooldown → không có gợi ý.
+    expect(world.suggestDrop('origin_meadow', 'leaf', T0 + 1000)).toBeNull();
+    const s1 = world.agents.get('s1')!;
+    const leaf = world.suggestDrop('origin_meadow', 'leaf', T0 + 20_000)!;
+    expect(Math.hypot(leaf.x - s1.pos.x, leaf.y - s1.pos.y)).toBeLessThanOrEqual(121);
+    expect(world.suggestDrop('origin_meadow', 'aquatic', T0)).toBeNull();
+    expect(world.suggestDrop('origin_pondbank', 'fruit', T0)).toBeNull();
   });
 });

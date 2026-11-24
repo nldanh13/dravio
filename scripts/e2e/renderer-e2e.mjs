@@ -174,6 +174,32 @@ const tab = (page, i) => page.locator('.habitat-nav button[aria-pressed]').nth(i
   // Space trong ô nhập tên không cho ăn: chọn rồng → ô nhập → Space.
   results.dev.space = { outsideSceneSeekers: before, insideSceneSeekers: seen };
   results.dev.animStates = [...new Set((await agents()).map((a) => `${a.uid}:${a.anim}`))];
+  // Space: viên thức ăn rơi gần một rồng ăn được nhóm đang chọn (fruit: Emberling, Zephyr).
+  const foods = await page.$eval('[data-testid="world-canvas"]', (c) => c.dravioFood());
+  const ags = await agents();
+  const fruitEaters = ags.filter((a) => a.habitatId === 'origin_meadow' && /zephyr|^d_/.test(a.uid));
+  results.dev.spaceDrop = foods.map((f) => ({ pos: f.pos, nearestEaterPx: Math.round(Math.min(...fruitEaters.map((a) => Math.hypot(a.pos.x - f.pos.x, a.pos.y - f.pos.y)))) }));
+  // Focus: chọn Zephyr Adult trong danh sách → chưa zoom; bấm "Theo dõi rồng" → 2×, bám theo.
+  await page.locator('section[aria-labelledby="world-heading"] h3 + .row button').nth(1).click();
+  await sleep(300);
+  const camAfterSelect = await page.$eval('[data-testid="world-canvas"]', (c) => c.dravioCamera());
+  await page.locator('.camera-controls button').nth(1).click();
+  await sleep(1500);
+  const camFocus = await page.$eval('[data-testid="world-canvas"]', (c) => c.dravioCamera());
+  await page.locator('[data-testid="world-canvas"]').screenshot({ path: join(OUT, 'focus-2x.png') });
+  results.dev.focus = { afterSelectZoom: camAfterSelect.zoom, mode: camFocus.mode, zoom: camFocus.zoom, followUid: camFocus.followUid };
+  await page.locator('.camera-controls button').first().click();
+  // Chuyển cảnh: bình thường có trượt; reduced motion thì tức thì.
+  await page.locator('.habitat-nav button[aria-pressed]').nth(0).click();
+  await sleep(60);
+  const slideNormal = (await page.$eval('[data-testid="world-canvas"]', (c) => c.dravioStats())).transitioning;
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await sleep(200);
+  await page.locator('.habitat-nav button[aria-pressed]').nth(1).click();
+  await sleep(60);
+  const slideReduced = (await page.$eval('[data-testid="world-canvas"]', (c) => c.dravioStats())).transitioning;
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  results.dev.transition = { normalSlides: slideNormal, reducedMotionSlides: slideReduced };
   // Thu thập trạng thái hoạt ảnh trong 40 s.
   const seenAnim = {};
   for (let i = 0; i < 80; i++) {
@@ -226,6 +252,49 @@ const tab = (page, i) => page.locator('.habitat-nav button[aria-pressed]').nth(i
     stats: await m.$eval('[data-testid="world-canvas"]', (c) => c.dravioStats()),
   };
   await m.locator('[data-testid="world-canvas"]').screenshot({ path: join(OUT, 'mobile-390.png') });
+  // Camera trên điện thoại: chụm 2 ngón (CDP touch), kéo khi zoom, chạm khi zoom → toạ độ thế giới đúng.
+  const mc = await mctx.newCDPSession(m);
+  const touch = (type, pts) => mc.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map(([x, y], i) => ({ x, y, id: i })) });
+  const probe = (fn) => m.$eval('[data-testid="world-canvas"]', (c, f) => c[f](), fn);
+  const foodBefore = (await probe('dravioFood')).length;
+  const cx = box.x + box.width / 2;
+  const cy = box.y + box.height * 0.75;
+  await touch('touchStart', [[cx - 30, cy], [cx + 30, cy]]);
+  for (let i = 1; i <= 8; i++) await touch('touchMove', [[cx - 30 - i * 8, cy], [cx + 30 + i * 8, cy]]);
+  await touch('touchEnd', []);
+  await sleep(300);
+  const camPinch = await probe('dravioCamera');
+  const foodAfterPinch = (await probe('dravioFood')).length;
+  await m.locator('[data-testid="world-canvas"]').screenshot({ path: join(OUT, 'mobile-390-zoomed.png') });
+  // Kéo một ngón khi đang zoom.
+  await touch('touchStart', [[cx + 60, cy - 20]]);
+  for (let i = 1; i <= 6; i++) await touch('touchMove', [[cx + 60 - i * 12, cy - 20]]);
+  await touch('touchEnd', []);
+  await sleep(200);
+  const camPan = await probe('dravioCamera');
+  const foodAfterPan = (await probe('dravioFood')).length;
+  // Chạm khi zoom: tính toạ độ thế giới mong đợi theo đúng công thức camera.
+  const tx = box.x + box.width * 0.2;
+  const ty = box.y + box.height * 0.92;
+  const k0 = Math.min(box.width / 960, box.height / 540);
+  const bx = (box.width - 960 * k0) / 2;
+  const by = (box.height - 540 * k0) / 2;
+  const k = k0 * camPan.zoom;
+  const expected = { x: 960 + (tx - box.x - (bx + 480 * k0 - camPan.fx * k)) / k, y: (ty - box.y - (by + 270 * k0 - camPan.fy * k)) / k };
+  await m.touchscreen.tap(tx, ty);
+  let dropped = null;
+  for (let i = 0; i < 20 && !dropped; i++) {
+    await sleep(250);
+    dropped = (await probe('dravioFood')).find((f) => Math.abs(f.pos.x - expected.x) < 2 && Math.abs(f.pos.y - expected.y) < 2) ?? null;
+  }
+  results.dev.camera = {
+    pinch: { zoom: camPinch.zoom, mode: camPinch.mode, foodDropped: foodAfterPinch - foodBefore },
+    pan: { fxBefore: camPinch.fx, fxAfter: camPan.fx, foodDropped: foodAfterPan - foodAfterPinch },
+    tapWhileZoomed: { expected, dropped: dropped?.pos ?? null },
+  };
+  await m.locator('button', { hasText: /Tổng quan|Overview/ }).click();
+  await sleep(200);
+  results.dev.camera.overviewButton = await probe('dravioCamera');
   results.dev.pageErrors = errs;
   await browser.close();
   server.kill();

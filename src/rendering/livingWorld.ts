@@ -193,6 +193,49 @@ function randomPoint(rng: Rng, region: HabitatRegion, ok: (p: Vec) => boolean): 
 
 const WANDER_CHANCE: Record<Personality, number> = { playful: 0.7, curious: 0.6, calm: 0.35, shy: 0.3 };
 
+/** Dự phòng thời gian phản ứng (quyết định ~1 Hz) khi ước lượng có kịp tới thức ăn không, giây. */
+export const FOOD_REACT_MARGIN_S = 1;
+
+function segmentsCross(a: Vec, b: Vec, c: Vec, d: Vec): boolean {
+  const o = (p: Vec, q: Vec, r: Vec) => Math.sign((q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x));
+  return o(a, b, c) !== o(a, b, d) && o(c, d, a) !== o(c, d, b);
+}
+
+/** Đoạn thẳng a→b có cắt mặt nước không. */
+export function crossesWater(region: HabitatRegion, a: Vec, b: Vec): boolean {
+  const w = region.water;
+  if (!w) return false;
+  if (inWater(region, a) || inWater(region, b)) return true;
+  for (let i = 0; i < w.length; i++) {
+    const [x1, y1] = w[i] ?? [0, 0];
+    const [x2, y2] = w[(i + 1) % w.length] ?? [0, 0];
+    if (segmentsCross(a, b, { x: x1, y: y1 }, { x: x2, y: y2 })) return true;
+  }
+  return false;
+}
+
+/**
+ * Quãng đường ước lượng (px cảnh) để đi bộ từ a tới b: thẳng nếu không cắt mặt nước (hoặc rồng bơi được),
+ * nếu cắt thì vòng qua mép trên/dưới hồ (chọn đường ngắn hơn nằm trong vùng đi); Infinity nếu không có đường.
+ */
+export function walkPathLength(a: Pick<Agent, 'mobility'>, region: HabitatRegion, from: Vec, to: Vec): number {
+  const direct = len(sub(to, from));
+  if (a.mobility.swim || !region.water || !crossesWater(region, from, to)) return direct;
+  const xs = region.water.map(([x]) => x);
+  const ys = region.water.map(([, y]) => y);
+  const [minX, maxX, minY, maxY] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  const m = BODY_RADIUS;
+  let best = Infinity;
+  for (const yy of [minY - m, maxY + m]) {
+    if (yy < region.y0 || yy > region.y1) continue;
+    const p1 = { x: Math.min(maxX, Math.max(minX, from.x)), y: yy };
+    const p2 = { x: Math.min(maxX, Math.max(minX, to.x)), y: yy };
+    const l = len(sub(p1, from)) + len(sub(p2, p1)) + len(sub(to, p2));
+    if (l < best) best = l;
+  }
+  return best;
+}
+
 export class LivingWorld {
   readonly agents = new Map<string, Agent>();
   readonly food = new Map<string, FoodVisual>();
@@ -440,6 +483,8 @@ export class LivingWorld {
       if ((a.ignoredFood.get(f.id) ?? 0) > this.simMs) continue;
       // Bay được thì tới mọi chỗ (hạ xuống ăn trên đất cạnh đó); không thì phải đứng được ở chỗ thức ăn.
       if (!a.mobility.fly && !reachable(a, region, f.pos)) continue;
+      // Có kịp tới trước khi thức ăn hết hạn không (TTL 12 s không đổi): quãng đường thật / tốc độ vội.
+      if (this.etaSeconds(a, region, f.pos) > (f.expiresAtMs - nowMs) / 1000 - FOOD_REACT_MARGIN_S) continue;
       const d = len(sub(f.pos, a.pos));
       if (d < bestD) {
         best = f;
@@ -447,6 +492,43 @@ export class LivingWorld {
       }
     }
     return best;
+  }
+
+  /** Thời gian ước lượng (giây) để rồng tới vị trí: đi bộ/bơi theo đường thật, hoặc bay nếu đi bộ không tới được. */
+  etaSeconds(a: Agent, region: HabitatRegion, to: Vec): number {
+    const walk = walkPathLength(a, region, a.pos, to);
+    const walkV = clipSpeed(a.speciesId, a.stage, 'walk') * HURRY_FACTOR;
+    let eta = walk / walkV;
+    if (a.mobility.fly && !a.care && !this.opts.healthRestricted?.(a.uid)) {
+      const rule = flightRuleFor(a.speciesId as CommonSpeciesId, a.stage);
+      if (!rule) eta = Math.min(eta, len(sub(to, a.pos)) / (clipSpeed(a.speciesId, a.stage, 'fly') * 1.5) + TAKEOFF_MS / 1000);
+    }
+    return eta;
+  }
+
+  /**
+   * Vị trí thả thức ăn gợi ý cho phím Space: gần rồng phù hợp nhất (ăn được nhóm này, không ngủ/chăm sóc,
+   * hết cooldown ăn), chỗ rồng đó đứng tới được. null nếu không có rồng phù hợp (lệnh feed vẫn thả ngẫu nhiên).
+   * Không đổi TTL, cooldown, XP hay kinh tế — chỉ chọn chỗ hiển thị của viên thức ăn.
+   */
+  suggestDrop(habitatId: string, dietId: string, nowMs: number): Vec | null {
+    const region = regionOf(habitatId);
+    if (!region) return null;
+    const eligible = [...this.agents.values()]
+      .filter((a) => a.habitatId === habitatId && a.state !== 'sleep' && !a.care)
+      .filter((a) => getSpecies(a.speciesId).anatomy.dietIds.includes(dietId as never))
+      .filter((a) => a.lastFeedXpAtMs === undefined || nowMs - a.lastFeedXpAtMs >= FEED_XP_COOLDOWN_MS)
+      .sort((x, y) => (x.uid < y.uid ? -1 : 1));
+    for (const a of eligible) {
+      for (const r of [60, 90, 40, 120]) {
+        for (let i = 0; i < 8; i++) {
+          const ang = (i / 8) * Math.PI * 2 + (a.facing === 1 ? 0 : Math.PI);
+          const p = { x: a.pos.x + Math.cos(ang) * r, y: a.pos.y + Math.sin(ang) * r * 0.35 };
+          if (reachable(a, region, p) && this.etaSeconds(a, region, p) < 6) return p;
+        }
+      }
+    }
+    return null;
   }
 
   /** FSM: chọn trạng thái tiếp theo. Trạng thái có thời hạn (eat, pet) không bị ngắt. */

@@ -1,12 +1,12 @@
 {
- "when": "2026-11-24T19:43:41.015Z",
+ "when": "2026-11-24T19:57:40.721Z",
  "browser": "158.0.8127.36",
  "prod": {
   "meadow": {
    "fps": 60,
    "p95FrameMs": 16.799999999999272,
-   "avgDrawMs": 0.2829166667109045,
-   "frames": 998,
+   "avgDrawMs": 0.3937499999611949,
+   "frames": 1000,
    "longFrames": 0,
    "running": true,
    "reducedMotion": false,
@@ -20,35 +20,45 @@
     "failed": 0,
     "released": 0,
     "requested": 49
+   },
+   "transitioning": false,
+   "camera": {
+    "mode": "overview",
+    "zoom": 1
    }
   },
   "pondbank": {
    "fps": 60,
-   "p95FrameMs": 16.700000000000728,
-   "avgDrawMs": 0.33541666668994974,
-   "frames": 1157,
+   "p95FrameMs": 16.799999999999272,
+   "avgDrawMs": 0.47833333334031825,
+   "frames": 1159,
    "longFrames": 0,
    "running": true,
    "reducedMotion": false,
    "dpr": 1,
    "backingWidth": 926,
    "backingHeight": 521,
-   "particles": 9,
+   "particles": 10,
    "images": {
     "loaded": 83,
     "loading": 0,
     "failed": 0,
     "released": 0,
     "requested": 83
+   },
+   "transitioning": false,
+   "camera": {
+    "mode": "overview",
+    "zoom": 1
    }
   },
   "memory": {
    "heapKB": [
-    4708,
-    4876,
-    4904,
-    4901,
-    5062
+    4726,
+    4926,
+    4974,
+    4957,
+    5105
    ],
    "images": [
     {
@@ -83,22 +93,27 @@
   },
   "afterNavigation": {
    "fps": 60,
-   "p95FrameMs": 16.79999999998836,
-   "avgDrawMs": 0.3337500000023283,
-   "frames": 7682,
-   "longFrames": 0,
+   "p95FrameMs": 16.80000000000291,
+   "avgDrawMs": 0.376666666707024,
+   "frames": 7694,
+   "longFrames": 1,
    "running": true,
    "reducedMotion": false,
    "dpr": 1,
    "backingWidth": 926,
    "backingHeight": 521,
-   "particles": 4,
+   "particles": 5,
    "images": {
     "loaded": 50,
     "loading": 0,
     "failed": 0,
     "released": 130,
     "requested": 180
+   },
+   "transitioning": false,
+   "camera": {
+    "mode": "overview",
+    "zoom": 1
    }
   },
   "reload": {
@@ -107,8 +122,8 @@
    "stats": {
     "fps": 60,
     "p95FrameMs": 16.700000000000273,
-    "avgDrawMs": 0.3152173913195324,
-    "frames": 184,
+    "avgDrawMs": 0.4032085560869804,
+    "frames": 187,
     "longFrames": 0,
     "running": true,
     "reducedMotion": false,
@@ -122,14 +137,19 @@
      "failed": 0,
      "released": 0,
      "requested": 46
+    },
+    "transitioning": false,
+    "camera": {
+     "mode": "overview",
+     "zoom": 1
     }
    }
   },
   "reducedMotion": {
    "fps": 60,
-   "p95FrameMs": 16.800000000000182,
-   "avgDrawMs": 0.37083333334497487,
-   "frames": 342,
+   "p95FrameMs": 16.799999999999727,
+   "avgDrawMs": 0.39833333329297604,
+   "frames": 345,
    "longFrames": 0,
    "running": true,
    "reducedMotion": true,
@@ -143,6 +163,11 @@
     "failed": 0,
     "released": 0,
     "requested": 46
+   },
+   "transitioning": false,
+   "camera": {
+    "mode": "overview",
+    "zoom": 1
    }
   },
   "consoleErrors": []
@@ -150,22 +175,41 @@
  "dev": {
   "space": {
    "outsideSceneSeekers": 0,
-   "insideSceneSeekers": 1
+   "insideSceneSeekers": 2
   },
   "animStates": [
    "d_99e172c3da3bab73:walk",
-   "e2e-zephyr-adult:idle",
+   "e2e-zephyr-adult:walk",
    "e2e-zephyr-baby:walk",
    "e2e-droplet-adult:walk",
-   "e2e-sprout-juv:walk"
+   "e2e-sprout-juv:sleep"
   ],
+  "spaceDrop": [
+   {
+    "pos": {
+     "x": 1444.953761629808,
+     "y": 473.1060021337027
+    },
+    "nearestEaterPx": 38
+   }
+  ],
+  "focus": {
+   "afterSelectZoom": 1,
+   "mode": "focus",
+   "zoom": 2,
+   "followUid": "e2e-zephyr-adult"
+  },
+  "transition": {
+   "normalSlides": true,
+   "reducedMotionSlides": false
+  },
   "animSeen": {
    "d_99e172c3da3bab73": [
     "idle",
+    "sleep",
     "walk"
    ],
    "e2e-zephyr-adult": [
-    "eat",
     "fly",
     "idle",
     "landing",
@@ -194,7 +238,7 @@
   "secondTabNotice": "Bản G1 — thế giới sống của Khu Khởi Nguyên với mỹ thuật prototype (chưa phải art thương mại cuối cùng). | Dravio đang mở ở tab khác. Tab này chỉ xem, không lưu.",
   "assetFailure": {
    "failedImages": 5,
-   "framesDrawn": 244,
+   "framesDrawn": 248,
    "fps": 60,
    "otherDragonsAnimating": 4
   },
@@ -208,22 +252,56 @@
    "stats": {
     "fps": 60,
     "p95FrameMs": 16.700000000000273,
-    "avgDrawMs": 0.28518518523150493,
-    "frames": 189,
+    "avgDrawMs": 0.3502283105414072,
+    "frames": 219,
     "longFrames": 0,
     "running": true,
     "reducedMotion": false,
     "dpr": 2,
     "backingWidth": 712,
     "backingHeight": 400,
-    "particles": 2,
+    "particles": 1,
     "images": {
      "loaded": 22,
      "loading": 0,
      "failed": 0,
      "released": 0,
      "requested": 22
+    },
+    "transitioning": false,
+    "camera": {
+     "mode": "overview",
+     "zoom": 1
     }
+   }
+  },
+  "camera": {
+   "pinch": {
+    "zoom": 2.5,
+    "mode": "free",
+    "foodDropped": 0
+   },
+   "pan": {
+    "fxBefore": 480,
+    "fxAfter": 557.7600000000001,
+    "foodDropped": 0
+   },
+   "tapWhileZoomed": {
+    "expected": {
+     "x": 1402.5600000000002,
+     "y": 442.02375000000006
+    },
+    "dropped": {
+     "x": 1402.4159967041016,
+     "y": 442.27212890625003
+    }
+   },
+   "overviewButton": {
+    "mode": "overview",
+    "zoom": 1,
+    "fx": 480,
+    "fy": 270,
+    "followUid": null
    }
   },
   "pageErrors": []

@@ -21,7 +21,8 @@ import type { ImageCache } from './assetAdapter';
 import { STAGE_SCALE, cuesCrossed, dragonVisual } from './dragonVisual';
 import type { Agent, LivingWorld } from './livingWorld';
 import { ORIGIN_LAYOUT, inWater, regionOf, type HabitatRegion, type Vec } from './originLayout';
-import { fitView, toGround, toScreen, type View } from './projection';
+import { fitView, inSceneBox, toGround, toScreen, type View } from './projection';
+import { OVERVIEW, ZOOM_MAX, ZOOM_MIN, clampCamera, focusOn, follow, panBy, screenToLocal, zoomAround, type CameraState } from './camera';
 
 /**
  * Canvas 2D renderer cho Khởi Nguyên (G1 PR4 + tích hợp asset ADR 0012; GDD 3.1 trang 16–17, Phụ lục G).
@@ -63,6 +64,8 @@ export interface RendererOptions {
   getView: () => RenderView;
   onSelect: (uid: string | null) => void;
   onGroundTap: (habitatId: string, pos: Vec) => void;
+  /** Camera đổi chế độ/zoom (không gọi mỗi frame khi chỉ bám theo rồng). */
+  onCamera?: (c: { mode: CameraState['mode']; zoom: number }) => void;
   env?: RendererEnv;
   /** Seed cho hạt môi trường (cosmetic). */
   seed?: string;
@@ -81,6 +84,9 @@ export interface RenderStats {
   backingHeight: number;
   particles: number;
   images: ReturnType<ImageCache['stats']>;
+  /** Đang trượt chuyển cảnh. */
+  transitioning: boolean;
+  camera: { mode: CameraState['mode']; zoom: number };
 }
 
 const DT_CLAMP_MS = 100;
@@ -138,7 +144,11 @@ export class CanvasRenderer {
   private prefersReduced = false;
   private disposed = false;
   private cleanups: (() => void)[] = [];
-  private down: { x: number; y: number; t: number; id: number } | null = null;
+  /** Con trỏ đang chạm (chuột/bút/ngón tay) để phân biệt chạm · kéo · chụm. */
+  private pointers = new Map<number, { x: number; y: number; sx: number; sy: number; t: number }>();
+  private gesture: 'idle' | 'tap' | 'pan' | 'pinch' | 'consumed' = 'idle';
+  private pinch: { d0: number; cam0: CameraState; local0: Vec } | null = null;
+  private cam: CameraState = { ...OVERVIEW };
   private readonly env: RendererEnv;
   /** Camera: microhabitat đích và chuyển cảnh đang chạy. */
   private home: OriginHabitatId;
@@ -159,6 +169,9 @@ export class CanvasRenderer {
     this.home = opts.getView().habitatId;
     this.fxRng = createRng(hashSeed(opts.seed ?? 'origin-fx', 'particles'));
     this.bind();
+    // 1×: trang vẫn cuộn dọc qua canvas; chụm hai ngón thuộc về camera (không phóng to cả trang).
+    const style = (opts.canvas as Partial<HTMLCanvasElement>).style;
+    if (style) style.touchAction = 'pan-y';
     this.resize();
   }
 
@@ -184,19 +197,108 @@ export class CanvasRenderer {
       mql.addEventListener('change', onChange);
       this.cleanups.push(() => mql.removeEventListener('change', onChange));
     }
-    this.listen(c, 'pointerdown', (e) => {
-      const p = e as PointerEvent;
-      this.down = { x: p.offsetX, y: p.offsetY, t: performanceNow(), id: p.pointerId };
+    this.listen(c, 'pointerdown', (e) => this.onPointerDown(e as PointerEvent));
+    this.listen(c, 'pointermove', (e) => this.onPointerMove(e as PointerEvent));
+    this.listen(c, 'pointerup', (e) => this.onPointerUp(e as PointerEvent, false));
+    this.listen(c, 'pointercancel', (e) => this.onPointerUp(e as PointerEvent, true));
+    this.listen(c, 'wheel', (e) => {
+      const w = e as WheelEvent;
+      // Chụm trên touchpad/ctrl + lăn chuột: zoom quanh con trỏ. Lăn thường để trang cuộn.
+      if (!w.ctrlKey) return;
+      w.preventDefault?.();
+      this.zoomAt({ x: w.offsetX, y: w.offsetY }, this.cam.zoom * Math.exp(-w.deltaY * 0.01));
     });
-    this.listen(c, 'pointerup', (e) => {
-      const p = e as PointerEvent;
-      const d = this.down;
-      this.down = null;
-      if (!d || d.id !== p.pointerId) return;
-      if (Math.hypot(p.offsetX - d.x, p.offsetY - d.y) > TAP_MOVE_PX || performanceNow() - d.t > TAP_MS) return;
-      this.tap({ x: p.offsetX, y: p.offsetY });
-    });
-    this.listen(c, 'pointercancel', () => (this.down = null));
+  }
+
+  // ------------------------------------------------------------ gestures
+  private onPointerDown(p: PointerEvent): void {
+    this.pointers.set(p.pointerId, { x: p.offsetX, y: p.offsetY, sx: p.offsetX, sy: p.offsetY, t: performanceNow() });
+    if (this.pointers.size === 1) {
+      this.gesture = 'tap';
+    } else if (this.pointers.size === 2) {
+      // Ngón thứ hai: chụm để zoom, huỷ chạm (không thả thức ăn).
+      const [a, b] = this.twoPointers();
+      const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      this.pinch = { d0: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)), cam0: this.cam, local0: screenToLocal(this.view.box, this.cam, mid) };
+      this.gesture = 'pinch';
+    } else this.gesture = 'consumed';
+  }
+
+  private twoPointers(): [Vec, Vec] {
+    const [a, b] = [...this.pointers.values()];
+    return [a ?? { x: 0, y: 0 }, b ?? a ?? { x: 0, y: 0 }];
+  }
+
+  private onPointerMove(p: PointerEvent): void {
+    const ptr = this.pointers.get(p.pointerId);
+    if (!ptr) return;
+    const dx = p.offsetX - ptr.x;
+    const dy = p.offsetY - ptr.y;
+    ptr.x = p.offsetX;
+    ptr.y = p.offsetY;
+    if (this.gesture === 'pinch' && this.pinch && this.pointers.size >= 2) {
+      const [a, b] = this.twoPointers();
+      const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      const zoom = this.pinch.cam0.zoom * (Math.hypot(a.x - b.x, a.y - b.y) / this.pinch.d0);
+      this.setCamera(pinchTo(this.view.box, this.pinch.cam0, this.pinch.local0, mid, zoom));
+      return;
+    }
+    if (this.gesture === 'tap' && Math.hypot(p.offsetX - ptr.sx, p.offsetY - ptr.sy) > TAP_MOVE_PX) {
+      // Kéo: chỉ dời camera khi đang zoom; ở 1× kéo không làm gì (không thả thức ăn).
+      this.gesture = this.cam.zoom > ZOOM_MIN + 1e-6 ? 'pan' : 'consumed';
+    }
+    if (this.gesture === 'pan') this.setCamera(panBy(this.view.box, this.cam, dx, dy));
+  }
+
+  private onPointerUp(p: PointerEvent, cancelled: boolean): void {
+    const ptr = this.pointers.get(p.pointerId);
+    this.pointers.delete(p.pointerId);
+    if (!ptr) return;
+    if (!cancelled && this.gesture === 'tap' && this.pointers.size === 0) {
+      const moved = Math.hypot(p.offsetX - ptr.sx, p.offsetY - ptr.sy);
+      if (moved <= TAP_MOVE_PX && performanceNow() - ptr.t <= TAP_MS) this.tap({ x: p.offsetX, y: p.offsetY });
+    }
+    if (this.pointers.size === 0) {
+      this.gesture = 'idle';
+      this.pinch = null;
+    } else if (this.gesture === 'pinch' || this.gesture === 'tap') this.gesture = 'consumed';
+  }
+
+  // ------------------------------------------------------------ camera API
+  get camera(): CameraState {
+    return this.cam;
+  }
+
+  private setCamera(next: CameraState): void {
+    const prev = this.cam;
+    this.cam = clampCamera(next);
+    this.view = fitView(this.view.cssWidth, this.view.cssHeight, this.camX(), this.cam);
+    // Đang zoom: kéo một ngón là dời camera → chặn cuộn trang trên canvas; 1×: cho trang cuộn dọc.
+    const style = (this.opts.canvas as Partial<HTMLCanvasElement>).style;
+    if (style) style.touchAction = this.cam.zoom > ZOOM_MIN + 1e-6 ? 'none' : 'pan-y';
+    if (prev.mode !== this.cam.mode || Math.abs(prev.zoom - this.cam.zoom) > 1e-3) this.opts.onCamera?.({ mode: this.cam.mode, zoom: this.cam.zoom });
+    if (this.raf === null && !this.disposed) this.draw();
+  }
+
+  /** Về tổng quan (1×). */
+  overview(): void {
+    this.setCamera({ ...OVERVIEW });
+  }
+
+  /** Bật Focus vào rồng (chỉ khi người chơi bấm; chọn rồng không tự zoom). */
+  focus(uid: string): boolean {
+    const a = this.opts.world.agents.get(uid);
+    const region = a ? regionOf(a.habitatId) : undefined;
+    if (!a || !region || a.habitatId !== this.home) return false;
+    this.setCamera(focusOn(this.cam, uid, { x: a.pos.x - region.sceneX, y: a.pos.y - a.z }));
+    return true;
+  }
+
+  /** Zoom quanh một điểm màn hình (mặc định tâm khung). */
+  zoomAt(s: Vec | null, zoom: number): void {
+    const b = this.view.box;
+    const at = s ?? { x: b.x + (SCENE.width * b.k0) / 2, y: b.y + (SCENE.height * b.k0) / 2 };
+    this.setCamera(zoomAround(b, this.cam, Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom)), at));
   }
 
   get reducedMotion(): boolean {
@@ -217,7 +319,7 @@ export class CanvasRenderer {
     const bh = Math.round(h * this.dpr);
     if (c.width !== bw) c.width = bw;
     if (c.height !== bh) c.height = bh;
-    this.view = fitView(w, h, this.camX());
+    this.view = fitView(w, h, this.camX(), this.cam);
     if (this.raf === null && !this.disposed) this.draw();
   }
 
@@ -257,6 +359,8 @@ export class CanvasRenderer {
       backingHeight: this.opts.canvas.height,
       particles: this.particles.length,
       images: this.opts.images.stats(),
+      transitioning: this.transition !== null,
+      camera: { mode: this.cam.mode, zoom: this.cam.zoom },
     };
   }
 
@@ -321,9 +425,18 @@ export class CanvasRenderer {
     if (target !== this.home) {
       this.transition = this.reducedMotion ? null : { from: this.home, to: target, start: this.wallMs };
       this.home = target;
+      // Đổi sinh cảnh: giữ Focus nếu rồng đang theo dõi ở sinh cảnh mới, nếu không về tổng quan.
+      const followed = this.cam.followUid ? this.opts.world.agents.get(this.cam.followUid) : undefined;
+      if (!followed || followed.habitatId !== target) this.setCamera({ ...OVERVIEW });
     }
     if (this.transition && this.wallMs - this.transition.start >= TRANSITION_MS) this.transition = null;
-    this.view = fitView(this.view.cssWidth, this.view.cssHeight, this.camX());
+    if (this.cam.mode === 'focus' && this.cam.followUid) {
+      const a = this.opts.world.agents.get(this.cam.followUid);
+      const region = a ? regionOf(a.habitatId) : undefined;
+      if (!a || !region || a.habitatId !== this.home) this.setCamera({ ...OVERVIEW });
+      else this.cam = follow(this.cam, { x: a.pos.x - region.sceneX, y: a.pos.y - a.z });
+    }
+    this.view = fitView(this.view.cssWidth, this.view.cssHeight, this.camX(), this.cam);
     this.prefetch();
     this.spawnDragonFx();
     this.spawnEnvFx(dt);
@@ -364,6 +477,7 @@ export class CanvasRenderer {
 
   // ------------------------------------------------------------ input
   tap(s: Vec): void {
+    if (!inSceneBox(this.view, s)) return;
     const hit = this.pick(s);
     if (hit) {
       this.opts.onSelect(hit.uid);
@@ -524,7 +638,7 @@ export class CanvasRenderer {
     ctx.fillRect(0, 0, v.cssWidth, v.cssHeight);
     ctx.save();
     ctx.beginPath();
-    ctx.rect(v.ox, v.oy, SCENE.width * v.k, SCENE.height * v.k);
+    ctx.rect(v.box.x, v.box.y, SCENE.width * v.box.k0, SCENE.height * v.box.k0);
     ctx.clip();
     const reduced = this.reducedMotion;
     const u = this.transitionU();
@@ -544,10 +658,13 @@ export class CanvasRenderer {
         const layer = art.layers.find((l) => l.id === layerId);
         if (!layer) continue;
         ctx.globalAlpha = tile.alpha;
-        const ok = this.blit(layer.url, v.ox + tile.dx * v.k, v.oy, layer.width * v.k, layer.height * v.k);
+        // Parallax theo camera trong cảnh: lớp xa dời theo camera một phần (1 − parallax).
+        const px = (this.cam.fx - SCENE.width / 2) * (1 - layer.parallax);
+        const py = (this.cam.fy - SCENE.height / 2) * (1 - layer.parallax);
+        const ok = this.blit(layer.url, v.ox + (tile.dx + px) * v.k, v.oy + py * v.k, layer.width * v.k, layer.height * v.k);
         if (!ok && layerId === 'sky') {
           ctx.fillStyle = '#cfe6ef';
-          ctx.fillRect(v.ox + tile.dx * v.k, v.oy, SCENE.width * v.k, 330 * v.k);
+          ctx.fillRect(v.ox + (tile.dx + px) * v.k, v.oy + py * v.k, SCENE.width * v.k, 330 * v.k);
         }
       }
       ctx.globalAlpha = 1;
@@ -601,7 +718,9 @@ export class CanvasRenderer {
     ctx.globalCompositeOperation = 'multiply';
     ctx.globalAlpha = opacity;
     ctx.fillStyle = color;
-    ctx.fillRect(v.ox, v.oy + y0 * v.k, SCENE.width * v.k, (y1 - y0) * v.k);
+    // Cả khung: lớp nền phủ theo dải y của cảnh; lớp cảnh phủ toàn khung nhìn.
+    if (y0 === 0 && y1 === SCENE.height) ctx.fillRect(v.box.x, v.box.y, SCENE.width * v.box.k0, SCENE.height * v.box.k0);
+    else ctx.fillRect(v.box.x, v.oy + y0 * v.k, SCENE.width * v.box.k0, (y1 - y0) * v.k);
     ctx.restore();
   }
 
@@ -762,6 +881,20 @@ export class CanvasRenderer {
       this.blit(fx.url, s.x - fx.anchor.x * k, s.y - fx.anchor.y * k, fx.width * k, fx.height * k);
     }
   }
+}
+
+/** Chụm hai ngón: điểm cảnh dưới tâm chụm ban đầu đi theo tâm chụm hiện tại, zoom theo tỉ lệ khoảng cách. */
+export function pinchTo(box: View['box'], cam0: CameraState, local0: Vec, mid: Vec, zoom: number): CameraState {
+  const z = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom));
+  if (z <= ZOOM_MIN + 1e-6) return { ...OVERVIEW };
+  const k = box.k0 * z;
+  return clampCamera({
+    ...cam0,
+    mode: cam0.mode === 'focus' ? 'focus' : 'free',
+    zoom: z,
+    fx: (box.x + (SCENE.width / 2) * box.k0 - mid.x) / k + local0.x,
+    fy: (box.y + (SCENE.height / 2) * box.k0 - mid.y) / k + local0.y,
+  });
 }
 
 /** Chuyển động của hạt theo tuổi 0..1 (thuần, tất định theo seed của hạt). */

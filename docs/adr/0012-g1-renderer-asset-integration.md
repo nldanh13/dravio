@@ -1,6 +1,6 @@
 # ADR 0012 — Tích hợp mỹ thuật vào Canvas renderer (G1)
 
-Trạng thái: **Đề xuất — chờ tác giả duyệt**. Bổ sung ADR 0011 (Living World + renderer), ADR 0101–0103 (mỹ thuật). Áp dụng các quyết định còn mở mà tác giả đã chốt khi bàn giao dự án (24/11/2026). Không đổi kinh tế, di truyền, ID loài hay schema save.
+Trạng thái: **Chấp nhận** (24/11/2026, tác giả xác nhận 3 điểm kèm yêu cầu bổ sung). Bổ sung ADR 0011 (Living World + renderer), ADR 0101–0103 (mỹ thuật). Áp dụng các quyết định còn mở mà tác giả đã chốt khi bàn giao dự án (24/11/2026). Không đổi kinh tế, di truyền, ID loài hay schema save.
 
 ## Bối cảnh
 - Renderer PR4 (ADR 0011) dùng mặt đất xiên 1200 × 520 đơn vị, thứ tự đồng cỏ · đá ấm · bờ hồ, vật cản hình tròn, nền khối màu tạm và biến đổi thủ tục trên ảnh tĩnh.
@@ -24,7 +24,21 @@ Trạng thái: **Đề xuất — chờ tác giả duyệt**. Bổ sung ADR 0011
 - `ASSET_CONTRACT.md` lên v2 (khung SVG + clip thay cho dải khung ngang; không bắt buộc sprite sheet).
 - PR6 cần nối `LivingWorld.setCare` / `healthRestricted` với HealthCase.
 
-## Cần tác giả quyết định
-1. Duyệt cách hiển thị một microhabitat mỗi lần (khung 16:9) và chuyển cảnh trượt.
-2. Tốc độ đi dạo chậm (≈ 25 px cảnh/s cho Adult, ≈ 38 s băng qua một cảnh) và hệ số vội 2,4 khi đi tới thức ăn.
-3. Trên điện thoại dọc, cảnh 16:9 khá nhỏ (≈ 356 × 200 px CSS ở màn 390 px): giữ vừa chiều rộng, hay cho phép phóng to/cắt hai bên quanh rồng đang chọn?
+## Tác giả xác nhận (24/11/2026) và phần bổ sung đã làm
+1. ✅ **Một microhabitat mỗi lần**, trượt 520 ms, parallax, tab/mũi tên; reduced motion tắt trượt (chuyển tức thì). Camera chỉ đổi cách nhìn — không đổi vị trí, sinh học, hành vi hay sản xuất (test khóa). **Bổ sung:** số rồng ở từng sinh cảnh trên tab.
+2. ✅ **Tốc độ** ≈ 25 px cảnh/s (Adult đi dạo), ×2,4 khi tìm thức ăn, theo loài/stage/sải bước. **Bổ sung:**
+   - Trước `seekFood`: ước lượng **quãng đường thật** (`walkPathLength`: thẳng; nếu rồng không bơi và đường cắt mặt hồ thì vòng qua mép trên/dưới hồ trong vùng đi; không có đường → bỏ qua) chia tốc độ vội (hoặc bay nếu được phép) và so với **thời gian sống còn lại** của viên thức ăn trừ 1 s phản ứng (`FOOD_REACT_MARGIN_S`). Không kịp → không đi.
+   - **Space** ưu tiên chỗ gần rồng phù hợp (`suggestDrop`: ăn được nhóm đang chọn, không ngủ/chăm sóc, hết cooldown; điểm đứng tới được trong ≤ 6 s); không có thì engine thả ngẫu nhiên như cũ.
+   - TTL 12 s, cooldown 8 s, XP và kinh tế **không đổi**.
+3. ✅ **Camera điện thoại** (`src/rendering/camera.ts`, thuần):
+   - **Overview** 1× (mặc định) · **Focus** 2× bám rồng được chọn (chỉ khi bấm "Theo dõi rồng"; chọn rồng **không** tự zoom) · **Free** khi người chơi zoom/kéo.
+   - Zoom 1–2,5× bằng chụm hai ngón, Ctrl + lăn chuột (chụm touchpad), nút ±; kéo một ngón khi đang zoom; nút "Tổng quan" về 1×.
+   - Camera kẹp trong biên sinh cảnh; đổi sinh cảnh về Overview (giữ Focus nếu rồng đang theo dõi ở sinh cảnh mới).
+   - Toạ độ màn hình ↔ thế giới qua cùng một phép biến đổi cho chọn rồng (hitbox), thả thức ăn và vẽ.
+   - Phân biệt cử chỉ: chạm (≤ 10 px, ≤ 600 ms, một ngón) mới chọn/thả; kéo (> 10 px) chỉ dời camera khi đang zoom, ở 1× bỏ qua; ngón thứ hai biến cử chỉ thành chụm và huỷ chạm đến khi nhấc hết ngón. `touch-action`: `pan-y` ở 1× (trang vẫn cuộn), `none` khi đang zoom.
+   - Không đổi GameState hay schema save.
+4. Giới hạn giữ nguyên: Windows + Chromium trên thiết bị thật chưa kiểm thử; FPS headless không đại diện thiết bị thật; HealthCase/`healthRestricted` nối ở PR6.
+
+## Kiểm chứng
+- Unit: `tests/unit/canvasRenderer.test.ts` (camera: biên, zoom 1–2,5, ánh xạ màn hình ↔ thế giới khi zoom, zoom giữ điểm dưới con trỏ, chụm không thả thức ăn, kéo chỉ khi zoom, chạm khi zoom đúng toạ độ, hitbox khi zoom, Focus bám theo/không tự zoom khi chọn/về Overview khi rời sinh cảnh, letterbox), `tests/unit/livingWorld.test.ts` (đường vòng quanh hồ, bỏ qua thức ăn không kịp, gợi ý Space).
+- E2E Chromium 158 headless (Linux): `docs/rendering/e2e/renderer-e2e.json` — chụm → 2,5×, 0 thức ăn; kéo khi zoom → camera dời, 0 thức ăn; chạm khi zoom → thức ăn rơi lệch < 0,3 px so với toạ độ tính toán; chọn rồng giữ 1×, "Theo dõi rồng" → Focus 2× đúng rồng; chuyển cảnh trượt khi bình thường, tức thì khi reduced motion; Space → thức ăn cách rồng ăn được 38 px.

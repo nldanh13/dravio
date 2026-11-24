@@ -29,6 +29,8 @@ Cập nhật 24/11/2026 (ADR 0012). Bản v1 (G1 PR4, ADR 0011) mô tả sprite 
 | Huy hiệu biến thể | Có trong SVG (cho UI); renderer cắt góc 50 × 50 khi vẽ trong cảnh |
 | Tải | Mỗi SVG là file riêng (`?url&no-inline`); `ImageCache` tải khi cần, giải phóng ảnh không dùng > 30 s |
 | URL | Chỉ asset đóng gói cục bộ; không tải Internet |
+| Camera | Overview 1× · Focus 2× (bám rồng được chọn, chỉ khi người chơi bật) · Free; zoom 1–2,5×; kẹp trong biên sinh cảnh; lớp nền dời theo camera × (1 − parallax). SVG vẽ lại đúng độ phóng nên không vỡ hình khi zoom |
+| Toạ độ tương tác | `toGround`/`toScreen` (`projection.ts`) dùng cùng phép biến đổi camera cho vẽ, chọn (hitbox của khung) và thả thức ăn |
 
 ## Thêm loài/tư thế mới
 1. Thêm hình học vào `scripts/art/generate-common-dragons.mjs` (tư thế trong `SPECIES_POSES`), chạy lại script.
