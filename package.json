@@ -14,7 +14,12 @@
     "typecheck": "tsc -b --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "art:shade": "node scripts/art/generate-ancient-shading.mjs",
+    "predev": "npm run art:shade",
+    "prebuild": "npm run art:shade",
+    "pretest": "node --test scripts/art/ancient-shading.test.mjs && npm run art:shade",
+    "pretest:watch": "npm run art:shade"
   },
   "dependencies": {
     "react": "^19.3.1",
