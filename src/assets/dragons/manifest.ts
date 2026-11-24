@@ -84,12 +84,12 @@ const COMMON_G1: DragonAssetSource = {
 
 const emberlingFiles = import.meta.glob<string>('../g0/emberling/{baby,juvenile,adult}_*.svg', {
   eager: true,
-  query: '?url',
+  query: '?url&no-inline',
   import: 'default',
 });
 const commonFiles = import.meta.glob<string>('./common/*/{baby,juvenile,adult}_*.svg', {
   eager: true,
-  query: '?url',
+  query: '?url&no-inline',
   import: 'default',
 });
 

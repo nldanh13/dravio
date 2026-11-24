@@ -25,7 +25,7 @@ export interface DragonFrameAsset {
   tier: 'prototype';
 }
 
-const files = import.meta.glob<string>('./frames/*/*.svg', { eager: true, query: '?url', import: 'default' });
+const files = import.meta.glob<string>('./frames/*/*.svg', { eager: true, query: '?url&no-inline', import: 'default' });
 
 type AttachTable = Record<string, Record<string, Record<string, Record<string, [number, number]>>>>;
 type HitboxTable = Record<string, Record<string, Record<string, { x: number; y: number; w: number; h: number }>>>;

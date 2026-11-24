@@ -89,6 +89,12 @@ function buildHtml(stages) {
           .join('');
         css.push(`@keyframes ${id}fb{${fb}}@keyframes ${id}tr{${tr}}`);
         css.push(`#${id} .spr{animation:${id}fb ${dur}ms step-end infinite,${id}tr ${dur}ms linear infinite}`);
+        if (clip.descend) {
+          // Hạ cánh liên tục: lấy mẫu altitudeAt (cùng hàm renderer dùng).
+          const steps = Array.from({ length: 11 }, (_, i) => i / 10);
+          const kf = steps.map((t) => `${pct(t)}{transform:translateY(${(-anim.altitudeAt(sp, clip, stage, t) * k).toFixed(2)}px)}`).join('');
+          css.push(`@keyframes ${id}al{${kf}}#${id} .lift{animation:${id}al ${dur}ms linear infinite}`);
+        }
         const alt = clip.altitude ? clip.altitude[stage] * k : 0;
         const attach = frameData.attach[sp][stage][frames[0].pose] ?? {};
         const shadowW = 128 * s * k * (clip.shadow === 'altitude' ? 0.7 : 1);

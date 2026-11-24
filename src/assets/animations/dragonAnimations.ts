@@ -82,6 +82,20 @@ export interface BlinkSpec {
   intervalMs: readonly [number, number];
 }
 
+/** Luật tập bay (ADR 0102 mục 2). */
+export interface FlightRule {
+  /** Thời gian bay tối thiểu/tối đa của một lần cất cánh (ms). */
+  minFlightMs: number;
+  maxFlightMs: number;
+  /** Bắt buộc chuyển sang `landing` khi hết `maxFlightMs`. */
+  mustLand: true;
+  /** Chỉ trong microhabitat hiện tại; không dùng để di chuyển liên vùng. */
+  sameHabitatOnly: true;
+  interZoneTravel: false;
+  /** Không được cất cánh khi rồng có hạn chế sức khỏe (đang chấn thương/chăm sóc). */
+  blockedWhenHealthRestricted: true;
+}
+
 export interface DragonClip {
   state: DragonAnimState;
   durationMs: number;
@@ -93,8 +107,19 @@ export interface DragonClip {
   fx: readonly FxCue[];
   /** ground: bóng tại chân; altitude: bóng co theo độ cao bay; water: không bóng, vẽ mặt nước. */
   shadow: 'ground' | 'altitude' | 'water';
-  /** Độ cao bay theo stage (px viewBox, đã theo tỉ lệ stage). */
+  /**
+   * Độ cao bay theo stage (px viewBox), ĐÃ là giá trị cuối cho từng stage (ADR 0102:
+   * Baby/Juvenile/Adult = 18/40/56). Renderer chỉ nhân hệ số hiển thị `k`, KHÔNG nhân
+   * `stageScale` lần nữa (khác với dx/dy của track).
+   */
   altitude?: Readonly<Record<GrowthStage, number>>;
+  /**
+   * Hạ độ cao liên tục: từ độ cao lúc bắt đầu clip về 0 trong khoảng pha [fromT, toT]
+   * (smoothstep). Dùng `altitudeAt`.
+   */
+  descend?: { fromT: number; toT: number };
+  /** Ràng buộc bay theo stage (chỉ dữ liệu; FSM/Behavior Engine phải thực thi). */
+  flightRules?: Readonly<Partial<Record<GrowthStage, FlightRule>>>;
   /** Quãng đường một chu kỳ (px viewBox Adult) để khớp tốc độ, tránh trượt chân. */
   stridePx?: number;
   blink?: BlinkSpec;
@@ -171,6 +196,10 @@ const BASE_CLIPS: Readonly<Record<DragonAnimState, DragonClip>> = {
     fx: [{ t: 0.5, fx: 'wind', at: 'body', durMs: 500, dx: -50 }],
     shadow: 'altitude',
     altitude: { baby: 18, juvenile: 40, adult: 56 },
+    // Zephyr Baby chỉ tập bay ngắn trong sinh cảnh hiện tại rồi hạ cánh.
+    flightRules: {
+      baby: { minFlightMs: 1000, maxFlightMs: 2000, mustLand: true, sameHabitatOnly: true, interZoneTravel: false, blockedWhenHealthRestricted: true },
+    },
     stridePx: 60,
     interruptible: true,
   },
@@ -239,8 +268,9 @@ const BASE_CLIPS: Readonly<Record<DragonAnimState, DragonClip>> = {
       { t: 0, pose: 'land' },
       { t: 0.7, pose: 'idle' },
     ],
-    // dy âm = còn trên không; renderer cộng thêm độ cao hiện tại lúc bắt đầu hạ cánh.
-    track: [K(0, { dy: -20 }), K(0.5, { dy: 0 }), K(0.6, { sx: 1.08, sy: 0.9 }), K(1)],
+    // Độ cao giảm liên tục từ độ cao hiện tại (altitudeAt) tới 0 ở t=0.5, rồi nén khi chạm đất.
+    track: [K(0), K(0.5), K(0.6, { sx: 1.08, sy: 0.9 }), K(1)],
+    descend: { fromT: 0, toT: 0.5 },
     fx: [{ t: 0.5, fx: 'dust', at: 'ground', durMs: 400 }],
     shadow: 'altitude',
     interruptible: false,
@@ -286,7 +316,7 @@ const BASE_CLIPS: Readonly<Record<DragonAnimState, DragonClip>> = {
 export type CommonSpeciesId = 'emberling' | 'droplet' | 'sprout' | 'zephyr';
 
 /**
- * Emberling G0 là bản vẽ phẳng (giữ nguyên đến G3, ADR 0008): chỉ có khung thay mắt/miệng.
+ * Emberling G0 là bản vẽ phẳng (giữ nguyên đến G3, ADR 0101): chỉ có khung thay mắt/miệng.
  * Tư thế thiếu được thay bằng tư thế gần nhất, track bù chuyển động.
  */
 export const POSE_FALLBACK: Readonly<Partial<Record<CommonSpeciesId, Partial<Record<PoseId, PoseId>>>>> = {
@@ -378,4 +408,78 @@ export function sampleTrack(clip: DragonClip, t: number): TransformKey {
   }
   const last = keys[keys.length - 1] ?? first;
   return { ...last, t };
+}
+
+/**
+ * Độ cao (px viewBox) tại pha t. `fly`: độ cao của stage. Clip có `descend` (landing):
+ * giảm liên tục từ `startAltitude` (độ cao thực lúc bắt đầu hạ cánh, mặc định độ cao bay của
+ * stage) về 0. Clip khác: 0. Kết quả không nhân stageScale.
+ */
+export function altitudeAt(speciesId: CommonSpeciesId, clip: DragonClip, stage: GrowthStage, t: number, startAltitude?: number): number {
+  if (clip.altitude) return clip.altitude[stage];
+  if (clip.descend) {
+    const start = startAltitude ?? resolveDragonClip(speciesId, 'fly')?.altitude?.[stage] ?? 0;
+    const { fromT, toT } = clip.descend;
+    if (t <= fromT) return start;
+    if (t >= toT) return 0;
+    return start * (1 - smooth((t - fromT) / (toT - fromT)));
+  }
+  return 0;
+}
+
+/** Luật bay cho stage, null nếu không giới hạn hoặc loài không bay. */
+export function flightRuleFor(speciesId: CommonSpeciesId, stage: GrowthStage): FlightRule | null {
+  return resolveDragonClip(speciesId, 'fly')?.flightRules?.[stage] ?? null;
+}
+
+export interface SpriteBox {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/**
+ * Biên an toàn của clip quanh điểm neo (px viewBox, chưa nhân `k`): hitbox xấu nhất của mọi
+ * khung + biên độ track (đã nhân stageScale) + độ cao bay tối đa. Renderer dùng để kẹp vị trí
+ * neo trong vùng vận động và không cắt sprite ở mép màn hình:
+ *   anchorX ∈ [left·k, viewW − right·k], anchorY ∈ [up·k, viewH − down·k].
+ */
+export function clipExtents(
+  speciesId: CommonSpeciesId,
+  clip: DragonClip,
+  stage: GrowthStage,
+  hitboxOf: (pose: PoseId) => SpriteBox | null,
+  stageScale: number,
+): { left: number; right: number; up: number; down: number } {
+  let left = 0;
+  let right = 0;
+  let up = 0;
+  let down = 0;
+  for (const f of clip.frames) {
+    const hb = hitboxOf(resolvePose(speciesId, f.pose));
+    if (!hb) continue;
+    left = Math.max(left, 120 - hb.x);
+    right = Math.max(right, hb.x + hb.w - 120);
+    up = Math.max(up, 170 - hb.y);
+    down = Math.max(down, hb.y + hb.h - 170);
+  }
+  // Biên độ transform: dời + giãn (ước lượng thô, an toàn).
+  let mdx = 0;
+  let mdyUp = 0;
+  let mdyDown = 0;
+  let ms = 1;
+  for (const k of clip.track) {
+    mdx = Math.max(mdx, Math.abs(k.dx));
+    mdyUp = Math.max(mdyUp, -k.dy);
+    mdyDown = Math.max(mdyDown, k.dy);
+    ms = Math.max(ms, k.sx, k.sy);
+  }
+  const maxAlt = Math.max(clip.altitude?.[stage] ?? 0, clip.descend ? (resolveDragonClip(speciesId, 'fly')?.altitude?.[stage] ?? 0) : 0);
+  return {
+    left: left * ms + mdx * stageScale,
+    right: right * ms + mdx * stageScale,
+    up: up * ms + mdyUp * stageScale + maxAlt,
+    down: down * ms + mdyDown * stageScale,
+  };
 }

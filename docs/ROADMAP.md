@@ -45,6 +45,7 @@ Thứ tự PR đề xuất, mỗi PR một lát cắt có test:
 
 ### G2 — MVP offline
 3 realm, 16 loài, tổ ấp, 3 thiên tai, 4 loại chăm sóc, thám hiểm, nghiên cứu, Codex, achievement, kinh tế đầy đủ, offline receipt.
+- Art: hoạt ảnh đào hang (burrow) cho Sproutling — clip đề xuất 1.800 ms, tư thế đào riêng, hiệu ứng bụi đất; chỉ làm cùng cơ chế hang G2 (ADR 0102 mục 4).
 
 ### G3 → G7
 Theo GDD trang 21: cân bằng + `simulate:economy` (1.000 seed/chiến lược), Companion/Zen, Web/Steam 1.0, Connect P1, Mobile, P2.

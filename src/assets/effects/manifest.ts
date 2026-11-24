@@ -44,7 +44,7 @@ export interface DragonEffectAsset {
   flipWithFacing: boolean;
 }
 
-const files = import.meta.glob<string>('./dragon/*.svg', { eager: true, query: '?url', import: 'default' });
+const files = import.meta.glob<string>('./dragon/*.svg', { eager: true, query: '?url&no-inline', import: 'default' });
 
 type Spec = Omit<DragonEffectAsset, 'assetId' | 'id' | 'url'>;
 const SPECS: Readonly<Record<DragonEffectId, Spec>> = {
