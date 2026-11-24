@@ -39,3 +39,9 @@ Các nhân vật/cốt truyện mới trong Art Bible chỉ là tham chiếu, kh
 - npm run typecheck, lint, test, build; renderer E2E, sau đó thiết bị Windows + Chromium thật.
 - Không công bố đạt 60FPS thiết bị thật hoặc mỹ thuật thương mại khi chưa có bằng chứng.
 - GDD 3.1 gốc được giữ nguyên. Tài liệu này là addendum cho GDD 3.2; bản DOCX hợp nhất là công việc riêng khi rà soát phiên bản.
+
+## Nâng cấp kỹ thuật tiếp theo
+- Script `npm run art:shade` tạo SVG gradient dẫn xuất cho Emberling/Sproutling (3 stage, 4 mutation, các pose hiện có); chạy trước dev/build/test. Không chỉnh sửa geometry, anchor, source SVG hoặc dữ liệu gene. Chỉ là prototype có ánh sáng và bóng mềm.
+- Renderer ưu tiên PNG/WebP tác giả duyệt trong `src/assets/animations/painted/<species>/<stage>_<mutation>_<pose>.webp|png`, tiếp đến bản gradient, cuối cùng SVG gốc. Rồng hiển thị trên inspector dùng cùng idle frame.
+- Sinh cảnh/props có đường dẫn tương ứng `src/assets/habitats/origin/painted/<habitatId>/<layer>.webp|png` và `painted/props/<propId>.webp|png`. Giữ tỉ lệ và anchor canonical; không có file thì tiếp tục dùng SVG. Lớp mid Meadow thay thế phải bao gồm di tích/tượng; khi có replacement không vẽ lớp shrine prototype chồng lên.
+- Raster vẫn chưa được sản xuất/duyệt. Không dùng concept chứa rồng, chỉ số hoặc UI đóng cứng làm background. Sprite atlas/compositing genotype vẫn là công việc sau.
