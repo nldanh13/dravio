@@ -8,3 +8,6 @@ coverage/
 .env
 .env.*
 !.env.example
+
+# Derived art; generated from canonical frame sources
+src/assets/animations/shaded/
