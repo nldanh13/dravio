@@ -3,7 +3,7 @@ import { SCHEMA_VERSION } from '../types/state';
 /**
  * Migration save Dravio theo `schemaVersion` (GDD 3.1 trang 18; ADR 0006, 0007).
  *
- * Dravio Save Schema v1 là định dạng chính thức đầu tiên: chưa có bước migration nào.
+ * Dravio Save Schema v1 là định dạng chính thức đầu tiên; v1 → v2 thêm `discoveries` (ADR 0009).
  * Khi schema đổi, thêm một bước `{ from, to, run }` + fixture save của bản trước + test;
  * save gốc luôn được lưu riêng trước khi ghi bản đã migrate (SaveManager).
  */
@@ -17,8 +17,18 @@ export interface MigrationStep {
   run(state: RawState): RawState;
 }
 
-/** Chuỗi bước chính thức. Rỗng ở v1. */
-export const MIGRATION_STEPS: readonly MigrationStep[] = [];
+/** Chuỗi bước chính thức. Mỗi bước có fixture save thật của bản trước trong `tests/fixtures/`. */
+export const MIGRATION_STEPS: readonly MigrationStep[] = [
+  /** v1 → v2 (ADR 0009): thêm `discoveries` rỗng. Microhabitat đã mở được giữ nguyên. */
+  {
+    from: 1,
+    to: 2,
+    run(state) {
+      if ('discoveries' in state) throw new Error('v1 state already has discoveries');
+      return { ...state, discoveries: [] };
+    },
+  },
+];
 
 /**
  * Bản phát triển chưa phát hành (G1 PR2, commit 3f466a6) ghi `schemaVersion: 3` với state giống hệt v1.

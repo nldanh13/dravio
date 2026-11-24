@@ -22,6 +22,7 @@ Trạng thái: Chấp nhận cho G1 PR2; sửa đổi 25/11/2026 theo ADR 0007 (
 
 ## Lịch sử sửa đổi
 - 24/11/2026 (PR #5): bản đầu có migration v1 → v2 → v3 từ save tiền thân giả định và đọc một khóa localStorage cũ.
+- 25/11/2026 (ADR 0009): Schema hiện tại là v2; bước `1 → 2` thêm `discoveries`, save gốc lưu trong `archive:schema-1`.
 - 25/11/2026 (ADR 0007): tác giả đính chính rằng không có bản phát hành hay save tiền thân; phần đó bị gỡ, schema chính thức đầu tiên là Dravio Save Schema v1. Nội dung cũ còn trong lịch sử Git.
 
 ## Giả định cần xác nhận

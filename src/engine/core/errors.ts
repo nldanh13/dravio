@@ -20,7 +20,10 @@ export type CommandErrorCode =
   | 'habitat-unsuitable'
   | 'already-there'
   | 'not-placed'
-  | 'production-budget-full';
+  | 'production-budget-full'
+  | 'unknown-habitat'
+  | 'habitat-already-unlocked'
+  | 'unlock-requirement-missing';
 
 export interface CommandError {
   code: CommandErrorCode;

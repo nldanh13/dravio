@@ -17,7 +17,7 @@ import { gainBond } from '../biology/bond';
 import { normalizeNickname } from '../inventory/nickname';
 import { addXp, advanceDragon } from '../progression/growth';
 import { findZone, habitatZone, isProducing } from '../world/placement';
-import { moveDragon, setProduction, type MoveTarget } from '../world/zones';
+import { moveDragon, setProduction, unlockHabitat, type MoveTarget } from '../world/zones';
 import { computeElapsed, type Clock } from './clock';
 import { commandError, type CommandError } from './errors';
 import type { DomainEvent } from './events';
@@ -41,7 +41,9 @@ export type Command =
   /** Chuyển rồng tới microhabitat đã mở (kiểm sinh học + sức chứa) hoặc vào kho an toàn. */
   | { type: 'moveDragon'; requestId: string; dragonUid: string; target: MoveTarget }
   /** Chọn/bỏ rồng khỏi ngân sách sản xuất (5 + 2 × cấp, tối đa 25). */
-  | { type: 'setProductionSlot'; requestId: string; dragonUid: string; enabled: boolean };
+  | { type: 'setProductionSlot'; requestId: string; dragonUid: string; enabled: boolean }
+  /** Mở microhabitat miễn phí khi đã có khám phá điều kiện (ADR 0009). */
+  | { type: 'unlockHabitat'; requestId: string; habitatId: string };
 
 export interface CommandContext {
   clock: Clock;
@@ -82,6 +84,8 @@ export function parseCommand(input: unknown): Command | null {
         ? { type: 'moveDragon', requestId, dragonUid: input.dragonUid, target: { kind: 'zone', zoneId: t.zoneId, habitatId: t.habitatId } }
         : null;
     }
+    case 'unlockHabitat':
+      return isId(input.habitatId) ? { type: 'unlockHabitat', requestId, habitatId: input.habitatId } : null;
     case 'setProductionSlot':
       return isId(input.dragonUid) && typeof input.enabled === 'boolean'
         ? { type: 'setProductionSlot', requestId, dragonUid: input.dragonUid, enabled: input.enabled }
@@ -244,6 +248,13 @@ function handle(state: GameState, cmd: Command, nowMs: number): Handled {
       const r = cmd.type === 'moveDragon' ? moveDragon(settled.state, d0, cmd.target) : setProduction(settled.state, d0, cmd.enabled);
       if (!r.ok) return { ok: false, error: commandError(r.code) };
       return { ok: true, state: r.state, events: [...settled.events, ...r.events] };
+    }
+
+    case 'unlockHabitat': {
+      const r = unlockHabitat(state, cmd.habitatId);
+      if (!r.ok) return { ok: false, error: commandError(r.code) };
+      // Mở chỗ không đổi vị trí rồng nào nên không cần quyết toán thời gian; vàng giữ nguyên.
+      return { ok: true, state: r.state, events: r.events };
     }
 
     case 'renameDragon': {

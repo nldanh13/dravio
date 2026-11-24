@@ -1,4 +1,5 @@
 import { DIET_IDS } from '../../data/care';
+import { isDiscoveryId } from '../../data/habitatUnlocks';
 import { DRAGON_SPECIES } from '../../data/dragons';
 import { UPGRADES } from '../../data/economy';
 import { HABITAT_PROFILES } from '../../data/g0Biology';
@@ -187,6 +188,10 @@ export function validateGameState(input: unknown): ValidationResult {
   const clock = s.clock;
   if (!isObj(clock) || !isInt(clock.lastProcessedAtMs) || !isInt(clock.highWaterAtMs) || clock.lastProcessedAtMs > clock.highWaterAtMs) {
     errors.push('clock: invalid');
+  }
+
+  if (!Array.isArray(s.discoveries) || !s.discoveries.every(isDiscoveryId) || new Set(s.discoveries).size !== s.discoveries.length) {
+    errors.push('discoveries: invalid');
   }
 
   const r = s.offlineReceipt;

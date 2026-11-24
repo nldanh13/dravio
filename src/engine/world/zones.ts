@@ -1,4 +1,5 @@
 import { HABITAT_PROFILES, type HabitatId } from '../../data/g0Biology';
+import { HABITAT_UNLOCK_RULES, type DiscoveryId } from '../../data/habitatUnlocks';
 import type { DragonInstance, Location } from '../../types/game';
 import type { GameState } from '../../types/state';
 import type { CommandErrorCode } from '../core/errors';
@@ -8,7 +9,7 @@ import { speciesSuitability, suitabilityTier, type HabitatResult, type Suitabili
 import { findZone, habitatZone, isPlacedInValidHabitat } from './placement';
 
 /**
- * Zone Khởi Nguyên và luật bố trí (GDD 3.1 trang 5; ADR 0003; PACK_README G0; ADR 0008).
+ * Zone Khởi Nguyên và luật bố trí (GDD 3.1 trang 5; ADR 0003; PACK_README G0; ADR 0008, 0009).
  * Zone là chỗ vật lý (P0: 5 chỗ/zone); microhabitat là cấu hình trong zone, không thêm chỗ.
  * Ngân sách sản xuất toàn cục = 5 + 2 × cấp, tối đa 25; rồng ngoài ngân sách vẫn sống và lớn.
  */
@@ -135,21 +136,48 @@ export function setProduction(state: GameState, dragon: DragonInstance, enabled:
 }
 
 /**
- * Mở một microhabitat trong zone đã mở. Không phải lệnh người chơi: là phần thưởng của
- * hướng dẫn/khám phá (PACK_README: pondbank, warm_rocks mở qua hướng dẫn/khám phá — nối ở PR5).
- * Không có giá vàng vì GDD chưa định giá.
+ * Mở một microhabitat (lệnh người chơi `unlockHabitat`, ADR 0009). Miễn phí; không đổi sức chứa
+ * hay ngân sách. Chỉ chấp nhận khi khám phá điều kiện đã được engine ghi nhận.
  */
-export function grantHabitatUnlock(state: GameState, habitatId: string): WorldResult {
+export function unlockHabitat(state: GameState, habitatId: string): WorldResult {
+  if (!isRuledHabitat(habitatId)) return { ok: false, code: 'unknown-habitat' };
   const zoneId = habitatZone(habitatId);
-  if (zoneId === null) return { ok: false, code: 'habitat-locked' };
-  const zone = findZone(state, zoneId);
+  const zone = zoneId === null ? undefined : findZone(state, zoneId);
   if (!zone?.unlocked) return { ok: false, code: 'zone-locked' };
-  if (zone.unlockedHabitatIds.includes(habitatId)) return { ok: false, code: 'already-there' };
-  const order = habitatsOfZone(zone.id);
-  const unlocked = order.filter((h) => h === habitatId || zone.unlockedHabitatIds.includes(h));
+  if (zone.unlockedHabitatIds.includes(habitatId)) return { ok: false, code: 'habitat-already-unlocked' };
+  const rule = HABITAT_UNLOCK_RULES[habitatId];
+  if (rule.requires !== null && !state.discoveries.includes(rule.requires)) return { ok: false, code: 'unlock-requirement-missing' };
+  const unlocked = habitatsOfZone(zone.id).filter((h) => h === habitatId || zone.unlockedHabitatIds.includes(h));
   return {
     ok: true,
     state: { ...state, zones: state.zones.map((z) => (z.id === zone.id ? { ...z, unlockedHabitatIds: unlocked } : z)) },
     events: [{ type: 'habitatUnlocked', zoneId: zone.id, habitatId }],
+  };
+}
+
+function isRuledHabitat(id: string): id is keyof typeof HABITAT_UNLOCK_RULES {
+  return Object.prototype.hasOwnProperty.call(HABITAT_UNLOCK_RULES, id);
+}
+
+/** Trạng thái mở khóa từng microhabitat có luật, cho UI. */
+export function habitatUnlockStatus(state: GameState): { habitatId: string; unlocked: boolean; requires: DiscoveryId | null; eligible: boolean }[] {
+  return habitatsOfZone('origin').filter(isRuledHabitat).map((habitatId) => {
+    const rule = HABITAT_UNLOCK_RULES[habitatId];
+    const zone = findZone(state, HABITAT_PROFILES[habitatId].zoneId);
+    const unlocked = zone?.unlockedHabitatIds.includes(habitatId) ?? false;
+    return { habitatId, unlocked, requires: rule.requires, eligible: !unlocked && unlockHabitat(state, habitatId).ok };
+  });
+}
+
+/**
+ * Ghi nhận một khám phá. KHÔNG phải lệnh người chơi: chỉ hệ thống nhiệm vụ của engine (PR5)
+ * gọi sau khi tự kiểm điều kiện nhiệm vụ; UI production không có đường nào gọi hàm này.
+ */
+export function recordDiscovery(state: GameState, id: DiscoveryId): WorldResult {
+  if (state.discoveries.includes(id)) return { ok: false, code: 'already-there' };
+  return {
+    ok: true,
+    state: { ...state, discoveries: [...state.discoveries, id].sort() },
+    events: [{ type: 'discoveryRecorded', discoveryId: id }],
   };
 }

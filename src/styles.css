@@ -60,3 +60,4 @@ label.button.disabled { opacity: 0.5; cursor: not-allowed; }
 .row.compact { gap: 8px; margin: 4px 0 8px; }
 .tier-needs-improvement { color: #8a5a00; }
 .tier-unsuitable { color: #a12d2d; }
+.dev-tools { margin-top: 12px; border: 2px dashed #a12d2d; border-radius: 8px; padding: 8px 12px; }

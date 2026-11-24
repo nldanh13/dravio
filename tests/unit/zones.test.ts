@@ -6,7 +6,10 @@ import { createRng } from '../../src/engine/core/rng';
 import { validateGameState } from '../../src/engine/core/validation';
 import { SUITABILITY_ALLOWED, SUITABILITY_GOOD, speciesSuitability, suitabilityTier } from '../../src/engine/world/habitat';
 import { isProducing } from '../../src/engine/world/placement';
-import { currentProductionBudget, grantHabitatUnlock, habitatsOfZone, placementOptions, zoneOccupancy } from '../../src/engine/world/zones';
+import { currentProductionBudget, habitatsOfZone, habitatUnlockStatus, placementOptions, recordDiscovery, unlockHabitat, zoneOccupancy } from '../../src/engine/world/zones';
+import { HABITAT_UNLOCK_RULES, type DiscoveryId } from '../../src/data/habitatUnlocks';
+import { createEnvelope } from '../../src/persistence/schema';
+import { parseSaveText } from '../../src/persistence/saveFile';
 import { en } from '../../src/i18n/en';
 import { vi } from '../../src/i18n/vi';
 import type { DragonInstance } from '../../src/types/game';
@@ -36,9 +39,20 @@ function ok(state: GameState, cmd: CommandInput, clock: { nowMs(): number }) {
   return r;
 }
 
+const NEEDS: Record<string, DiscoveryId> = { origin_warm_rocks: 'DISC_EMBERLING_THERMAL', origin_pondbank: 'DISC_AQUATIC_HABITAT' };
+
+/** Fixture kiểm thử: ghi nhận khám phá như hệ nhiệm vụ PR5 sẽ làm, rồi mở bằng hàm engine. */
+function discover(state: GameState, id: DiscoveryId): GameState {
+  const r = recordDiscovery(state, id);
+  if (!r.ok) throw new Error(r.code);
+  return r.state;
+}
+
 function unlock(state: GameState, ...habitats: string[]): GameState {
   return habitats.reduce((s, h) => {
-    const r = grantHabitatUnlock(s, h);
+    const need = NEEDS[h];
+    const withDisc = need && !s.discoveries.includes(need) ? discover(s, need) : s;
+    const r = unlockHabitat(withDisc, h);
     if (!r.ok) throw new Error(r.code);
     return r.state;
   }, state);
@@ -67,13 +81,102 @@ describe('Origin zone layout (ADR 0003, PACK_README)', () => {
     expect(s.zones.find((z) => z.id === 'origin')).toMatchObject({ capacity: 5, unlockedHabitatIds: ['origin_meadow', 'origin_pondbank', 'origin_warm_rocks'] });
   });
 
-  it('grantHabitatUnlock rejects duplicates, unknown habitats and habitats of a locked zone', () => {
-    const { state } = game();
-    expect(grantHabitatUnlock(state, 'origin_meadow')).toEqual({ ok: false, code: 'already-there' });
-    expect(grantHabitatUnlock(state, 'nowhere')).toEqual({ ok: false, code: 'habitat-locked' });
-    expect(grantHabitatUnlock(state, 'ocean_estuary')).toEqual({ ok: false, code: 'zone-locked' });
-    const r = grantHabitatUnlock(state, 'origin_warm_rocks');
-    expect(r.ok && r.events).toEqual([{ type: 'habitatUnlocked', zoneId: 'origin', habitatId: 'origin_warm_rocks' }]);
+});
+
+describe('unlockHabitat (ADR 0009): free, condition-checked, no capacity change', () => {
+  it('rules: meadow by default, warm rocks needs the Emberling thermal discovery, pondbank the aquatic one', () => {
+    expect(HABITAT_UNLOCK_RULES).toEqual({
+      origin_meadow: { default: true, requires: null },
+      origin_warm_rocks: { default: false, requires: 'DISC_EMBERLING_THERMAL' },
+      origin_pondbank: { default: false, requires: 'DISC_AQUATIC_HABITAT' },
+    });
+    expect(game().state.discoveries).toEqual([]);
+  });
+
+  it('rejects unknown IDs, already-open habitats, missing discoveries and locked zones — without touching state', () => {
+    const { clock, state } = game();
+    const cases: [string, string][] = [
+      ['nowhere', 'unknown-habitat'],
+      ['ocean_estuary', 'unknown-habitat'],
+      ['origin_meadow', 'habitat-already-unlocked'],
+      ['origin_warm_rocks', 'unlock-requirement-missing'],
+      ['origin_pondbank', 'unlock-requirement-missing'],
+    ];
+    for (const [habitatId, code] of cases) {
+      const r = run(state, { type: 'unlockHabitat', habitatId }, clock);
+      expect(r).toMatchObject({ ok: false, error: { code } });
+      expect(r.state).toBe(state);
+    }
+    // Đúng khám phá nhưng sai sinh cảnh vẫn bị chặn.
+    const s = discover(state, 'DISC_EMBERLING_THERMAL');
+    expect(run(s, { type: 'unlockHabitat', habitatId: 'origin_pondbank' }, clock)).toMatchObject({ ok: false, error: { code: 'unlock-requirement-missing' } });
+    const originLocked = { ...s, zones: s.zones.map((z) => (z.id === 'origin' ? { ...z, unlocked: false } : z)) };
+    expect(unlockHabitat(originLocked, 'origin_warm_rocks')).toEqual({ ok: false, code: 'zone-locked' });
+  });
+
+  it('opens warm rocks for free after the discovery; gold, capacity and budget do not change; duplicate is rejected', () => {
+    const { clock, state } = game();
+    const s = discover(state, 'DISC_EMBERLING_THERMAL');
+    clock.advance(30_000);
+    const r = ok(s, { type: 'unlockHabitat', habitatId: 'origin_warm_rocks' }, clock);
+    expect(r.events).toEqual([{ type: 'habitatUnlocked', zoneId: 'origin', habitatId: 'origin_warm_rocks' }]);
+    expect(r.state.goldMicro).toBe(s.goldMicro);
+    expect(r.state.zones.find((z) => z.id === 'origin')).toMatchObject({ capacity: 5, unlockedHabitatIds: ['origin_meadow', 'origin_warm_rocks'] });
+    expect(currentProductionBudget(r.state)).toBe(currentProductionBudget(s));
+    expect(run(r.state, { type: 'unlockHabitat', habitatId: 'origin_warm_rocks' }, clock)).toMatchObject({ ok: false, error: { code: 'habitat-already-unlocked' } });
+  });
+
+  it('pondbank does not require owning a Droplet', () => {
+    const { clock, state } = game();
+    expect(state.dragons.some((d) => d.speciesId === 'droplet')).toBe(false);
+    const r = ok(discover(state, 'DISC_AQUATIC_HABITAT'), { type: 'unlockHabitat', habitatId: 'origin_pondbank' }, clock);
+    expect(r.state.zones.find((z) => z.id === 'origin')?.unlockedHabitatIds).toEqual(['origin_meadow', 'origin_pondbank']);
+  });
+
+  it('unlock order does not matter; the stored list follows the zone order', () => {
+    const a = unlock(game().state, 'origin_pondbank', 'origin_warm_rocks');
+    const b = unlock(game().state, 'origin_warm_rocks', 'origin_pondbank');
+    expect(a.zones).toEqual(b.zones);
+    expect(a.discoveries).toEqual(['DISC_AQUATIC_HABITAT', 'DISC_EMBERLING_THERMAL']);
+  });
+
+  it('recordDiscovery is idempotent-safe and is not exposed as a command', () => {
+    const { clock, state } = game();
+    const s = discover(state, 'DISC_AQUATIC_HABITAT');
+    expect(recordDiscovery(s, 'DISC_AQUATIC_HABITAT')).toEqual({ ok: false, code: 'already-there' });
+    for (const type of ['recordDiscovery', 'completeTutorial', 'grantHabitatUnlock']) {
+      expect(dispatch(state, { type, requestId: rid(), discoveryId: 'DISC_AQUATIC_HABITAT', habitatId: 'origin_pondbank' }, { clock })).toMatchObject({ ok: false, error: { code: 'invalid-command' } });
+    }
+  });
+
+  it('habitatUnlockStatus reports eligibility for the UI', () => {
+    const s = discover(game().state, 'DISC_EMBERLING_THERMAL');
+    expect(habitatUnlockStatus(s)).toEqual([
+      { habitatId: 'origin_meadow', unlocked: true, requires: null, eligible: false },
+      { habitatId: 'origin_pondbank', unlocked: false, requires: 'DISC_AQUATIC_HABITAT', eligible: false },
+      { habitatId: 'origin_warm_rocks', unlocked: false, requires: 'DISC_EMBERLING_THERMAL', eligible: true },
+    ]);
+  });
+
+  it('discoveries and unlocked habitats survive save → load; an unknown discovery ID is rejected on load', async () => {
+    const s = unlock(game().state, 'origin_warm_rocks');
+    const r = await parseSaveText(JSON.stringify(await createEnvelope(s, T0)));
+    expect(r.ok && r.save.state.discoveries).toEqual(['DISC_EMBERLING_THERMAL']);
+    expect(r.ok && r.save.state.zones).toEqual(s.zones);
+    expect(validateGameState({ ...s, discoveries: ['DISC_FAKE'] }).ok).toBe(false);
+    expect(validateGameState({ ...s, discoveries: ['DISC_EMBERLING_THERMAL', 'DISC_EMBERLING_THERMAL'] }).ok).toBe(false);
+  });
+
+  it('after unlocking, Emberling can move to warm rocks keeping gold accrual; Droplet fits pondbank but not meadow', () => {
+    const { clock, state } = game();
+    const s = withDragons(unlock(state, 'origin_warm_rocks', 'origin_pondbank'), adult('drop', 'droplet'));
+    clock.advance(100_000);
+    const moved = ok(s, { type: 'moveDragon', dragonUid: firstUid(s), target: { kind: 'zone', zoneId: 'origin', habitatId: 'origin_warm_rocks' } }, clock);
+    expect(moved.state.goldMicro - s.goldMicro).toBe(1_000_000);
+    expect(isProducing(moved.state, moved.state.dragons[0] as DragonInstance)).toBe(true);
+    expect(run(moved.state, { type: 'moveDragon', dragonUid: 'drop', target: meadow }, clock)).toMatchObject({ ok: false, error: { code: 'habitat-unsuitable' } });
+    const placed = ok(moved.state, { type: 'moveDragon', dragonUid: 'drop', target: { kind: 'zone', zoneId: 'origin', habitatId: 'origin_pondbank' } }, clock);
+    expect(zoneOccupancy(placed.state, 'origin')).toBe(2);
   });
 });
 
@@ -267,7 +370,7 @@ describe('setProductionSlot (budget 5 + 2 × level, max 25)', () => {
 
 describe('i18n for the new errors', () => {
   it('every new error code has VI and EN text', () => {
-    for (const c of ['zone-full', 'habitat-unsuitable', 'already-there', 'not-placed', 'production-budget-full']) {
+    for (const c of ['zone-full', 'habitat-unsuitable', 'already-there', 'not-placed', 'production-budget-full', 'unknown-habitat', 'habitat-already-unlocked', 'unlock-requirement-missing']) {
       expect(vi).toHaveProperty(`commandError.${c}`);
       expect(en).toHaveProperty(`commandError.${c}`);
     }

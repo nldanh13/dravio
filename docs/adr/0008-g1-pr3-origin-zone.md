@@ -5,15 +5,16 @@ Trạng thái: Chấp nhận cho G1 PR3. Nguồn: GDD 3.1 trang 4–5 (tiến tr
 ## Quyết định
 1. **Suitability sống ở engine.** Hàm thuần `suitability` chuyển từ `src/data/g0Biology.ts` sang `src/engine/world/habitat.ts` theo AI_HANDOFF; `g0Biology.ts` re-export để giữ API cũ. Dữ liệu sinh học vẫn chỉ một nguồn. Ngưỡng: ≥ 80 phù hợp, 50–79 cần cải thiện (được bố trí, UI cảnh báo), < 50 không được bố trí.
 2. **Zone Khởi Nguyên**: 3 microhabitat `origin_meadow`, `origin_pondbank`, `origin_warm_rocks`; 5 chỗ vật lý cho cả zone. Microhabitat không cộng thêm chỗ. Ocean/Sky vẫn khóa ở G1.
-3. **Mở microhabitat**: save mới chỉ mở đồng cỏ. Bờ hồ và đá ấm mở "qua hướng dẫn/khám phá" (PACK_README). GDD không định giá vàng nên PR3 **không** tạo lệnh mua; chỉ có hàm engine `grantHabitatUnlock` (có test) để PR5 tutorial/nhiệm vụ gọi. Không phải lệnh người chơi.
+3. **Mở microhabitat** — *đã được thay bởi ADR 0009 (lệnh `unlockHabitat` có điều kiện khám phá, Schema v2)*. Nội dung ban đầu: save mới chỉ mở đồng cỏ. Bờ hồ và đá ấm mở "qua hướng dẫn/khám phá" (PACK_README). GDD không định giá vàng nên PR3 **không** tạo lệnh mua; chỉ có hàm engine `grantHabitatUnlock` (có test) để PR5 tutorial/nhiệm vụ gọi. Không phải lệnh người chơi.
 4. **`moveDragon`** tới microhabitat (`zone` + `habitatId`) hoặc kho an toàn (`storage`). Thứ tự kiểm: rồng rảnh (không released, care, shelter, không bận) → zone mở → microhabitat mở và thuộc zone → suitability ≥ 50 → không phải chỗ hiện tại → còn chỗ (rồng đang trong cùng zone không tính chính nó). Kho an toàn không giới hạn trong PR3 (GDD chưa nêu sức chứa kho).
 5. **`setProductionSlot`**: chọn chỉ khi rồng ở sinh cảnh đã mở và hợp lệ; ngân sách toàn cục `5 + 2 × islandCapacityLevel`, tối đa 25. Bỏ chọn luôn được phép. Rồng chuyển vào kho tự rời ngân sách (event `productionChanged`). Rồng ngoài ngân sách vẫn lớn.
 6. **Quyết toán trước khi đổi**: hai lệnh trên kiểm điều kiện trên state hiện tại (lệnh lỗi không đổi gì), rồi chạy `advanceTime` online tới thời điểm lệnh, rồi mới đổi chỗ/ngân sách, để vàng trước đó tính theo vị trí cũ.
 7. **Lỗi mới** (có i18n VI/EN): `zone-full`, `habitat-unsuitable`, `already-there`, `not-placed`, `production-budget-full`. **Event mới**: `dragonMoved`, `productionChanged`, `habitatUnlocked`.
-8. **Schema không đổi**: vẫn Dravio Save Schema v1; `unlockedHabitatIds`, `productionDragonIds`, `location.habitatId` đã có từ PR1.
+8. **Schema**: luật bố trí không cần trường mới (`unlockedHabitatIds`, `productionDragonIds`, `location.habitatId` có từ PR1). Phần mở khóa ở ADR 0009 nâng lên Dravio Save Schema v2.
 
 ## Ngoài phạm vi PR3
 - Lệnh mua nâng cấp sức chứa (`buyUpgrade`) — ngân sách đã đọc cấp hiện có; mua nâng cấp thuộc phần kinh tế.
+- Chuỗi nhiệm vụ ghi nhận khám phá (PR5, ADR 0009).
 - Tự chuyển vào nơi trú khi nguy hiểm (thiên tai, PR6/G2), graph di chuyển Origin↔Ocean/Sky (G2), renderer 2.5D (PR4), nhiệm vụ mở bờ hồ/đá ấm (PR5).
 
 ## Kiểm chứng

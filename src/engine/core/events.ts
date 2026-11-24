@@ -13,4 +13,5 @@ export type DomainEvent =
   | { type: 'dragonRenamed'; dragonUid: string; nickname: string | null }
   | { type: 'dragonMoved'; dragonUid: string; from: Location; to: Location }
   | { type: 'productionChanged'; dragonUid: string; enabled: boolean }
-  | { type: 'habitatUnlocked'; zoneId: string; habitatId: string };
+  | { type: 'habitatUnlocked'; zoneId: string; habitatId: string }
+  | { type: 'discoveryRecorded'; discoveryId: string };

@@ -3,7 +3,8 @@ import { getSpecies } from '../data/dragons';
 import type { CommandError } from '../engine/core/errors';
 import { growthStage } from '../engine/economy/rates';
 import { speciesSuitability, suitabilityTier } from '../engine/world/habitat';
-import { currentProductionBudget, habitatsOfZone, placementOptions, zoneOccupancy } from '../engine/world/zones';
+import { DISCOVERY_IDS } from '../data/habitatUnlocks';
+import { currentProductionBudget, habitatUnlockStatus, habitatsOfZone, placementOptions, zoneOccupancy } from '../engine/world/zones';
 import { useTranslation } from '../i18n';
 import type { GameSession } from '../platform/gameSession';
 import type { DragonInstance } from '../types/game';
@@ -22,6 +23,7 @@ export function ZonePanel({ session }: { session: GameSession }) {
   const alive = state.dragons.filter((d) => d.location.kind !== 'released');
   const at = (habitatId: string) => alive.filter((d) => d.location.kind === 'zone' && d.location.habitatId === habitatId);
   const stored = alive.filter((d) => d.location.kind === 'storage');
+  const unlockStatus = habitatUnlockStatus(state);
 
   const row = (d: DragonInstance) => {
     const producing = state.productionDragonIds.includes(d.uid);
@@ -86,10 +88,27 @@ export function ZonePanel({ session }: { session: GameSession }) {
         {habitatsOfZone('origin').map((h) => {
           const open = origin.unlockedHabitatIds.includes(h);
           const list = at(h);
+          const status = unlockStatus.find((u) => u.habitatId === h);
           return (
             <div key={h} className={open ? 'habitat' : 'habitat locked'}>
               <h3>{t(`habitat.${h}`)}</h3>
-              {!open ? <p className="muted">{t('zone.locked')} · {t('zone.lockedHint')}</p> : list.length === 0 ? <p className="muted">{t('zone.empty')}</p> : <ul>{list.map(row)}</ul>}
+              {!open ? (
+                <>
+                  <p className="muted">
+                    {t('zone.locked')} · {t('zone.lockedHint')}
+                  </p>
+                  {status?.requires && <p className="muted">{t(`zone.requires.${status.requires}`)}</p>}
+                  {status?.eligible && (
+                    <button type="button" disabled={!canAct} onClick={() => send({ type: 'unlockHabitat', habitatId: h })}>
+                      {t('zone.unlock')}
+                    </button>
+                  )}
+                </>
+              ) : list.length === 0 ? (
+                <p className="muted">{t('zone.empty')}</p>
+              ) : (
+                <ul>{list.map(row)}</ul>
+              )}
             </div>
           );
         })}
@@ -99,6 +118,18 @@ export function ZonePanel({ session }: { session: GameSession }) {
           {stored.length === 0 ? <p className="muted">{t('zone.empty')}</p> : <ul>{stored.map(row)}</ul>}
         </div>
       </div>
+      {import.meta.env.DEV && (
+        <div className="dev-tools">
+          <h3>{t('zone.dev.heading')}</h3>
+          <div className="row compact">
+            {DISCOVERY_IDS.filter((id) => !state.discoveries.includes(id)).map((id) => (
+              <button key={id} type="button" disabled={!canAct} onClick={() => session.devRecordDiscovery(id)}>
+                {t('zone.dev.record', { id })}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }

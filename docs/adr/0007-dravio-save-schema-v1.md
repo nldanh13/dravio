@@ -16,6 +16,9 @@ GDD 3.1 có nhắc một tên dự án cũ trong giai đoạn thiết kế, mộ
 5. **Giữ nguyên** khung migration theo `schemaVersion` (bước thuần, tuần tự, có test), 2 backup xoay trong một transaction, checksum SHA-256, validate runtime, khôi phục khi hỏng, khóa chế độ chỉ đọc với save từ bản mới hơn, một người ghi.
 6. **Windows + Chromium**: vẫn chưa kiểm thử trên thiết bị thật; chỉ báo đạt khi đã chạy trên máy thật và ghi cấu hình.
 
+## Cập nhật
+- 25/11/2026: ADR 0009 thêm bước chính thức đầu tiên v1 → v2 (`discoveries`), kèm fixture save v1 thật.
+
 ## Hệ quả
 - Bước migration đầu tiên trong tương lai (v1 → v2) phải kèm fixture save v1 do Dravio ghi, test round-trip và kiểm archive.
 - GDD 3.1 được sửa tại chỗ (trang 1, 18, 19, Phụ lục C.1, bảng đối chiếu quy tắc cũ); bản trước còn trong lịch sử Git.
