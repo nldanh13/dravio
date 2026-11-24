@@ -1,0 +1,217 @@
+import { systemClock, type Clock } from '../engine/core/clock';
+import { dispatch } from '../engine/core/commands';
+import { createInitialState } from '../engine/core/initialState';
+import { createRng, hashSeed } from '../engine/core/rng';
+import { createAutosave } from '../persistence/autosave';
+import { LEGACY_V2_STORAGE_KEY } from '../persistence/migrations';
+import type { ImportPreview, SaveErrorCode } from '../persistence/saveFile';
+import { SaveManager, type SlotFailure } from '../persistence/saveManager';
+import { IndexedDbSaveStore, MemorySaveStore, type SaveStore } from '../persistence/store';
+import type { GameState } from '../types/state';
+import { onPageHide } from './lifecycle';
+import { acquireWriterLock, type WriterLock } from './writerLock';
+
+/**
+ * Nối engine + persistence cho trình duyệt (lớp platform, được phép đọc đồng hồ hệ thống và crypto).
+ * Một phiên duy nhất cho mỗi tab; tab không giữ khóa người ghi chỉ đọc và không chạy thời gian.
+ */
+
+export type SessionStatus = 'loading' | 'ready' | 'read-only' | 'newer-version' | 'unrecoverable';
+
+export interface SessionSnapshot {
+  status: SessionStatus;
+  state: GameState | null;
+  /** false khi IndexedDB không mở được (chế độ riêng tư…): dữ liệu mất khi đóng tab. */
+  persistent: boolean;
+  lockUnsupported: boolean;
+  lastSavedAtMs: number | null;
+  loadedFrom: 'main' | 'backup1' | 'backup2' | 'legacy' | 'new' | null;
+  failures: SlotFailure[];
+  saveError: boolean;
+  importPreview: ImportPreview | null;
+  importError: SaveErrorCode | null;
+}
+
+const TICK_MS = 1000;
+
+function newRequestId(): string {
+  return globalThis.crypto.randomUUID();
+}
+
+export class GameSession {
+  private snap: SessionSnapshot = {
+    status: 'loading',
+    state: null,
+    persistent: true,
+    lockUnsupported: false,
+    lastSavedAtMs: null,
+    loadedFrom: null,
+    failures: [],
+    saveError: false,
+    importPreview: null,
+    importError: null,
+  };
+  private listeners = new Set<() => void>();
+  private manager: SaveManager | null = null;
+  private lock: WriterLock | null = null;
+  private tickHandle: ReturnType<typeof setInterval> | null = null;
+  private autosave: ReturnType<typeof createAutosave> | null = null;
+  private unbindHide: (() => void) | null = null;
+  /** Đang thay save bằng file import: dừng tick và autosave để không ghi đè save mới. */
+  private swapping = false;
+
+  constructor(private readonly clock: Clock = systemClock) {}
+
+  subscribe = (fn: () => void): (() => void) => {
+    this.listeners.add(fn);
+    return () => this.listeners.delete(fn);
+  };
+
+  getSnapshot = (): SessionSnapshot => this.snap;
+
+  private set(patch: Partial<SessionSnapshot>): void {
+    this.snap = { ...this.snap, ...patch };
+    this.listeners.forEach((l) => l());
+  }
+
+  async start(): Promise<void> {
+    let store: SaveStore;
+    let persistent = true;
+    try {
+      store = await IndexedDbSaveStore.open();
+    } catch {
+      store = new MemorySaveStore();
+      persistent = false;
+    }
+    this.lock = await acquireWriterLock();
+    const manager = new SaveManager({
+      store,
+      nowMs: () => this.clock.nowMs(),
+      readLegacy: () => {
+        try {
+          return globalThis.localStorage.getItem(LEGACY_V2_STORAGE_KEY);
+        } catch {
+          return null;
+        }
+      },
+    });
+    this.manager = manager;
+    manager.setReadOnly(!this.lock.acquired);
+    const outcome = await manager.load();
+    this.set({ persistent, lockUnsupported: this.lock.unsupported, failures: 'failures' in outcome ? outcome.failures : [] });
+
+    if (outcome.kind === 'newer-version' || outcome.kind === 'unrecoverable') {
+      this.set({ status: outcome.kind });
+      return;
+    }
+    let state: GameState;
+    if (outcome.kind === 'loaded') {
+      state = outcome.save.state;
+      this.set({ loadedFrom: outcome.slot, lastSavedAtMs: outcome.save.savedAtMs });
+    } else {
+      state = this.newGame();
+      this.set({ loadedFrom: 'new' });
+    }
+    if (!this.lock.acquired) {
+      this.set({ status: 'read-only', state });
+      return;
+    }
+    // Thời gian vắng mặt tính offline (75 %, chặn 24 h) trước khi chạy online.
+    state = this.apply(state, 'offline');
+    this.set({ status: 'ready', state });
+    await this.saveNow();
+    this.run();
+  }
+
+  private newGame(): GameState {
+    const saveId = newRequestId();
+    return createInitialState({ saveId, nowMs: this.clock.nowMs(), rng: createRng(hashSeed('new-save', saveId)) });
+  }
+
+  private apply(state: GameState, mode: 'online' | 'offline'): GameState {
+    const r = dispatch(state, { type: 'advanceTime', requestId: newRequestId(), mode }, { clock: this.clock });
+    return r.ok ? r.state : state;
+  }
+
+  private run(): void {
+    const manager = this.manager;
+    if (!manager) return;
+    this.tickHandle = setInterval(() => {
+      const s = this.snap.state;
+      if (s && this.snap.status === 'ready' && !this.swapping) this.set({ state: this.apply(s, 'online') });
+    }, TICK_MS);
+    this.autosave = createAutosave({
+      save: (s) => manager.save(s),
+      getState: () => (this.snap.status === 'ready' && !this.swapping ? this.snap.state : null),
+      timer: { setInterval: (fn, ms) => setInterval(fn, ms), clearInterval: (h) => clearInterval(h as ReturnType<typeof setInterval>) },
+      onSaved: () => this.set({ lastSavedAtMs: this.clock.nowMs(), saveError: false }),
+      onError: () => this.set({ saveError: true }),
+    });
+    this.autosave.start();
+    this.unbindHide = onPageHide(() => void this.autosave?.flush());
+  }
+
+  async saveNow(): Promise<void> {
+    const s = this.snap.state;
+    if (!this.manager || !s || this.snap.status !== 'ready') return;
+    try {
+      if (await this.manager.save(s)) this.set({ lastSavedAtMs: this.clock.nowMs(), saveError: false });
+    } catch {
+      this.set({ saveError: true });
+    }
+  }
+
+  /** Bắt đầu lại khi mọi slot hỏng (người chơi đã xác nhận). Dữ liệu hỏng được đẩy xuống backup1. */
+  async startFresh(): Promise<void> {
+    if (!this.manager || this.snap.status !== 'unrecoverable' || !this.lock?.acquired) return;
+    const state = this.newGame();
+    await this.manager.save(state, { force: true });
+    this.set({ status: 'ready', state, loadedFrom: 'new', lastSavedAtMs: this.clock.nowMs() });
+    this.run();
+  }
+
+  exportText(): Promise<string> | null {
+    const s = this.snap.state;
+    return this.manager && s ? this.manager.exportText(s) : null;
+  }
+
+  async prepareImport(text: string): Promise<void> {
+    if (!this.manager) return;
+    const r = await this.manager.prepareImport(text);
+    this.set(r.ok ? { importPreview: r.preview, importError: null } : { importPreview: null, importError: r.code });
+  }
+
+  cancelImport(): void {
+    this.manager?.cancelImport();
+    this.set({ importPreview: null, importError: null });
+  }
+
+  async confirmImport(): Promise<void> {
+    if (!this.manager) return;
+    const wasRunning = this.tickHandle !== null;
+    this.swapping = true;
+    let imported: GameState | null;
+    try {
+      imported = await this.manager.confirmImport(this.snap.status === 'ready' ? this.snap.state : null);
+    } catch {
+      imported = null;
+    }
+    if (!imported) {
+      this.swapping = false;
+      this.set({ importPreview: null, importError: 'invalid-state' });
+      return;
+    }
+    const state = this.apply(imported, 'offline');
+    this.swapping = false;
+    this.set({ status: 'ready', state, importPreview: null, importError: null, loadedFrom: 'main', lastSavedAtMs: this.clock.nowMs() });
+    if (!wasRunning) this.run();
+  }
+
+  dispose(): void {
+    if (this.tickHandle !== null) clearInterval(this.tickHandle);
+    this.tickHandle = null;
+    this.autosave?.stop();
+    this.unbindHide?.();
+    this.lock?.release();
+  }
+}

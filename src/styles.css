@@ -46,3 +46,9 @@ button { cursor: pointer; }
 figure { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px; text-align: center; }
 figure img { width: 100%; height: auto; max-width: 160px; }
 figcaption { font-size: 0.85rem; color: var(--muted); }
+.stats { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 12px 0; }
+.stats dt { color: var(--muted); }
+.stats dd { margin: 0; }
+label.button { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); cursor: pointer; }
+label.button.disabled { opacity: 0.5; cursor: not-allowed; }
+.confirm { border: 2px solid var(--line); border-radius: 8px; padding: 12px; margin-top: 12px; }

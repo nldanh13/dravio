@@ -5,6 +5,8 @@ import { pairKey } from './engine/genetics/alleles';
 import { queryBreedPreview } from './engine/genetics/breeding';
 import { SPRITES } from './assets/manifest';
 import { LanguageContext, useTranslation } from './i18n';
+import type { GameSession } from './platform/gameSession';
+import { SavePanel } from './ui/SavePanel';
 import type { DragonInstance, LanguageCode } from './types/game';
 
 /** Rồng mẫu Adult dị hợp mọi locus, chỉ để minh họa preview. */
@@ -148,16 +150,16 @@ function BreedingPreview() {
   );
 }
 
-export function App() {
+export function App({ session }: { session: GameSession }) {
   const [lang, setLang] = useState<LanguageCode>('vi');
   return (
     <LanguageContext.Provider value={lang}>
-      <Shell onToggle={() => setLang((l) => (l === 'vi' ? 'en' : 'vi'))} />
+      <Shell session={session} onToggle={() => setLang((l) => (l === 'vi' ? 'en' : 'vi'))} />
     </LanguageContext.Provider>
   );
 }
 
-function Shell({ onToggle }: { onToggle: () => void }) {
+function Shell({ session, onToggle }: { session: GameSession; onToggle: () => void }) {
   const { t } = useTranslation();
   return (
     <main>
@@ -171,6 +173,7 @@ function Shell({ onToggle }: { onToggle: () => void }) {
         </button>
       </header>
       <p className="notice">{t('app.status')}</p>
+      <SavePanel session={session} />
       <Catalog />
       <EmberlingGallery />
       <BreedingPreview />
