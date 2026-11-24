@@ -13,6 +13,6 @@ test('same geometry, no external resources, stable soft colour volume', () => {
   assert.ok(out.includes('fill="#3A303A"'));
   assert.ok(out.includes('fill="url(#aether)"'));
   assert.equal((out.match(/id="dravio_shade_75b57d"/g) ?? []).length, 1);
-  assert.equal((out.match(/fill="url\(#dravio_shade_75b57d\)"/g) ?? []).length, 2);
+  assert.equal(out.split('fill="url(#dravio_shade_75b57d)"').length - 1, 2);
   assert.throws(() => shadeFrame(out));
 });
