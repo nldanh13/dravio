@@ -1,7 +1,7 @@
 # Bộ sprite rồng Common — G1 (prototype)
 
-Trạng thái: **prototype đã được tác giả duyệt** (36 sprite mới, ADR 0008, 24/11/2026) + Emberling prototype G0 đã duyệt (12 sprite, giữ nguyên đến G3). Không phải art thương mại cuối cùng; chất lượng thương mại ở G3 (ADR 0005).
-Nguồn quyết định: GDD 3.1, `docs/g0/ART_DIRECTION.md`, `docs/g0/BIOLOGY_CATALOG.md`, `src/data/g0Biology.ts`, ADR 0003, ADR 0005, ADR 0008.
+Trạng thái: **prototype đã được tác giả duyệt** (36 sprite mới, ADR 0101, 24/11/2026) + Emberling prototype G0 đã duyệt (12 sprite, giữ nguyên đến G3). Không phải art thương mại cuối cùng; chất lượng thương mại ở G3 (ADR 0005).
+Nguồn quyết định: GDD 3.1, `docs/g0/ART_DIRECTION.md`, `docs/g0/BIOLOGY_CATALOG.md`, `src/data/g0Biology.ts`, ADR 0003, ADR 0005, ADR 0101.
 
 ## Tổng quan
 
@@ -63,7 +63,7 @@ shadow → body → pattern → aether-tint → eye → aether-fx → badge
 | Golden | vàng 60% | **vòng hào quang** trên đầu, vòng nhỏ, vệt sáng | ◎ vòng |
 | Prismatic | gradient cầu vồng 62% | vệt cầu vồng, **sao 5 cánh** | ★ sao |
 
-Khác biệt với Emberling G0: Emberling đổi palette toàn thân theo biến thể (bản vẽ phẳng). Ba loài mới dùng lớp phủ để giữ dấu nhận biết kiểu hình theo hướng production của ART_DIRECTION. Tác giả đã chấp nhận (ADR 0008); Emberling sẽ được làm lại theo cấu trúc lớp ở G3.
+Khác biệt với Emberling G0: Emberling đổi palette toàn thân theo biến thể (bản vẽ phẳng). Ba loài mới dùng lớp phủ để giữ dấu nhận biết kiểu hình theo hướng production của ART_DIRECTION. Tác giả đã chấp nhận (ADR 0101); Emberling sẽ được làm lại theo cấu trúc lớp ở G3.
 
 ## Nghiệm thu đã chạy
 

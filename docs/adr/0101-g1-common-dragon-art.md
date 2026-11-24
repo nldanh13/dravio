@@ -1,6 +1,6 @@
-# ADR 0008 — Sprite Common G1: lớp kiểu hình tách khỏi lớp Aether
+# ADR 0101 — Sprite Common G1: lớp kiểu hình tách khỏi lớp Aether
 
-Trạng thái: **Chấp nhận** (24/11/2026, tác giả duyệt cả 4 điểm). Bổ sung ADR 0005 (mỹ thuật). Không đổi ID loài, giá, gene hay luật sinh học.
+Trạng thái: **Chấp nhận** (24/11/2026, tác giả duyệt cả 4 điểm). Số hiệu: trước đây là ADR 0008 (trùng ADR 0008 của Game Engine), đổi sang dải Art 01xx (`docs/adr/README.md`). Bổ sung ADR 0005 (mỹ thuật). Không đổi ID loài, giá, gene hay luật sinh học.
 
 ## Bối cảnh
 - G1 cần 4 loài Common (ROADMAP G1). Emberling đã có prototype G0 được duyệt (ADR 0005).

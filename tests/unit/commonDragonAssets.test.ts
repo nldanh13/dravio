@@ -64,11 +64,17 @@ describe('Common dragon sprite set (48)', () => {
     const ember = COMMON_DRAGON_SPRITES.filter((s) => s.speciesId === 'emberling');
     expect(ember).toHaveLength(12);
     for (const e of ember) {
-      expect(G0_SPRITES.find((g) => g.stage === e.stage && g.mutation === e.mutation)?.url).toBe(e.url);
+      // Cùng file G0 (manifest mới dùng `?no-inline` nên URL khác dạng, nhưng trỏ đúng file gốc).
+      expect(G0_SPRITES.find((g) => g.stage === e.stage && g.mutation === e.mutation)).toBeDefined();
+      expect(e.url).toContain(`/src/assets/g0/emberling/${e.stage}_${e.mutation}.svg`);
       expect(e.source.origin).toContain('G0');
     }
-    // Tác giả duyệt 36 sprite mới làm prototype G1 (ADR 0008); vẫn chưa phải production.
+    // Tác giả duyệt 36 sprite mới làm prototype G1 (ADR 0101); vẫn chưa phải production.
     expect(COMMON_DRAGON_SPRITES.every((s) => s.source.review === 'approved-prototype' && s.source.tier === 'prototype')).toBe(true);
+  });
+
+  it('sprites are emitted as separate files, never inlined into the JS bundle', () => {
+    for (const s of COMMON_DRAGON_SPRITES) expect(s.url.startsWith('data:')).toBe(false);
   });
 
   it('new SVGs are well-formed, self-contained and in the shared 240×200 frame', () => {

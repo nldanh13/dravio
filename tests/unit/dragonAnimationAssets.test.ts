@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
   DRAGON_ANIM_STATES,
+  altitudeAt,
   availableStates,
+  clipExtents,
+  flightRuleFor,
   clipPhase,
   poseAt,
   resolveDragonClip,
@@ -141,6 +144,66 @@ describe('Dragon animation clips (spec)', () => {
     expect(src).not.toMatch(/Math\.random|Date\.now|performance\.now/);
   });
 
+  it('flight altitude is 18/40/56 viewBox px per stage and is not scaled again (ADR 0102 §3)', () => {
+    const fly = resolveDragonClip('zephyr', 'fly');
+    if (!fly) throw new Error('missing');
+    expect(fly.altitude).toEqual({ baby: 18, juvenile: 40, adult: 56 });
+    for (const st of STAGES) {
+      for (const t of [0, 0.3, 0.9]) expect(altitudeAt('zephyr', fly, st, t)).toBe(fly.altitude?.[st]);
+    }
+    expect(altitudeAt('zephyr', resolveDragonClip('zephyr', 'idle')!, 'adult', 0.5)).toBe(0);
+  });
+
+  it('landing descends continuously from the current altitude to the ground', () => {
+    const land = resolveDragonClip('zephyr', 'landing');
+    if (!land) throw new Error('missing');
+    for (const st of STAGES) {
+      const start = resolveDragonClip('zephyr', 'fly')?.altitude?.[st] ?? 0;
+      expect(altitudeAt('zephyr', land, st, 0)).toBe(start);
+      let prev = start;
+      for (let i = 1; i <= 20; i++) {
+        const a = altitudeAt('zephyr', land, st, i / 20);
+        expect(a).toBeLessThanOrEqual(prev);
+        expect(prev - a).toBeLessThan(start * 0.2 + 1e-9); // không nhảy cóc
+        prev = a;
+      }
+      expect(altitudeAt('zephyr', land, st, 0.5)).toBe(0);
+    }
+    // Hạ cánh từ độ cao thực khác (ví dụ đang lên dở).
+    expect(altitudeAt('zephyr', land, 'adult', 0, 30)).toBe(30);
+    expect(land.track.every((k) => k.dy === 0)).toBe(true);
+  });
+
+  it('Zephyr Baby only practises short flights inside its habitat (ADR 0102 §2)', () => {
+    expect(flightRuleFor('zephyr', 'baby')).toEqual({
+      minFlightMs: 1000,
+      maxFlightMs: 2000,
+      mustLand: true,
+      sameHabitatOnly: true,
+      interZoneTravel: false,
+      blockedWhenHealthRestricted: true,
+    });
+    expect(flightRuleFor('zephyr', 'juvenile')).toBeNull();
+    expect(flightRuleFor('zephyr', 'adult')).toBeNull();
+    for (const sp of ['emberling', 'droplet', 'sprout'] as const) expect(flightRuleFor(sp, 'baby')).toBeNull();
+  });
+
+  it('clip extents include flight altitude so the renderer can keep sprites on screen', () => {
+    const hb = (st: (typeof STAGES)[number]) => (pose: Parameters<typeof getDragonFrame>[3]) => getDragonFrame('zephyr', st, 'normal', pose)?.hitbox ?? null;
+    const fly = resolveDragonClip('zephyr', 'fly')!;
+    const idle = resolveDragonClip('zephyr', 'idle')!;
+    const ef = clipExtents('zephyr', fly, 'adult', hb('adult'), 1);
+    const ei = clipExtents('zephyr', idle, 'adult', hb('adult'), 1);
+    expect(ef.up).toBeGreaterThanOrEqual(ei.up - 30 + 56);
+    expect(clipExtents('zephyr', resolveDragonClip('zephyr', 'landing')!, 'adult', hb('adult'), 1).up).toBeGreaterThanOrEqual(56);
+    for (const e of [ef, ei]) for (const v of Object.values(e)) expect(v).toBeGreaterThanOrEqual(0);
+  });
+
+  it('burrow is planned for G2, not part of the G1 clip set (ADR 0102 §4)', () => {
+    expect((DRAGON_ANIM_STATES as readonly string[]).includes('burrow')).toBe(false);
+    expect((SPECIES_BIOLOGY.sprout.locomotion as readonly string[]).includes('burrow')).toBe(true);
+  });
+
   it('Emberling uses fallbacks instead of modified G0 art', () => {
     expect(resolvePose('emberling', 'walk_a')).toBe('idle');
     expect(resolvePose('emberling', 'sleep')).toBe('blink');
@@ -211,6 +274,11 @@ describe('Dragon animation frames (assets)', () => {
       const b = base[`../../src/assets/dragons/common/${sp}/adult_golden.svg`] ?? '';
       expect(layer(frameSrc(sp, 'adult', 'golden', 'idle'), 'body')).toBe(layer(b, 'body'));
     }
+  });
+
+  it('frames are emitted as separate files for on-demand loading (never inlined)', () => {
+    for (const f of DRAGON_FRAMES) expect(f.url.startsWith('data:')).toBe(false);
+    for (const fx of DRAGON_EFFECTS) expect(fx.url.startsWith('data:')).toBe(false);
   });
 
   it('every frame has attach points and an illustrative hitbox', () => {
