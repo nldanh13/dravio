@@ -7,6 +7,7 @@ import { SPRITES } from './assets/manifest';
 import { LanguageContext, useTranslation } from './i18n';
 import type { GameSession } from './platform/gameSession';
 import { SavePanel } from './ui/SavePanel';
+import { TutorialPanel } from './ui/TutorialPanel';
 import { WorldView } from './ui/WorldView';
 import { ZonePanel } from './ui/ZonePanel';
 import type { DragonInstance, LanguageCode } from './types/game';
@@ -175,6 +176,7 @@ function Shell({ session, onToggle }: { session: GameSession; onToggle: () => vo
         </button>
       </header>
       <p className="notice">{t('app.status')}</p>
+      <TutorialPanel session={session} />
       <WorldView session={session} />
       <ZonePanel session={session} />
       <SavePanel session={session} />

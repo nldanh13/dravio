@@ -154,9 +154,11 @@ describe('advanceTime', () => {
     const { state, clock } = newGame();
     clock.advance(300_000);
     const r = ok(state, { type: 'advanceTime', mode: 'online' }, clock);
-    const gained = r.state.goldMicro - state.goldMicro;
+    const gained = r.state.totalGoldEarnedMicro - state.totalGoldEarnedMicro;
     expect(gained).toBe(4_706_250); // 105×0.025×0.4 + 195×0.025×0.75 G
-    expect(r.state.totalGoldEarnedMicro).toBe(gained);
+    // Thành tựu "Rồng trưởng thành đầu tiên" tự nhận +100 G, không tính vào vàng sản xuất (ADR 0013).
+    expect(r.state.goldMicro - state.goldMicro).toBe(gained + 100_000_000);
+    expect(r.events).toContainEqual({ type: 'achievementUnlocked', achievementId: 'ACH_FIRST_ADULT', rewardGoldMicro: 100_000_000 });
     expect(growthStage(ember(r.state).xpSec, getSpecies('emberling'))).toBe('adult');
     const changes = r.events.filter((e): e is Extract<DomainEvent, { type: 'stageChanged' }> => e.type === 'stageChanged');
     expect(changes.map((e) => [e.from, e.to])).toEqual([
@@ -178,7 +180,7 @@ describe('advanceTime', () => {
     r = ok(s, { type: 'advanceTime', mode: 'online' }, clock);
     expect(r.events.some((e) => e.type === 'stageChanged' && e.to === 'adult')).toBe(true);
     // Chia nhỏ khoảng thời gian không làm lệch tổng vàng.
-    expect(r.state.goldMicro - state.goldMicro).toBe(4_706_250);
+    expect(r.state.totalGoldEarnedMicro - state.totalGoldEarnedMicro).toBe(4_706_250);
   });
 
   it('S01: adult offline 8 h → 540 G (75%), XP capped, receipt created once', () => {

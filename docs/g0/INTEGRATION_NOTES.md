@@ -18,7 +18,7 @@ Ngày 24/11/2026. Ghi lại cách pack được đưa vào repo và các điểm
 2. **Điều kiện sức khỏe khi lai (ADR 0003).** ADR 0003 thêm health ≥80, mobility ≥80, comfort ≥60 và "không có HealthCase mở". GameState chưa có dữ liệu sức khỏe (TD-05), nên `checkBreed` chưa kiểm các điều kiện này và **không** giả lập giá trị "khỏe". Đã có: chặn `released`, shelter khẩn cấp, đang care, genotype sai.
 3. **Màu biến thể Crystal trùng tông "lạnh".** Bản mẫu Crystal tô thân màu lam, dễ nhầm với kiểu hình `rr` (tông lạnh). Art direction yêu cầu biến thể không chỉ dựa vào màu. **Đã xử lý (ADR 0005):** thêm huy hiệu hình học cho từng biến thể.
 4. **Frostfin `bodyStyle: 'winged'` nhưng không bay.** Đúng theo GDD trang 30 (dáng thân là baseline mỹ thuật, không quyết định vận động) và G0 (`locomotion: ['swim']`). Không đổi.
-5. **Tutorial trứng Sprout.** AI_HANDOFF nhắc tới trong G1 PR1, nhưng ROADMAP đặt tutorial ở PR5 và yêu cầu của tác giả cho PR1 chỉ gồm 4 lệnh. Trứng tutorial để PR5; GameState đã có chỗ cho `pendingPack`.
+5. **Tutorial trứng Sprout.** AI_HANDOFF nhắc tới trong G1 PR1, nhưng ROADMAP đặt tutorial ở PR5 và yêu cầu của tác giả cho PR1 chỉ gồm 4 lệnh. Trứng tutorial để PR5; GameState đã có chỗ cho `pendingPack`. Đã làm ở G1 PR5 (ADR 0013).
 
 ## Cổng G0
 

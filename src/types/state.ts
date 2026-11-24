@@ -1,5 +1,7 @@
+import type { AchievementId } from '../data/achievements';
 import type { DiscoveryId } from '../data/habitatUnlocks';
-import type { DragonInstance, GrowthStage, LanguageCode, MutationType, Realm } from './game';
+import type { TutorialStepId } from '../data/tutorial';
+import type { DragonInstance, Genotype, GrowthStage, LanguageCode, MutationType, Realm } from './game';
 
 /**
  * GameState (GDD 3.1 Phụ lục C.2–C.3), phạm vi G1 PR1.
@@ -9,10 +11,11 @@ import type { DragonInstance, GrowthStage, LanguageCode, MutationType, Realm } f
  */
 
 /**
- * Dravio Save Schema hiện tại. v1 = định dạng chính thức đầu tiên (ADR 0007); v2 thêm `discoveries` (ADR 0009).
+ * Dravio Save Schema hiện tại. v1 = định dạng chính thức đầu tiên (ADR 0007); v2 thêm `discoveries` (ADR 0009);
+ * v4 thêm `tutorial`, `pendingPack`, `unlockedAchievements`, `claimedAchievements` (ADR 0013).
  * Số 3 được dành riêng cho bản phát triển trước v1, không dùng lại.
  */
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 4;
 
 export interface UpgradesState {
   islandCapacityLevel: number;
@@ -79,6 +82,31 @@ export interface OfflineReceipt {
   createdAtMs: number;
 }
 
+/** Trứng đã mua, đã roll và lưu ngay; chờ người chơi nhận (GDD Phụ lục C.2). */
+export interface PendingPack {
+  id: string;
+  packId: string;
+  speciesId: string;
+  genotype: Genotype;
+  mutation: MutationType;
+  createdAtMs: number;
+  /** Trứng hướng dẫn: kết quả cố định, không tính pity. */
+  tutorial: boolean;
+}
+
+/** Tiến trình hướng dẫn (ADR 0013). Bước chỉ hoàn thành khi engine thấy điều kiện trong state. */
+export interface TutorialState {
+  status: 'active' | 'skipped' | 'completed';
+  /** Các bước đã xong, theo thứ tự TUT_01…TUT_08. */
+  completed: TutorialStepId[];
+  /** Mốc tính TUT_01 (quan sát). Đặt lại khi xem lại hướng dẫn. */
+  startedAtMs: number;
+  /** Loài đã mở hồ sơ sinh học (TUT_03; điều kiện khảo sát nhiệt độ), sắp xếp, không trùng. */
+  profilesViewed: string[];
+  /** Gói Starter hướng dẫn đã mua (một lần mỗi save). */
+  starterPackUsed: boolean;
+}
+
 export interface GameState {
   schemaVersion: number;
   contentVersion: string;
@@ -103,6 +131,12 @@ export interface GameState {
   offlineReceipt: OfflineReceipt | null;
   /** Khám phá đã ghi nhận (ADR 0009), sắp xếp, không trùng. Điều kiện mở microhabitat. Schema v2. */
   discoveries: DiscoveryId[];
+  /** Schema v4 (ADR 0013). */
+  tutorial: TutorialState;
+  pendingPack: PendingPack | null;
+  /** Thành tựu đã mở / đã nhận thưởng (nhận ⊆ mở), theo thứ tự ACHIEVEMENT_IDS. */
+  unlockedAchievements: AchievementId[];
+  claimedAchievements: AchievementId[];
 }
 
 /** Giá trị dẫn xuất cho UI — không lưu. */

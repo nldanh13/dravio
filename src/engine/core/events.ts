@@ -14,4 +14,11 @@ export type DomainEvent =
   | { type: 'dragonMoved'; dragonUid: string; from: Location; to: Location }
   | { type: 'productionChanged'; dragonUid: string; enabled: boolean }
   | { type: 'habitatUnlocked'; zoneId: string; habitatId: string }
-  | { type: 'discoveryRecorded'; discoveryId: string };
+  | { type: 'discoveryRecorded'; discoveryId: string }
+  | { type: 'habitatSurveyed'; habitatId: string }
+  | { type: 'biologyProfileViewed'; speciesId: string }
+  | { type: 'tutorialStepCompleted'; stepId: string }
+  | { type: 'tutorialStatusChanged'; status: 'active' | 'skipped' | 'completed' }
+  | { type: 'packBought'; packId: string; speciesId: string; priceGoldMicro: number; tutorial: boolean }
+  | { type: 'dragonHatched'; dragonUid: string; speciesId: string; mutation: string; location: Location; tutorial: boolean }
+  | { type: 'achievementUnlocked'; achievementId: string; rewardGoldMicro: number };

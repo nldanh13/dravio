@@ -15,7 +15,11 @@ import type { DragonInstance } from '../../types/game';
 import type { GameState } from '../../types/state';
 import { gainBond } from '../biology/bond';
 import { normalizeNickname } from '../inventory/nickname';
+import { buyTutorialPack, claimPack, type PackTarget } from '../inventory/packs';
+import { evaluateAchievements } from '../progression/achievements';
 import { addXp, advanceDragon } from '../progression/growth';
+import { evaluateTutorial, setTutorialStatus, viewBiologyProfile } from '../progression/tutorial';
+import { surveyHabitat } from '../world/survey';
 import { findZone, habitatZone, isProducing } from '../world/placement';
 import { moveDragon, setProduction, unlockHabitat, type MoveTarget } from '../world/zones';
 import { computeElapsed, type Clock } from './clock';
@@ -43,7 +47,17 @@ export type Command =
   /** Chọn/bỏ rồng khỏi ngân sách sản xuất (5 + 2 × cấp, tối đa 25). */
   | { type: 'setProductionSlot'; requestId: string; dragonUid: string; enabled: boolean }
   /** Mở microhabitat miễn phí khi đã có khám phá điều kiện (ADR 0009). */
-  | { type: 'unlockHabitat'; requestId: string; habitatId: string };
+  | { type: 'unlockHabitat'; requestId: string; habitatId: string }
+  /** Khảo sát biển khám phá của microhabitat chưa mở để ghi nhận khám phá (ADR 0013). */
+  | { type: 'surveyHabitat'; requestId: string; habitatId: string }
+  /** Mở hồ sơ sinh học của một loài đang nuôi (TUT_03). */
+  | { type: 'viewBiologyProfile'; requestId: string; speciesId: string }
+  /** Mua gói Starter hướng dẫn (100 G, một lần mỗi save, kết quả cố định Sproutling Normal). */
+  | { type: 'buyTutorialPack'; requestId: string }
+  /** Nhận trứng đang chờ: nở và đặt vào microhabitat hợp lệ hoặc kho. */
+  | { type: 'claimPack'; requestId: string; target: PackTarget }
+  /** Bỏ qua hoặc xem lại hướng dẫn. */
+  | { type: 'setTutorialStatus'; requestId: string; status: 'active' | 'skipped' };
 
 export interface CommandContext {
   clock: Clock;
@@ -86,6 +100,22 @@ export function parseCommand(input: unknown): Command | null {
     }
     case 'unlockHabitat':
       return isId(input.habitatId) ? { type: 'unlockHabitat', requestId, habitatId: input.habitatId } : null;
+    case 'surveyHabitat':
+      return isId(input.habitatId) ? { type: 'surveyHabitat', requestId, habitatId: input.habitatId } : null;
+    case 'viewBiologyProfile':
+      return isId(input.speciesId) ? { type: 'viewBiologyProfile', requestId, speciesId: input.speciesId } : null;
+    case 'buyTutorialPack':
+      return { type: 'buyTutorialPack', requestId };
+    case 'claimPack': {
+      if (!isObj(input.target)) return null;
+      const t = input.target;
+      if (t.kind === 'storage') return { type: 'claimPack', requestId, target: { kind: 'storage' } };
+      return t.kind === 'zone' && isId(t.zoneId) && isId(t.habitatId)
+        ? { type: 'claimPack', requestId, target: { kind: 'zone', zoneId: t.zoneId, habitatId: t.habitatId } }
+        : null;
+    }
+    case 'setTutorialStatus':
+      return input.status === 'active' || input.status === 'skipped' ? { type: 'setTutorialStatus', requestId, status: input.status } : null;
     case 'setProductionSlot':
       return isId(input.dragonUid) && typeof input.enabled === 'boolean'
         ? { type: 'setProductionSlot', requestId, dragonUid: input.dragonUid, enabled: input.enabled }
@@ -257,6 +287,41 @@ function handle(state: GameState, cmd: Command, nowMs: number): Handled {
       return { ok: true, state: r.state, events: r.events };
     }
 
+    case 'surveyHabitat': {
+      const r = surveyHabitat(state, cmd.habitatId);
+      return r.ok ? r : { ok: false, error: commandError(r.code) };
+    }
+
+    case 'viewBiologyProfile': {
+      const r = viewBiologyProfile(state, cmd.speciesId);
+      return r.ok ? r : { ok: false, error: commandError(r.code) };
+    }
+
+    case 'setTutorialStatus': {
+      const r = setTutorialStatus(state, cmd.status, nowMs);
+      return r.ok ? r : { ok: false, error: commandError(r.code) };
+    }
+
+    case 'buyTutorialPack': {
+      const pre = buyTutorialPack(state, nowMs);
+      if (!pre.ok) return { ok: false, error: commandError(pre.code) };
+      // Quyết toán thời gian trước khi trừ vàng để số dư và XP nhất quán tại thời điểm mua.
+      const settled = settleTime(state, nowMs, 'online');
+      const r = buyTutorialPack(settled.state, nowMs);
+      if (!r.ok) return { ok: false, error: commandError(r.code) };
+      return { ok: true, state: r.state, events: [...settled.events, ...r.events] };
+    }
+
+    case 'claimPack': {
+      const pre = claimPack(state, cmd.target, nowMs);
+      if (!pre.ok) return { ok: false, error: commandError(pre.code) };
+      // Rồng mới có thể vào ngân sách sản xuất: quyết toán trước để vàng cũ tính theo đội hình cũ.
+      const settled = settleTime(state, nowMs, 'online');
+      const r = claimPack(settled.state, cmd.target, nowMs);
+      if (!r.ok) return { ok: false, error: commandError(r.code) };
+      return { ok: true, state: r.state, events: [...settled.events, ...r.events] };
+    }
+
     case 'renameDragon': {
       const dragon = findDragon(state, cmd.dragonUid);
       if (!dragon) return { ok: false, error: commandError('unknown-dragon') };
@@ -290,11 +355,14 @@ export function dispatch(state: GameState, input: unknown, ctx: CommandContext):
   const nowMs = Math.max(ctx.clock.nowMs(), state.clock.highWaterAtMs);
   const result = handle(state, cmd, nowMs);
   if (!result.ok) return { ok: false, state, error: result.error };
-  const processed = [...result.state.processedRequestIds, cmd.requestId].slice(-PROCESSED_REQUEST_LIMIT);
+  // Sau mỗi lệnh thành công: thành tựu rồi hướng dẫn, đều đọc state (không đọc thao tác UI).
+  const ach = evaluateAchievements(result.state);
+  const tut = evaluateTutorial(ach.state);
+  const processed = [...tut.state.processedRequestIds, cmd.requestId].slice(-PROCESSED_REQUEST_LIMIT);
   return {
     ok: true,
-    state: { ...result.state, revision: state.revision + 1, processedRequestIds: processed },
-    events: result.events,
+    state: { ...tut.state, revision: state.revision + 1, processedRequestIds: processed },
+    events: [...result.events, ...ach.events, ...tut.events],
     duplicate: false,
   };
 }

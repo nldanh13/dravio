@@ -42,6 +42,8 @@ export interface SessionSnapshot {
 }
 
 
+const IMMEDIATE_SAVE: ReadonlySet<string> = new Set(['buyTutorialPack', 'claimPack']);
+
 function newRequestId(): string {
   return globalThis.crypto.randomUUID();
 }
@@ -227,6 +229,8 @@ export class GameSession {
     const r = dispatch(s, { ...cmd, requestId: newRequestId() }, { clock: this.clock });
     if (!r.ok) return r.error;
     this.set({ state: r.state });
+    // Mua/nhận trứng: lưu ngay để kết quả đã roll không thể bị làm lại bằng cách đóng tab (CLAUDE.md).
+    if (IMMEDIATE_SAVE.has(cmd.type)) void this.saveNow();
     return null;
   }
 

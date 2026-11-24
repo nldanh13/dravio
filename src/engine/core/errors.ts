@@ -23,7 +23,13 @@ export type CommandErrorCode =
   | 'production-budget-full'
   | 'unknown-habitat'
   | 'habitat-already-unlocked'
-  | 'unlock-requirement-missing';
+  | 'unlock-requirement-missing'
+  | 'discovery-already-known'
+  | 'survey-requirement-missing'
+  | 'tutorial-pack-used'
+  | 'pack-pending'
+  | 'no-pending-pack'
+  | 'not-enough-gold';
 
 export interface CommandError {
   code: CommandErrorCode;

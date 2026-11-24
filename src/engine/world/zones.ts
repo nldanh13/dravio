@@ -170,8 +170,8 @@ export function habitatUnlockStatus(state: GameState): { habitatId: string; unlo
 }
 
 /**
- * Ghi nhận một khám phá. KHÔNG phải lệnh người chơi: chỉ hệ thống nhiệm vụ của engine (PR5)
- * gọi sau khi tự kiểm điều kiện nhiệm vụ; UI production không có đường nào gọi hàm này.
+ * Ghi nhận một khám phá. KHÔNG phải lệnh người chơi: chỉ engine gọi — lệnh `surveyHabitat`
+ * (ADR 0013) sau khi tự kiểm điều kiện khảo sát; UI production không có đường nào gọi hàm này trực tiếp.
  */
 export function recordDiscovery(state: GameState, id: DiscoveryId): WorldResult {
   if (state.discoveries.includes(id)) return { ok: false, code: 'already-there' };
