@@ -35,9 +35,9 @@ Kịch bản nghiệm thu chạy trên gameplay thật: S01 qua PR1–PR4 (phầ
 Thứ tự PR đề xuất, mỗi PR một lát cắt có test:
 1. [x] `GameState` + command bus (`advanceTime`, `feed` + `consumeFood`, `pet`, `renameDragon`) + validate runtime + domain events — ADR 0004, `tests/unit/gameState.test.ts`. Chưa có: trứng tutorial, nhận bonus offline (PR5)
 2. [x] Persistence: IndexedDB, autosave 30s, export/import JSON + checksum, backup — ADR 0006, `tests/unit/persistence.test.ts`, Dravio Save Schema v1 (ADR 0007), kiểm trên Chromium 158 headless (Linux). Windows + Chromium trên thiết bị thật: chưa kiểm thử
-3. Zone đất Khởi Nguyên: suitability, sức chứa 5, ngân sách sản xuất
+3. [x] Zone đất Khởi Nguyên: suitability, sức chứa 5, ngân sách sản xuất — ADR 0008, `tests/unit/zones.test.ts`, lệnh `moveDragon`/`setProductionSlot`/`unlockHabitat` (miễn phí, cần khám phá; ADR 0009, Dravio Save Schema v2). Chưa có: nhiệm vụ ghi nhận khám phá (PR5), mua nâng cấp sức chứa. Windows + Chromium trên thiết bị thật: chưa kiểm thử
 4. Canvas renderer 2.5D + steering + FSM hành vi cơ bản; thả thức ăn (0,8s / 12s / XP mỗi 8s)
-5. Tutorial 0–15 phút: 150 G, Emberling, trứng Sproutling, mốc Adult
+5. Tutorial 0–15 phút: 150 G, Emberling, trứng Sproutling, mốc Adult; chuỗi TUT_01–TUT_08 ghi nhận `DISC_EMBERLING_THERMAL` (TUT_04) và `DISC_AQUATIC_HABITAT` (TUT_06), có đường khám phá thay thế khi bỏ hướng dẫn (ADR 0009)
 6. Một ca chăm sóc dựng sẵn (Forecast → … → Closed rút gọn)
 7. Xuất PNG Dragon Passport
 

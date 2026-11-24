@@ -67,7 +67,7 @@ export async function parseSaveText(text: string): Promise<ParseResult> {
 const STATE_KEYS: readonly (keyof GameState)[] = [
   'schemaVersion', 'contentVersion', 'saveId', 'revision', 'goldMicro', 'goldRemainder', 'totalGoldEarnedMicro',
   'dragons', 'zones', 'productionDragonIds', 'inventory', 'upgrades', 'food', 'processedRequestIds', 'pityCount',
-  'stats', 'settings', 'clock', 'offlineReceipt',
+  'stats', 'settings', 'clock', 'offlineReceipt', 'discoveries',
 ];
 
 /** Khóa rồng được phép đi qua import. `registryRef` (Verified) và mọi khóa lạ bị bỏ. */

@@ -15,7 +15,15 @@ export type CommandErrorCode =
   | 'pet-cooldown'
   | 'name-empty'
   | 'name-too-long'
-  | 'name-invalid-chars';
+  | 'name-invalid-chars'
+  | 'zone-full'
+  | 'habitat-unsuitable'
+  | 'already-there'
+  | 'not-placed'
+  | 'production-budget-full'
+  | 'unknown-habitat'
+  | 'habitat-already-unlocked'
+  | 'unlock-requirement-missing';
 
 export interface CommandError {
   code: CommandErrorCode;

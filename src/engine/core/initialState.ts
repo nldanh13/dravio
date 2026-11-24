@@ -61,6 +61,7 @@ export function createInitialState(opts: { saveId: string; nowMs: number; rng: R
     inventory: {},
     upgrades: { islandCapacityLevel: 0, foodQualityLevel: 0, foodCooldownLevel: 0, mutationLuckLevel: 0, hatchSpeedLevel: 0 },
     food: { lastSpawnAtMs: null, drops: [] },
+    discoveries: [],
     processedRequestIds: [],
     pityCount: 0,
     stats: {

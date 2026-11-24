@@ -1,3 +1,4 @@
+import type { DiscoveryId } from '../data/habitatUnlocks';
 import type { DragonInstance, GrowthStage, LanguageCode, MutationType, Realm } from './game';
 
 /**
@@ -7,8 +8,11 @@ import type { DragonInstance, GrowthStage, LanguageCode, MutationType, Realm } f
  * không để field rỗng không có logic.
  */
 
-/** Dravio Save Schema v1 — định dạng save chính thức đầu tiên (ADR 0007). Số 3 được dành riêng, không dùng lại. */
-export const SCHEMA_VERSION = 1;
+/**
+ * Dravio Save Schema hiện tại. v1 = định dạng chính thức đầu tiên (ADR 0007); v2 thêm `discoveries` (ADR 0009).
+ * Số 3 được dành riêng cho bản phát triển trước v1, không dùng lại.
+ */
+export const SCHEMA_VERSION = 2;
 
 export interface UpgradesState {
   islandCapacityLevel: number;
@@ -97,6 +101,8 @@ export interface GameState {
   settings: GameSettings;
   clock: { lastProcessedAtMs: number; highWaterAtMs: number };
   offlineReceipt: OfflineReceipt | null;
+  /** Khám phá đã ghi nhận (ADR 0009), sắp xếp, không trùng. Điều kiện mở microhabitat. Schema v2. */
+  discoveries: DiscoveryId[];
 }
 
 /** Giá trị dẫn xuất cho UI — không lưu. */

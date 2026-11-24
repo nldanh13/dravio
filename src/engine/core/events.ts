@@ -1,4 +1,4 @@
-import type { GrowthStage } from '../../types/game';
+import type { GrowthStage, Location } from '../../types/game';
 
 /** Domain events do engine phát ra sau mỗi lệnh thành công. UI chỉ đọc, không suy diễn lại. */
 export type DomainEvent =
@@ -10,4 +10,8 @@ export type DomainEvent =
   | { type: 'foodConsumed'; foodId: string; dragonUid: string; xpGainedSec: number }
   | { type: 'bondChanged'; dragonUid: string; from: number; to: number; source: 'feed' | 'pet' }
   | { type: 'dragonPetted'; dragonUid: string }
-  | { type: 'dragonRenamed'; dragonUid: string; nickname: string | null };
+  | { type: 'dragonRenamed'; dragonUid: string; nickname: string | null }
+  | { type: 'dragonMoved'; dragonUid: string; from: Location; to: Location }
+  | { type: 'productionChanged'; dragonUid: string; enabled: boolean }
+  | { type: 'habitatUnlocked'; zoneId: string; habitatId: string }
+  | { type: 'discoveryRecorded'; discoveryId: string };

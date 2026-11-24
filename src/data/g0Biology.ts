@@ -1,5 +1,5 @@
 /** Dravio G0 decision pack: new data only; do not replace existing species IDs/economy. */
-import type { G0Anatomy, G0HabitatEnv, QualityKey } from '../types/biology';
+import type { G0Anatomy, G0HabitatEnv } from '../types/biology';
 
 export type { G0Anatomy, G0HabitatEnv, G0Realm, HazardId, QualityKey, TemperatureBand } from '../types/biology';
 
@@ -929,26 +929,5 @@ export function getBiology(id: string): G0Anatomy {
   if (!Object.prototype.hasOwnProperty.call(SPECIES_BIOLOGY, id)) throw new Error(`Unknown G0 species: ${id}`);
   return SPECIES_BIOLOGY[id as G0SpeciesId];
 }
-export type HabitatResult = { allowed: boolean; score: number; reason: 'ok' | 'incompatible' | 'invalid-env' | 'low-suitability' };
-const keys: readonly QualityKey[] = ['airQuality', 'waterQuality', 'vegetation', 'foodAvailability'];
-export function suitability(id: string, habitatId: HabitatId, env: G0HabitatEnv): HabitatResult {
-  const b = getBiology(id);
-  if (!Object.prototype.hasOwnProperty.call(HABITAT_PROFILES, habitatId) || keys.some(k => !Number.isFinite(env[k]) || env[k] < 0 || env[k] > 100)) {
-    return { allowed: false, score: 0, reason: 'invalid-env' };
-  }
-  const h = HABITAT_PROFILES[habitatId];
-  // A microhabitat is an approved physical configuration, not an extra zone capacity.
-  const compatible = b.habitatRules.includes(habitatId) && env.zoneId === h.zoneId && env.realm === h.realm &&
-    b.thermalBands.includes(env.temperatureBand) && env.humidityBand === h.humidityBand &&
-    env.salinityBand === h.salinityBand && b.salinityBands.includes(env.salinityBand) &&
-    env.depthBand === h.depthBand && b.depthBands.includes(env.depthBand) &&
-    env.altitudeBand === h.altitudeBand && b.altitudeBands.includes(env.altitudeBand) &&
-    (env.realm === 'ocean' ? b.respiration !== 'lung' && b.locomotion.includes('swim') : b.respiration !== 'gill' && b.locomotion.includes('walk')) &&
-    (env.realm !== 'sky' || (b.locomotion.includes('fly') && env.perch));
-  if (!compatible) return { allowed: false, score: 0, reason: 'incompatible' };
-  // Ignore non-relevant environmental metrics; deficits cost 1 point each.
-  const relevant: readonly QualityKey[] = env.realm === 'ocean' ? ['waterQuality', 'vegetation', 'foodAvailability'] :
-    habitatId === 'origin_pondbank' && b.locomotion.includes('swim') ? keys : ['airQuality', 'vegetation', 'foodAvailability'];
-  const score = Math.max(0, Math.min(100, 100 - relevant.reduce((n, k) => n + Math.ceil(Math.max(0, b.comfortMin[k] - env[k])), 0)));
-  return { allowed: score >= 50, score, reason: score >= 50 ? 'ok' : 'low-suitability' };
-}
+// Helper suitability thuần sống ở engine (AI_HANDOFF: một nguồn nghiệp vụ); re-export để giữ API cũ.
+export { suitability, type HabitatResult } from '../engine/world/habitat';

@@ -52,3 +52,12 @@ figcaption { font-size: 0.85rem; color: var(--muted); }
 label.button { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); cursor: pointer; }
 label.button.disabled { opacity: 0.5; cursor: not-allowed; }
 .confirm { border: 2px solid var(--line); border-radius: 8px; padding: 12px; margin-top: 12px; }
+.habitats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.habitat { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; background: var(--card); }
+.habitat.locked { opacity: 0.6; }
+.habitat h3 { margin: 4px 0 8px; font-size: 1rem; }
+.habitat ul { padding-left: 16px; margin: 0; }
+.row.compact { gap: 8px; margin: 4px 0 8px; }
+.tier-needs-improvement { color: #8a5a00; }
+.tier-unsuitable { color: #a12d2d; }
+.dev-tools { margin-top: 12px; border: 2px dashed #a12d2d; border-radius: 8px; padding: 8px 12px; }

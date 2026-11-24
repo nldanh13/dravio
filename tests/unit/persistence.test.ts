@@ -33,7 +33,10 @@ function manager(store = new MemorySaveStore()) {
 /** Envelope của một schemaVersion bất kỳ, checksum hợp lệ (giả lập save do bản khác ghi). */
 async function envelopeAt(version: number, state: GameState = freshState()): Promise<string> {
   const env = await createEnvelope(state, T0);
-  const s = { ...env.state, schemaVersion: version };
+  // v1 và bí danh 3 chưa có `discoveries` (thêm ở v2).
+  const { discoveries, ...v1 } = env.state;
+  void discoveries;
+  const s = version === 1 || version === 3 ? { ...v1, schemaVersion: version } : { ...env.state, schemaVersion: version };
   return JSON.stringify({ ...env, schemaVersion: version, state: s, checksum: await sha256Hex(canonicalJson(s)) });
 }
 
@@ -75,8 +78,8 @@ describe('Dravio Save Schema v1 + checksum', () => {
     expect(await parseSaveText('[1,2]')).toMatchObject({ code: 'bad-format' });
     expect(await parseSaveText('{"hello":1}')).toMatchObject({ code: 'bad-format' });
     const env = await createEnvelope(freshState(), T0);
-    expect(await parseSaveText(await envelopeAt(2))).toMatchObject({ code: 'newer-version' });
     expect(await parseSaveText(await envelopeAt(4))).toMatchObject({ code: 'newer-version' });
+    expect(await parseSaveText(await envelopeAt(5))).toMatchObject({ code: 'newer-version' });
     expect(await parseSaveText(await envelopeAt(0))).toMatchObject({ code: 'unsupported-version' });
     // Envelope và state phải cùng schemaVersion.
     expect(await parseSaveText(JSON.stringify({ ...env, schemaVersion: 4 }))).toMatchObject({ code: 'bad-format' });
@@ -87,16 +90,17 @@ describe('Dravio Save Schema v1 + checksum', () => {
 });
 
 describe('migration framework (schemaVersion)', () => {
-  it('Dravio Save Schema v1 is the current schema and new saves use it', () => {
-    expect(SCHEMA_VERSION).toBe(1);
-    expect(freshState().schemaVersion).toBe(1);
-    expect(MIGRATION_STEPS).toEqual([]);
+  it('Dravio Save Schema v2 is the current schema and new saves use it', () => {
+    expect(SCHEMA_VERSION).toBe(2);
+    expect(freshState().schemaVersion).toBe(2);
+    expect(freshState().discoveries).toEqual([]);
+    expect(MIGRATION_STEPS.map((m) => [m.from, m.to])).toEqual([[1, 2]]);
   });
 
   it('current version passes through unchanged', () => {
     const s = freshState() as unknown as Record<string, unknown>;
-    const r = migrateState(1, s);
-    expect(r).toEqual({ ok: true, state: s, fromVersion: 1, preRelease: false });
+    const r = migrateState(2, s);
+    expect(r).toEqual({ ok: true, state: s, fromVersion: 2, preRelease: false });
   });
 
   it('runs future steps in order and stamps schemaVersion', () => {
@@ -112,17 +116,61 @@ describe('migration framework (schemaVersion)', () => {
     expect(migrateState(1, { schemaVersion: 1 }, [], 2)).toMatchObject({ ok: false, code: 'unsupported-version' });
     const boom: MigrationStep[] = [{ from: 1, to: 2, run: () => { throw new Error('bad data'); } }];
     expect(migrateState(1, { schemaVersion: 1 }, boom, 2)).toMatchObject({ ok: false, code: 'migration-failed', details: ['1 → 2: bad data'] });
-    expect(migrateState(2, { schemaVersion: 2 })).toMatchObject({ ok: false, code: 'newer-version' });
+    expect(migrateState(4, { schemaVersion: 4 })).toMatchObject({ ok: false, code: 'newer-version' });
   });
 
-  it('pre-release dev saves (schemaVersion 3, same shape) are kept and read as v1', async () => {
+  it('pre-release dev saves (schemaVersion 3, v1 shape) are read as v1 then migrated to v2', async () => {
     const s = advanced(freshState(), 5000, 'dev');
     const r = await parseSaveText(await envelopeAt(3, s));
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.save.migratedFrom).toBe(3);
-    expect(r.save.state).toEqual({ ...s, food: { lastSpawnAtMs: null, drops: [] }, schemaVersion: 1 });
-    expect(migrateState(3, { schemaVersion: 3 })).toMatchObject({ ok: true, preRelease: true, state: { schemaVersion: 1 } });
+    expect(r.save.state).toEqual({ ...s, food: { lastSpawnAtMs: null, drops: [] }, schemaVersion: 2, discoveries: [] });
+    expect(migrateState(3, { schemaVersion: 3 })).toMatchObject({ ok: true, preRelease: true, state: { schemaVersion: 2, discoveries: [] } });
+  });
+});
+
+describe('migration v1 → v2 on a real Schema v1 save (tests/fixtures/save-schema-v1.json)', () => {
+  // File được ghi bởi code main@34d42ec (Schema v1), giữ nguyên văn.
+  const fixture = import.meta.glob('../fixtures/save-schema-v1.json', { query: '?raw', import: 'default', eager: true });
+  const text = Object.values(fixture)[0] as string;
+
+  it('loads, keeps every v1 field and adds empty discoveries', async () => {
+    const original = JSON.parse(text) as { schemaVersion: number; state: Record<string, unknown> };
+    expect(original.schemaVersion).toBe(1);
+    expect('discoveries' in original.state).toBe(false);
+    const r = await parseSaveText(text);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.save.migratedFrom).toBe(1);
+    expect(r.save.state.schemaVersion).toBe(2);
+    expect(r.save.state.discoveries).toEqual([]);
+    const { schemaVersion: _a, discoveries: _b, ...rest } = r.save.state;
+    void _a;
+    void _b;
+    const { schemaVersion: _c, ...origRest } = original.state;
+    void _c;
+    expect(rest).toEqual(origRest);
+  });
+
+  it('a v1 save is archived verbatim and the gold, dragons and habitats are preserved after saving as v2', async () => {
+    const store = new MemorySaveStore();
+    store.slots.set('main', text);
+    const mgr = new SaveManager({ store, nowMs: () => T0 });
+    const r = await mgr.load();
+    if (r.kind !== 'loaded') throw new Error(r.kind);
+    await mgr.save(r.save.state);
+    expect(store.slots.get('archive:schema-1')).toBe(text);
+    const again = await parseSaveText((await store.get('main')) ?? '');
+    expect(again.ok && again.save.migratedFrom).toBeNull();
+    const orig = (JSON.parse(text) as { state: GameState }).state;
+    expect(again.ok && again.save.state.goldMicro).toBe(orig.goldMicro);
+    expect(again.ok && again.save.state.dragons).toEqual(orig.dragons);
+    expect(again.ok && again.save.state.zones).toEqual(orig.zones);
+  });
+
+  it('refuses a v1 state that already has discoveries (would hide a shape mismatch)', () => {
+    expect(migrateState(1, { schemaVersion: 1, discoveries: [] })).toMatchObject({ ok: false, code: 'migration-failed' });
   });
 });
 
@@ -192,7 +240,7 @@ describe('SaveManager: load, backups, one writer', () => {
 
   it('a save written by a newer version blocks writes and is never overwritten', async () => {
     const { store } = manager();
-    const newer = await envelopeAt(2);
+    const newer = await envelopeAt(4);
     store.slots.set('main', newer);
     const mgr = new SaveManager({ store, nowMs: () => T0 });
     expect((await mgr.load()).kind).toBe('newer-version');
@@ -229,7 +277,7 @@ describe('SaveManager: load, backups, one writer', () => {
     // Sau nhiều lần xoay, bản gốc vẫn còn nguyên trong archive; main đã là schema v1.
     expect(store.slots.get('archive:schema-3')).toBe(original);
     const main = await parseSaveText((await store.get('main')) ?? '');
-    expect(main.ok && main.save.state.schemaVersion).toBe(1);
+    expect(main.ok && main.save.state.schemaVersion).toBe(2);
     expect(main.ok && main.save.migratedFrom).toBeNull();
   });
 

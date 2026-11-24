@@ -1,7 +1,10 @@
 import { systemClock, type Clock } from '../engine/core/clock';
-import { dispatch } from '../engine/core/commands';
+import { dispatch, type Command } from '../engine/core/commands';
+import type { CommandError } from '../engine/core/errors';
 import { createInitialState } from '../engine/core/initialState';
 import { createRng, hashSeed } from '../engine/core/rng';
+import { recordDiscovery } from '../engine/world/zones';
+import type { DiscoveryId } from '../data/habitatUnlocks';
 import { createAutosave } from '../persistence/autosave';
 import type { ImportPreview, SaveErrorCode } from '../persistence/saveFile';
 import { SaveManager, type SlotFailure } from '../persistence/saveManager';
@@ -14,6 +17,9 @@ import { acquireWriterLock, type WriterLock } from './writerLock';
  * Nối engine + persistence cho trình duyệt (lớp platform, được phép đọc đồng hồ hệ thống và crypto).
  * Một phiên duy nhất cho mỗi tab; tab không giữ khóa người ghi chỉ đọc và không chạy thời gian.
  */
+
+/** Lệnh từ UI, requestId do phiên tự gán. */
+export type CommandInput = Command extends infer C ? (C extends Command ? Omit<C, 'requestId'> : never) : never;
 
 export type SessionStatus = 'loading' | 'ready' | 'read-only' | 'newer-version' | 'unrecoverable';
 
@@ -160,6 +166,28 @@ export class GameSession {
     await this.manager.save(state, { force: true });
     this.set({ status: 'ready', state, loadedFrom: 'new', lastSavedAtMs: this.clock.nowMs() });
     this.run();
+  }
+
+  /** Gửi một lệnh người chơi qua command bus. Tab chỉ xem hoặc đang thay save thì không làm gì. */
+  send(cmd: CommandInput): CommandError | null {
+    const s = this.snap.state;
+    if (!s || this.snap.status !== 'ready' || this.swapping) return null;
+    const r = dispatch(s, { ...cmd, requestId: newRequestId() }, { clock: this.clock });
+    if (!r.ok) return r.error;
+    this.set({ state: r.state });
+    return null;
+  }
+
+  /**
+   * CHỈ DÙNG KHI PHÁT TRIỂN (ADR 0009): ghi nhận khám phá thay cho hệ nhiệm vụ PR5 để thử mở sinh cảnh.
+   * Trong bản build production `import.meta.env.DEV` là false: hàm không làm gì và mã bên dưới bị loại bỏ.
+   */
+  devRecordDiscovery(id: DiscoveryId): void {
+    if (!import.meta.env.DEV) return;
+    const s = this.snap.state;
+    if (!s || this.snap.status !== 'ready' || this.swapping) return;
+    const r = recordDiscovery(s, id);
+    if (r.ok) this.set({ state: { ...r.state, revision: s.revision + 1 } });
   }
 
   exportText(): Promise<string> | null {
