@@ -14,7 +14,8 @@
     "typecheck": "tsc -b --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "art:export:emberling": "node scripts/art/export-emberling-glb.mjs"
   },
   "dependencies": {
     "react": "^19.3.1",
