@@ -21,3 +21,9 @@ Tác giả xác nhận thử nghiệm nhân vật xoay 360°, không xoay camera
 
 ## Sau khi tác giả duyệt
 Thử nghiệm GLB/glTF rigged Emberling có texture hand-painted theo Art Bible. Cân nhắc Three.js + lazy loader, ánh sáng cố định, shader phenotype/Aether, vùng cơ thể có ID phục vụ chăm sóc. Tách layer inspector 3D khỏi renderer thế giới; chỉ xem xét nhân vật 3D trong scene hoặc PixiJS sau khi benchmark. Không nhân rộng 16 loài trước khi mẫu đạt chất lượng.
+
+## GLB export
+- Chạy `npm run art:export:emberling` sau khi cài dependencies. File `art-exports/emberling-baby-normal.glb` được sinh tại máy local; có thể nhập vào Blender để chỉnh sửa hình thể.
+- GLB 2.0 độc lập, mesh tam giác, màu đỉnh, normals đơn vị, winding hướng ngoài, loại mặt suy biến. Không có rig/UV/texture/animation. Không phải model production.
+- Có thể truyền đường dẫn khác qua `npm run art:export:emberling -- my-model.glb`.
+- Viewer WebGL hiện tại vẫn dùng mesh canonical; chưa tích hợp GLB loader hoặc Three.js. Cần nghiệm thu bằng Blender và trình duyệt thật trước khi chọn pipeline production.
