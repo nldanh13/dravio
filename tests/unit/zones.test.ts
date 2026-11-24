@@ -1,0 +1,276 @@
+import { describe, expect, it } from 'vitest';
+import { fixedClock } from '../../src/engine/core/clock';
+import { dispatch, type Command } from '../../src/engine/core/commands';
+import { createInitialState } from '../../src/engine/core/initialState';
+import { createRng } from '../../src/engine/core/rng';
+import { validateGameState } from '../../src/engine/core/validation';
+import { SUITABILITY_ALLOWED, SUITABILITY_GOOD, speciesSuitability, suitabilityTier } from '../../src/engine/world/habitat';
+import { isProducing } from '../../src/engine/world/placement';
+import { currentProductionBudget, grantHabitatUnlock, habitatsOfZone, placementOptions, zoneOccupancy } from '../../src/engine/world/zones';
+import { en } from '../../src/i18n/en';
+import { vi } from '../../src/i18n/vi';
+import type { DragonInstance } from '../../src/types/game';
+import type { GameState } from '../../src/types/state';
+import { adult } from './fixtures';
+
+const T0 = Date.UTC(2026, 10, 25, 9, 0, 0);
+let seq = 0;
+const rid = () => `z-${++seq}`;
+type CommandInput = Command extends infer C ? (C extends Command ? Omit<C, 'requestId'> : never) : never;
+
+function game() {
+  const clock = fixedClock(T0);
+  const state = createInitialState({ saveId: 'zones', nowMs: T0, rng: createRng(8) });
+  return { clock, state };
+}
+
+function run(state: GameState, cmd: CommandInput, clock: { nowMs(): number }) {
+  return dispatch(state, { requestId: rid(), ...cmd }, { clock });
+}
+
+function ok(state: GameState, cmd: CommandInput, clock: { nowMs(): number }) {
+  const r = run(state, cmd, clock);
+  if (!r.ok) throw new Error(`expected ok, got ${r.error.code}`);
+  const v = validateGameState(r.state);
+  if (!v.ok) throw new Error(v.errors.join('; '));
+  return r;
+}
+
+function unlock(state: GameState, ...habitats: string[]): GameState {
+  return habitats.reduce((s, h) => {
+    const r = grantHabitatUnlock(s, h);
+    if (!r.ok) throw new Error(r.code);
+    return r.state;
+  }, state);
+}
+
+function withDragons(state: GameState, ...dragons: DragonInstance[]): GameState {
+  return { ...state, dragons: [...state.dragons, ...dragons] };
+}
+
+const firstUid = (s: GameState) => s.dragons[0]?.uid ?? '';
+const meadow = { kind: 'zone', zoneId: 'origin', habitatId: 'origin_meadow' } as const;
+
+describe('Origin zone layout (ADR 0003, PACK_README)', () => {
+  it('has 3 microhabitats, 5 physical slots, only the meadow open; ocean and sky locked', () => {
+    const { state } = game();
+    expect(habitatsOfZone('origin')).toEqual(['origin_meadow', 'origin_pondbank', 'origin_warm_rocks']);
+    const origin = state.zones.find((z) => z.id === 'origin');
+    expect(origin).toMatchObject({ unlocked: true, capacity: 5, unlockedHabitatIds: ['origin_meadow'] });
+    expect(state.zones.filter((z) => z.id !== 'origin').every((z) => !z.unlocked)).toBe(true);
+    expect(zoneOccupancy(state, 'origin')).toBe(1);
+    expect(currentProductionBudget(state)).toBe(5);
+  });
+
+  it('microhabitats do not add capacity: unlocking keeps capacity 5', () => {
+    const s = unlock(game().state, 'origin_pondbank', 'origin_warm_rocks');
+    expect(s.zones.find((z) => z.id === 'origin')).toMatchObject({ capacity: 5, unlockedHabitatIds: ['origin_meadow', 'origin_pondbank', 'origin_warm_rocks'] });
+  });
+
+  it('grantHabitatUnlock rejects duplicates, unknown habitats and habitats of a locked zone', () => {
+    const { state } = game();
+    expect(grantHabitatUnlock(state, 'origin_meadow')).toEqual({ ok: false, code: 'already-there' });
+    expect(grantHabitatUnlock(state, 'nowhere')).toEqual({ ok: false, code: 'habitat-locked' });
+    expect(grantHabitatUnlock(state, 'ocean_estuary')).toEqual({ ok: false, code: 'zone-locked' });
+    const r = grantHabitatUnlock(state, 'origin_warm_rocks');
+    expect(r.ok && r.events).toEqual([{ type: 'habitatUnlocked', zoneId: 'origin', habitatId: 'origin_warm_rocks' }]);
+  });
+});
+
+describe('suitability tiers', () => {
+  it('uses the GDD thresholds 50 / 80', () => {
+    expect([SUITABILITY_ALLOWED, SUITABILITY_GOOD]).toEqual([50, 80]);
+    expect(suitabilityTier({ allowed: true, score: 80, reason: 'ok' })).toBe('good');
+    expect(suitabilityTier({ allowed: true, score: 79, reason: 'ok' })).toBe('needs-improvement');
+    expect(suitabilityTier({ allowed: false, score: 49, reason: 'low-suitability' })).toBe('unsuitable');
+  });
+
+  it('the four G1 Commons have a good home in Origin; land dragons never fly', () => {
+    expect(speciesSuitability('emberling', 'origin_meadow').score).toBeGreaterThanOrEqual(80);
+    expect(speciesSuitability('sprout', 'origin_meadow').score).toBeGreaterThanOrEqual(80);
+    expect(speciesSuitability('droplet', 'origin_pondbank').score).toBeGreaterThanOrEqual(80);
+    expect(speciesSuitability('zephyr', 'origin_meadow').score).toBeGreaterThanOrEqual(80);
+    expect(speciesSuitability('droplet', 'origin_meadow').allowed).toBe(false);
+    expect(speciesSuitability('emberling', 'sky_low_island').allowed).toBe(false);
+  });
+});
+
+describe('placementOptions', () => {
+  it('explains every target for Emberling at the start', () => {
+    const { state } = game();
+    const opts = placementOptions(state, state.dragons[0] as DragonInstance);
+    const by = Object.fromEntries(opts.map((o) => [o.habitatId, o.blocked]));
+    expect(by).toEqual({
+      origin_meadow: 'already-there',
+      origin_pondbank: 'habitat-locked',
+      origin_warm_rocks: 'habitat-locked',
+      ocean_estuary: 'zone-locked',
+      ocean_reef: 'zone-locked',
+      ocean_cool_pool: 'zone-locked',
+      sky_low_island: 'zone-locked',
+    });
+    expect(opts.find((o) => o.habitatId === 'origin_meadow')).toMatchObject({ tier: 'good', freeSlots: 5 });
+  });
+
+  it('suitability check runs before capacity, and is the same rule the command uses', () => {
+    const { state } = game();
+    const s = unlock(state, 'origin_pondbank', 'origin_warm_rocks');
+    const drop = adult('drop', 'droplet');
+    const opts = placementOptions(withDragons(s, drop), drop);
+    expect(opts.find((o) => o.habitatId === 'origin_meadow')?.blocked).toBe('habitat-unsuitable');
+    expect(opts.find((o) => o.habitatId === 'origin_pondbank')?.blocked).toBeNull();
+  });
+});
+
+describe('moveDragon', () => {
+  it('moves within Origin after a habitat opens, keeps production and validates', () => {
+    const { clock, state } = game();
+    const s = unlock(state, 'origin_warm_rocks');
+    clock.advance(10_000);
+    const r = ok(s, { type: 'moveDragon', dragonUid: firstUid(s), target: { kind: 'zone', zoneId: 'origin', habitatId: 'origin_warm_rocks' } }, clock);
+    const d = r.state.dragons[0] as DragonInstance;
+    expect(d.location).toEqual({ kind: 'zone', zoneId: 'origin', habitatId: 'origin_warm_rocks' });
+    expect(r.state.productionDragonIds).toEqual([d.uid]);
+    expect(isProducing(r.state, d)).toBe(true);
+    expect(r.events.map((e) => e.type)).toEqual(['timeAdvanced', 'dragonMoved']);
+  });
+
+  it('rejects locked habitats, locked zones, unsuitable habitats and the same spot without changing state', () => {
+    const { clock, state } = game();
+    const drop = adult('drop', 'droplet');
+    const s = withDragons(state, drop);
+    clock.advance(5_000);
+    const cases: [CommandInput, string][] = [
+      [{ type: 'moveDragon', dragonUid: firstUid(s), target: { kind: 'zone', zoneId: 'origin', habitatId: 'origin_warm_rocks' } }, 'habitat-locked'],
+      [{ type: 'moveDragon', dragonUid: firstUid(s), target: { kind: 'zone', zoneId: 'ocean', habitatId: 'ocean_estuary' } }, 'zone-locked'],
+      [{ type: 'moveDragon', dragonUid: firstUid(s), target: { kind: 'zone', zoneId: 'origin', habitatId: 'ocean_estuary' } }, 'habitat-locked'],
+      [{ type: 'moveDragon', dragonUid: 'drop', target: meadow }, 'habitat-unsuitable'],
+      [{ type: 'moveDragon', dragonUid: firstUid(s), target: meadow }, 'already-there'],
+      [{ type: 'moveDragon', dragonUid: 'drop', target: { kind: 'storage' } }, 'already-there'],
+      [{ type: 'moveDragon', dragonUid: 'ghost', target: meadow }, 'unknown-dragon'],
+    ];
+    for (const [cmd, code] of cases) {
+      const r = run(s, cmd, clock);
+      expect(r).toMatchObject({ ok: false, error: { code } });
+      expect(r.state).toBe(s);
+    }
+  });
+
+  it('a full zone (5) blocks a sixth dragon but still allows moves inside the zone', () => {
+    const { clock, state } = game();
+    let s = unlock(state, 'origin_warm_rocks');
+    const extras = ['a', 'b', 'c', 'd'].map((id) => adult(id, 'emberling', { location: meadow }));
+    s = withDragons(s, ...extras, adult('sixth', 'sprout'));
+    expect(zoneOccupancy(s, 'origin')).toBe(5);
+    expect(run(s, { type: 'moveDragon', dragonUid: 'sixth', target: meadow }, clock)).toMatchObject({ ok: false, error: { code: 'zone-full' } });
+    ok(s, { type: 'moveDragon', dragonUid: 'a', target: { kind: 'zone', zoneId: 'origin', habitatId: 'origin_warm_rocks' } }, clock);
+    const freed = ok(s, { type: 'moveDragon', dragonUid: 'a', target: { kind: 'storage' } }, clock).state;
+    ok(freed, { type: 'moveDragon', dragonUid: 'sixth', target: meadow }, clock);
+  });
+
+  it('busy, cared-for, sheltered and released dragons cannot be moved', () => {
+    const { clock, state } = game();
+    const s = withDragons(
+      state,
+      adult('busy', 'sprout', { activity: 'breeding' }),
+      adult('care', 'sprout', { location: { kind: 'care', caseId: 'case-1' }, activity: 'care' }),
+      adult('shelter', 'sprout', { location: { kind: 'shelter', zoneId: 'origin' } }),
+      adult('gone', 'sprout', { location: { kind: 'released' } }),
+    );
+    for (const uid of ['busy', 'care', 'shelter', 'gone']) {
+      expect(run(s, { type: 'moveDragon', dragonUid: uid, target: meadow }, clock)).toMatchObject({ ok: false, error: { code: 'dragon-unavailable' } });
+      expect(run(s, { type: 'moveDragon', dragonUid: uid, target: { kind: 'storage' } }, clock)).toMatchObject({ ok: false, error: { code: 'dragon-unavailable' } });
+    }
+  });
+
+  it('moving to safe storage leaves the production budget; gold up to the move is kept', () => {
+    const { clock, state } = game();
+    clock.advance(100_000);
+    const r = ok(state, { type: 'moveDragon', dragonUid: firstUid(state), target: { kind: 'storage' } }, clock);
+    // 100 s Baby Emberling: 0.025 G/s × 0.4 = 1 G = 1 000 000 microG.
+    expect(r.state.goldMicro - state.goldMicro).toBe(1_000_000);
+    expect(r.state.productionDragonIds).toEqual([]);
+    expect(r.events.map((e) => e.type)).toEqual(['timeAdvanced', 'dragonMoved', 'productionChanged']);
+    clock.advance(100_000);
+    const later = ok(r.state, { type: 'advanceTime', mode: 'online' }, clock);
+    expect(later.state.goldMicro).toBe(r.state.goldMicro);
+    // Vẫn lớn khi ở kho.
+    expect((later.state.dragons[0] as DragonInstance).xpSec).toBe(200);
+  });
+
+  it('is idempotent by requestId', () => {
+    const { clock, state } = game();
+    const cmd = { type: 'moveDragon', requestId: 'same-move', dragonUid: firstUid(state), target: { kind: 'storage' } } as const;
+    const a = dispatch(state, cmd, { clock });
+    const b = dispatch(a.state, cmd, { clock });
+    expect(b).toMatchObject({ ok: true, duplicate: true });
+    expect(b.state).toBe(a.state);
+  });
+
+  it('rejects malformed targets as invalid-command', () => {
+    const { clock, state } = game();
+    for (const target of [null, {}, { kind: 'zone' }, { kind: 'zone', zoneId: 'origin' }, { kind: 'shelter' }]) {
+      expect(dispatch(state, { type: 'moveDragon', requestId: rid(), dragonUid: firstUid(state), target }, { clock })).toMatchObject({ ok: false, error: { code: 'invalid-command' } });
+    }
+  });
+});
+
+describe('setProductionSlot (budget 5 + 2 × level, max 25)', () => {
+  it('toggles off and on; only placed dragons can be selected', () => {
+    const { clock, state } = game();
+    const off = ok(state, { type: 'setProductionSlot', dragonUid: firstUid(state), enabled: false }, clock);
+    expect(off.state.productionDragonIds).toEqual([]);
+    expect(run(off.state, { type: 'setProductionSlot', dragonUid: firstUid(state), enabled: false }, clock)).toMatchObject({ ok: false, error: { code: 'already-there' } });
+    const on = ok(off.state, { type: 'setProductionSlot', dragonUid: firstUid(state), enabled: true }, clock);
+    expect(on.state.productionDragonIds).toEqual([firstUid(state)]);
+    const stored = withDragons(state, adult('st', 'sprout'));
+    expect(run(stored, { type: 'setProductionSlot', dragonUid: 'st', enabled: true }, clock)).toMatchObject({ ok: false, error: { code: 'not-placed' } });
+  });
+
+  it('gold stops at the moment production is turned off', () => {
+    const { clock, state } = game();
+    clock.advance(50_000);
+    const off = ok(state, { type: 'setProductionSlot', dragonUid: firstUid(state), enabled: false }, clock);
+    expect(off.state.goldMicro - state.goldMicro).toBe(500_000);
+    clock.advance(50_000);
+    expect(ok(off.state, { type: 'advanceTime', mode: 'online' }, clock).state.goldMicro).toBe(off.state.goldMicro);
+  });
+
+  it('enforces the global budget across zones; a capacity upgrade level raises it by 2', () => {
+    const { clock, state } = game();
+    // Mở Ocean bằng fixture (G2 mới mở thật) để có hơn 5 chỗ vật lý.
+    let s: GameState = { ...state, zones: state.zones.map((z) => (z.id === 'ocean' ? { ...z, unlocked: true, unlockedHabitatIds: ['ocean_estuary'] } : z)) };
+    const inMeadow = ['m1', 'm2', 'm3', 'm4'].map((id) => adult(id, 'emberling', { location: meadow }));
+    const inEstuary = ['e1', 'e2'].map((id) => adult(id, 'droplet', { location: { kind: 'zone', zoneId: 'ocean', habitatId: 'ocean_estuary' } }));
+    s = withDragons(s, ...inMeadow, ...inEstuary);
+    for (const id of ['m1', 'm2', 'm3', 'm4']) s = ok(s, { type: 'setProductionSlot', dragonUid: id, enabled: true }, clock).state;
+    expect(s.productionDragonIds).toHaveLength(5);
+    expect(run(s, { type: 'setProductionSlot', dragonUid: 'e1', enabled: true }, clock)).toMatchObject({ ok: false, error: { code: 'production-budget-full' } });
+    const upgraded = { ...s, upgrades: { ...s.upgrades, islandCapacityLevel: 1 } };
+    expect(currentProductionBudget(upgraded)).toBe(7);
+    const more = ok(ok(upgraded, { type: 'setProductionSlot', dragonUid: 'e1', enabled: true }, clock).state, { type: 'setProductionSlot', dragonUid: 'e2', enabled: true }, clock).state;
+    expect(more.productionDragonIds).toHaveLength(7);
+    expect(currentProductionBudget({ ...s, upgrades: { ...s.upgrades, islandCapacityLevel: 10 } })).toBe(25);
+    // Dragons outside the budget still grow.
+    const outside = withDragons(s, adult('young', 'sprout', { xpSec: 0, location: { kind: 'storage' } }));
+    clock.advance(10_000);
+    const grown = ok(outside, { type: 'advanceTime', mode: 'online' }, clock).state;
+    expect(grown.dragons.find((d) => d.uid === 'young')?.xpSec).toBe(10);
+  });
+
+  it('released dragons cannot join production', () => {
+    const { clock, state } = game();
+    const s = withDragons(state, adult('gone', 'sprout', { location: { kind: 'released' } }));
+    expect(run(s, { type: 'setProductionSlot', dragonUid: 'gone', enabled: true }, clock)).toMatchObject({ ok: false, error: { code: 'dragon-unavailable' } });
+  });
+});
+
+describe('i18n for the new errors', () => {
+  it('every new error code has VI and EN text', () => {
+    for (const c of ['zone-full', 'habitat-unsuitable', 'already-there', 'not-placed', 'production-budget-full']) {
+      expect(vi).toHaveProperty(`commandError.${c}`);
+      expect(en).toHaveProperty(`commandError.${c}`);
+    }
+  });
+
+});
