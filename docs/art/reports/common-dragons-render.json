@@ -1,0 +1,2072 @@
+{
+ "tool": "Chromium (Playwright) Canvas 2D drawImage",
+ "browser": "158.0.8127.36",
+ "sprites": 48,
+ "failures": 0,
+ "results": [
+  {
+   "sp": "emberling",
+   "st": "baby",
+   "mu": "normal",
+   "file": "src/assets/g0/emberling/baby_normal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 466,
+     "coverage": 0.137,
+     "bbox": [
+      60,
+      98,
+      176,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 1693,
+     "coverage": 0.124,
+     "bbox": [
+      62,
+      98,
+      176,
+      171
+     ]
+    },
+    "256": {
+     "opaquePx": 6497,
+     "coverage": 0.119,
+     "bbox": [
+      61,
+      98,
+      176,
+      171
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "emberling",
+   "st": "baby",
+   "mu": "crystal",
+   "file": "src/assets/g0/emberling/baby_crystal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 600,
+     "coverage": 0.177,
+     "bbox": [
+      60,
+      94,
+      184,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 2191,
+     "coverage": 0.16,
+     "bbox": [
+      62,
+      92,
+      186,
+      171
+     ]
+    },
+    "256": {
+     "opaquePx": 8339,
+     "coverage": 0.153,
+     "bbox": [
+      61,
+      91,
+      187,
+      171
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "emberling",
+   "st": "baby",
+   "mu": "golden",
+   "file": "src/assets/g0/emberling/baby_golden.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 629,
+     "coverage": 0.185,
+     "bbox": [
+      60,
+      83,
+      184,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 2288,
+     "coverage": 0.167,
+     "bbox": [
+      62,
+      84,
+      184,
+      171
+     ]
+    },
+    "256": {
+     "opaquePx": 8629,
+     "coverage": 0.158,
+     "bbox": [
+      61,
+      83,
+      184,
+      171
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "emberling",
+   "st": "baby",
+   "mu": "prismatic",
+   "file": "src/assets/g0/emberling/baby_prismatic.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 610,
+     "coverage": 0.18,
+     "bbox": [
+      60,
+      83,
+      188,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 2208,
+     "coverage": 0.161,
+     "bbox": [
+      62,
+      84,
+      189,
+      171
+     ]
+    },
+    "256": {
+     "opaquePx": 8403,
+     "coverage": 0.154,
+     "bbox": [
+      61,
+      84,
+      189,
+      171
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "emberling",
+   "st": "juvenile",
+   "mu": "normal",
+   "file": "src/assets/g0/emberling/juvenile_normal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 757,
+     "coverage": 0.223,
+     "bbox": [
+      38,
+      71,
+      191,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 2786,
+     "coverage": 0.203,
+     "bbox": [
+      36,
+      71,
+      191,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 10704,
+     "coverage": 0.196,
+     "bbox": [
+      36,
+      71,
+      191,
+      171
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "emberling",
+   "st": "juvenile",
+   "mu": "crystal",
+   "file": "src/assets/g0/emberling/juvenile_crystal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 897,
+     "coverage": 0.264,
+     "bbox": [
+      38,
+      71,
+      203,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 3301,
+     "coverage": 0.241,
+     "bbox": [
+      36,
+      71,
+      203,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 12595,
+     "coverage": 0.231,
+     "bbox": [
+      36,
+      71,
+      203,
+      171
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "emberling",
+   "st": "juvenile",
+   "mu": "golden",
+   "file": "src/assets/g0/emberling/juvenile_golden.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 931,
+     "coverage": 0.274,
+     "bbox": [
+      38,
+      60,
+      199,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 3420,
+     "coverage": 0.25,
+     "bbox": [
+      36,
+      62,
+      201,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 12997,
+     "coverage": 0.238,
+     "bbox": [
+      36,
+      62,
+      200,
+      171
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "emberling",
+   "st": "juvenile",
+   "mu": "prismatic",
+   "file": "src/assets/g0/emberling/juvenile_prismatic.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 905,
+     "coverage": 0.267,
+     "bbox": [
+      38,
+      64,
+      206,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 3328,
+     "coverage": 0.243,
+     "bbox": [
+      36,
+      64,
+      206,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 12689,
+     "coverage": 0.233,
+     "bbox": [
+      36,
+      63,
+      207,
+      171
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "emberling",
+   "st": "adult",
+   "mu": "normal",
+   "file": "src/assets/g0/emberling/adult_normal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 1109,
+     "coverage": 0.327,
+     "bbox": [
+      8,
+      45,
+      203,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 4206,
+     "coverage": 0.307,
+     "bbox": [
+      8,
+      47,
+      203,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 16248,
+     "coverage": 0.298,
+     "bbox": [
+      8,
+      47,
+      203,
+      172
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "emberling",
+   "st": "adult",
+   "mu": "crystal",
+   "file": "src/assets/g0/emberling/adult_crystal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 1254,
+     "coverage": 0.37,
+     "bbox": [
+      8,
+      45,
+      218,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 4736,
+     "coverage": 0.346,
+     "bbox": [
+      8,
+      47,
+      218,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 18210,
+     "coverage": 0.334,
+     "bbox": [
+      8,
+      47,
+      218,
+      172
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "emberling",
+   "st": "adult",
+   "mu": "golden",
+   "file": "src/assets/g0/emberling/adult_golden.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 1279,
+     "coverage": 0.377,
+     "bbox": [
+      8,
+      45,
+      214,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 4833,
+     "coverage": 0.353,
+     "bbox": [
+      8,
+      43,
+      214,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 18570,
+     "coverage": 0.341,
+     "bbox": [
+      8,
+      43,
+      215,
+      172
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "emberling",
+   "st": "adult",
+   "mu": "prismatic",
+   "file": "src/assets/g0/emberling/adult_prismatic.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 1264,
+     "coverage": 0.373,
+     "bbox": [
+      8,
+      45,
+      221,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 4770,
+     "coverage": 0.348,
+     "bbox": [
+      8,
+      43,
+      221,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 18313,
+     "coverage": 0.336,
+     "bbox": [
+      8,
+      44,
+      222,
+      172
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "droplet",
+   "st": "baby",
+   "mu": "normal",
+   "file": "src/assets/dragons/common/droplet/baby_normal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 364,
+     "coverage": 0.107,
+     "bbox": [
+      75,
+      109,
+      176,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 1329,
+     "coverage": 0.097,
+     "bbox": [
+      73,
+      107,
+      176,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 5160,
+     "coverage": 0.095,
+     "bbox": [
+      74,
+      107,
+      175,
+      172
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "droplet",
+   "st": "baby",
+   "mu": "crystal",
+   "file": "src/assets/dragons/common/droplet/baby_crystal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 506,
+     "coverage": 0.149,
+     "bbox": [
+      75,
+      101,
+      184,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 1843,
+     "coverage": 0.135,
+     "bbox": [
+      73,
+      101,
+      184,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 7030,
+     "coverage": 0.129,
+     "bbox": [
+      74,
+      99,
+      185,
+      172
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "droplet",
+   "st": "baby",
+   "mu": "golden",
+   "file": "src/assets/dragons/common/droplet/baby_golden.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 550,
+     "coverage": 0.162,
+     "bbox": [
+      75,
+      90,
+      184,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 1990,
+     "coverage": 0.145,
+     "bbox": [
+      73,
+      92,
+      184,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 7570,
+     "coverage": 0.139,
+     "bbox": [
+      74,
+      91,
+      184,
+      172
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "droplet",
+   "st": "baby",
+   "mu": "prismatic",
+   "file": "src/assets/dragons/common/droplet/baby_prismatic.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 513,
+     "coverage": 0.151,
+     "bbox": [
+      75,
+      101,
+      184,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 1852,
+     "coverage": 0.135,
+     "bbox": [
+      73,
+      99,
+      186,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 7085,
+     "coverage": 0.13,
+     "bbox": [
+      74,
+      99,
+      185,
+      172
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "droplet",
+   "st": "juvenile",
+   "mu": "normal",
+   "file": "src/assets/dragons/common/droplet/juvenile_normal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 603,
+     "coverage": 0.178,
+     "bbox": [
+      45,
+      90,
+      188,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 2269,
+     "coverage": 0.166,
+     "bbox": [
+      45,
+      92,
+      189,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 8806,
+     "coverage": 0.161,
+     "bbox": [
+      44,
+      91,
+      188,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "droplet",
+   "st": "juvenile",
+   "mu": "crystal",
+   "file": "src/assets/dragons/common/droplet/juvenile_crystal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 754,
+     "coverage": 0.222,
+     "bbox": [
+      45,
+      83,
+      199,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 2801,
+     "coverage": 0.205,
+     "bbox": [
+      45,
+      84,
+      201,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 10767,
+     "coverage": 0.197,
+     "bbox": [
+      44,
+      83,
+      201,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "droplet",
+   "st": "juvenile",
+   "mu": "golden",
+   "file": "src/assets/dragons/common/droplet/juvenile_golden.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 809,
+     "coverage": 0.239,
+     "bbox": [
+      45,
+      71,
+      199,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 3016,
+     "coverage": 0.22,
+     "bbox": [
+      45,
+      71,
+      201,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 11461,
+     "coverage": 0.21,
+     "bbox": [
+      44,
+      71,
+      200,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "droplet",
+   "st": "juvenile",
+   "mu": "prismatic",
+   "file": "src/assets/dragons/common/droplet/juvenile_prismatic.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 761,
+     "coverage": 0.224,
+     "bbox": [
+      45,
+      83,
+      199,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 2824,
+     "coverage": 0.206,
+     "bbox": [
+      45,
+      83,
+      201,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 10843,
+     "coverage": 0.199,
+     "bbox": [
+      44,
+      83,
+      202,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "droplet",
+   "st": "adult",
+   "mu": "normal",
+   "file": "src/assets/dragons/common/droplet/adult_normal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 918,
+     "coverage": 0.271,
+     "bbox": [
+      11,
+      71,
+      203,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 3524,
+     "coverage": 0.257,
+     "bbox": [
+      11,
+      73,
+      201,
+      174
+     ]
+    },
+    "256": {
+     "opaquePx": 13721,
+     "coverage": 0.252,
+     "bbox": [
+      11,
+      72,
+      202,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "droplet",
+   "st": "adult",
+   "mu": "crystal",
+   "file": "src/assets/dragons/common/droplet/adult_crystal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 1073,
+     "coverage": 0.316,
+     "bbox": [
+      11,
+      68,
+      214,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 4074,
+     "coverage": 0.297,
+     "bbox": [
+      11,
+      69,
+      216,
+      174
+     ]
+    },
+    "256": {
+     "opaquePx": 15756,
+     "coverage": 0.289,
+     "bbox": [
+      11,
+      68,
+      217,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "droplet",
+   "st": "adult",
+   "mu": "golden",
+   "file": "src/assets/dragons/common/droplet/adult_golden.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 1143,
+     "coverage": 0.337,
+     "bbox": [
+      11,
+      49,
+      214,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 4369,
+     "coverage": 0.319,
+     "bbox": [
+      11,
+      49,
+      216,
+      174
+     ]
+    },
+    "256": {
+     "opaquePx": 16655,
+     "coverage": 0.305,
+     "bbox": [
+      11,
+      49,
+      215,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "droplet",
+   "st": "adult",
+   "mu": "prismatic",
+   "file": "src/assets/dragons/common/droplet/adult_prismatic.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 1087,
+     "coverage": 0.32,
+     "bbox": [
+      11,
+      68,
+      218,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 4103,
+     "coverage": 0.3,
+     "bbox": [
+      11,
+      68,
+      216,
+      174
+     ]
+    },
+    "256": {
+     "opaquePx": 15863,
+     "coverage": 0.291,
+     "bbox": [
+      11,
+      67,
+      217,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "sprout",
+   "st": "baby",
+   "mu": "normal",
+   "file": "src/assets/dragons/common/sprout/baby_normal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 382,
+     "coverage": 0.113,
+     "bbox": [
+      68,
+      94,
+      173,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 1406,
+     "coverage": 0.103,
+     "bbox": [
+      68,
+      94,
+      171,
+      171
+     ]
+    },
+    "256": {
+     "opaquePx": 5431,
+     "coverage": 0.1,
+     "bbox": [
+      68,
+      94,
+      172,
+      170
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "sprout",
+   "st": "baby",
+   "mu": "crystal",
+   "file": "src/assets/dragons/common/sprout/baby_crystal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 517,
+     "coverage": 0.152,
+     "bbox": [
+      68,
+      94,
+      180,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 1911,
+     "coverage": 0.14,
+     "bbox": [
+      68,
+      94,
+      182,
+      171
+     ]
+    },
+    "256": {
+     "opaquePx": 7290,
+     "coverage": 0.134,
+     "bbox": [
+      68,
+      94,
+      183,
+      170
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "sprout",
+   "st": "baby",
+   "mu": "golden",
+   "file": "src/assets/dragons/common/sprout/baby_golden.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 547,
+     "coverage": 0.161,
+     "bbox": [
+      68,
+      83,
+      184,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 2015,
+     "coverage": 0.147,
+     "bbox": [
+      68,
+      84,
+      182,
+      171
+     ]
+    },
+    "256": {
+     "opaquePx": 7662,
+     "coverage": 0.141,
+     "bbox": [
+      68,
+      84,
+      183,
+      170
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "sprout",
+   "st": "baby",
+   "mu": "prismatic",
+   "file": "src/assets/dragons/common/sprout/baby_prismatic.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 520,
+     "coverage": 0.153,
+     "bbox": [
+      68,
+      94,
+      184,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 1920,
+     "coverage": 0.14,
+     "bbox": [
+      68,
+      94,
+      184,
+      171
+     ]
+    },
+    "256": {
+     "opaquePx": 7331,
+     "coverage": 0.134,
+     "bbox": [
+      68,
+      94,
+      184,
+      170
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "sprout",
+   "st": "juvenile",
+   "mu": "normal",
+   "file": "src/assets/dragons/common/sprout/juvenile_normal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 643,
+     "coverage": 0.19,
+     "bbox": [
+      45,
+      64,
+      184,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 2422,
+     "coverage": 0.177,
+     "bbox": [
+      45,
+      62,
+      184,
+      171
+     ]
+    },
+    "256": {
+     "opaquePx": 9281,
+     "coverage": 0.17,
+     "bbox": [
+      44,
+      62,
+      183,
+      171
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "sprout",
+   "st": "juvenile",
+   "mu": "crystal",
+   "file": "src/assets/dragons/common/sprout/juvenile_crystal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 782,
+     "coverage": 0.231,
+     "bbox": [
+      45,
+      64,
+      195,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 2944,
+     "coverage": 0.215,
+     "bbox": [
+      45,
+      62,
+      199,
+      171
+     ]
+    },
+    "256": {
+     "opaquePx": 11231,
+     "coverage": 0.206,
+     "bbox": [
+      44,
+      62,
+      199,
+      171
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "sprout",
+   "st": "juvenile",
+   "mu": "golden",
+   "file": "src/assets/dragons/common/sprout/juvenile_golden.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 817,
+     "coverage": 0.241,
+     "bbox": [
+      45,
+      53,
+      195,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 3074,
+     "coverage": 0.224,
+     "bbox": [
+      45,
+      54,
+      197,
+      171
+     ]
+    },
+    "256": {
+     "opaquePx": 11660,
+     "coverage": 0.214,
+     "bbox": [
+      44,
+      53,
+      198,
+      171
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "sprout",
+   "st": "juvenile",
+   "mu": "prismatic",
+   "file": "src/assets/dragons/common/sprout/juvenile_prismatic.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 794,
+     "coverage": 0.234,
+     "bbox": [
+      45,
+      64,
+      199,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 2964,
+     "coverage": 0.216,
+     "bbox": [
+      45,
+      62,
+      199,
+      171
+     ]
+    },
+    "256": {
+     "opaquePx": 11304,
+     "coverage": 0.207,
+     "bbox": [
+      44,
+      62,
+      199,
+      171
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "sprout",
+   "st": "adult",
+   "mu": "normal",
+   "file": "src/assets/dragons/common/sprout/adult_normal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 945,
+     "coverage": 0.279,
+     "bbox": [
+      19,
+      34,
+      191,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 3623,
+     "coverage": 0.265,
+     "bbox": [
+      19,
+      32,
+      193,
+      171
+     ]
+    },
+    "256": {
+     "opaquePx": 13929,
+     "coverage": 0.255,
+     "bbox": [
+      20,
+      33,
+      193,
+      171
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "sprout",
+   "st": "adult",
+   "mu": "crystal",
+   "file": "src/assets/dragons/common/sprout/adult_crystal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 1094,
+     "coverage": 0.323,
+     "bbox": [
+      19,
+      34,
+      210,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 4161,
+     "coverage": 0.304,
+     "bbox": [
+      19,
+      32,
+      212,
+      171
+     ]
+    },
+    "256": {
+     "opaquePx": 15951,
+     "coverage": 0.293,
+     "bbox": [
+      20,
+      33,
+      211,
+      171
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "sprout",
+   "st": "adult",
+   "mu": "golden",
+   "file": "src/assets/dragons/common/sprout/adult_golden.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 1136,
+     "coverage": 0.335,
+     "bbox": [
+      19,
+      19,
+      210,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 4343,
+     "coverage": 0.317,
+     "bbox": [
+      19,
+      17,
+      210,
+      171
+     ]
+    },
+    "256": {
+     "opaquePx": 16566,
+     "coverage": 0.304,
+     "bbox": [
+      20,
+      18,
+      210,
+      171
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "sprout",
+   "st": "adult",
+   "mu": "prismatic",
+   "file": "src/assets/dragons/common/sprout/adult_prismatic.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 1106,
+     "coverage": 0.326,
+     "bbox": [
+      19,
+      34,
+      210,
+      169
+     ]
+    },
+    "128": {
+     "opaquePx": 4192,
+     "coverage": 0.306,
+     "bbox": [
+      19,
+      32,
+      212,
+      171
+     ]
+    },
+    "256": {
+     "opaquePx": 16050,
+     "coverage": 0.294,
+     "bbox": [
+      20,
+      33,
+      212,
+      171
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "zephyr",
+   "st": "baby",
+   "mu": "normal",
+   "file": "src/assets/dragons/common/zephyr/baby_normal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 392,
+     "coverage": 0.116,
+     "bbox": [
+      64,
+      98,
+      169,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 1449,
+     "coverage": 0.106,
+     "bbox": [
+      66,
+      99,
+      169,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 5587,
+     "coverage": 0.102,
+     "bbox": [
+      65,
+      98,
+      168,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "zephyr",
+   "st": "baby",
+   "mu": "crystal",
+   "file": "src/assets/dragons/common/zephyr/baby_crystal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 533,
+     "coverage": 0.157,
+     "bbox": [
+      64,
+      98,
+      176,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 1962,
+     "coverage": 0.143,
+     "bbox": [
+      66,
+      99,
+      178,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 7463,
+     "coverage": 0.137,
+     "bbox": [
+      65,
+      98,
+      179,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "zephyr",
+   "st": "baby",
+   "mu": "golden",
+   "file": "src/assets/dragons/common/zephyr/baby_golden.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 572,
+     "coverage": 0.169,
+     "bbox": [
+      64,
+      83,
+      176,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 2096,
+     "coverage": 0.153,
+     "bbox": [
+      66,
+      84,
+      178,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 7919,
+     "coverage": 0.145,
+     "bbox": [
+      65,
+      84,
+      178,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "zephyr",
+   "st": "baby",
+   "mu": "prismatic",
+   "file": "src/assets/dragons/common/zephyr/baby_prismatic.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 538,
+     "coverage": 0.159,
+     "bbox": [
+      64,
+      98,
+      180,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 1974,
+     "coverage": 0.144,
+     "bbox": [
+      66,
+      99,
+      178,
+      173
+     ]
+    },
+    "256": {
+     "opaquePx": 7512,
+     "coverage": 0.138,
+     "bbox": [
+      65,
+      98,
+      180,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "zephyr",
+   "st": "juvenile",
+   "mu": "normal",
+   "file": "src/assets/dragons/common/zephyr/juvenile_normal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 712,
+     "coverage": 0.21,
+     "bbox": [
+      41,
+      75,
+      176,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 2690,
+     "coverage": 0.196,
+     "bbox": [
+      41,
+      75,
+      176,
+      174
+     ]
+    },
+    "256": {
+     "opaquePx": 10344,
+     "coverage": 0.19,
+     "bbox": [
+      41,
+      75,
+      177,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "zephyr",
+   "st": "juvenile",
+   "mu": "crystal",
+   "file": "src/assets/dragons/common/zephyr/juvenile_crystal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 859,
+     "coverage": 0.253,
+     "bbox": [
+      41,
+      75,
+      188,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 3227,
+     "coverage": 0.236,
+     "bbox": [
+      41,
+      75,
+      191,
+      174
+     ]
+    },
+    "256": {
+     "opaquePx": 12304,
+     "coverage": 0.226,
+     "bbox": [
+      41,
+      75,
+      192,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "zephyr",
+   "st": "juvenile",
+   "mu": "golden",
+   "file": "src/assets/dragons/common/zephyr/juvenile_golden.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 914,
+     "coverage": 0.269,
+     "bbox": [
+      41,
+      56,
+      191,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 3408,
+     "coverage": 0.249,
+     "bbox": [
+      41,
+      60,
+      191,
+      174
+     ]
+    },
+    "256": {
+     "opaquePx": 12926,
+     "coverage": 0.237,
+     "bbox": [
+      41,
+      59,
+      190,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "zephyr",
+   "st": "juvenile",
+   "mu": "prismatic",
+   "file": "src/assets/dragons/common/zephyr/juvenile_prismatic.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 870,
+     "coverage": 0.256,
+     "bbox": [
+      41,
+      75,
+      191,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 3246,
+     "coverage": 0.237,
+     "bbox": [
+      41,
+      75,
+      191,
+      174
+     ]
+    },
+    "256": {
+     "opaquePx": 12390,
+     "coverage": 0.227,
+     "bbox": [
+      41,
+      75,
+      192,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "zephyr",
+   "st": "adult",
+   "mu": "normal",
+   "file": "src/assets/dragons/common/zephyr/adult_normal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 1139,
+     "coverage": 0.336,
+     "bbox": [
+      19,
+      45,
+      184,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 4365,
+     "coverage": 0.319,
+     "bbox": [
+      19,
+      47,
+      186,
+      174
+     ]
+    },
+    "256": {
+     "opaquePx": 16923,
+     "coverage": 0.31,
+     "bbox": [
+      18,
+      46,
+      186,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "zephyr",
+   "st": "adult",
+   "mu": "crystal",
+   "file": "src/assets/dragons/common/zephyr/adult_crystal.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 1293,
+     "coverage": 0.381,
+     "bbox": [
+      4,
+      45,
+      203,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 4914,
+     "coverage": 0.359,
+     "bbox": [
+      2,
+      47,
+      203,
+      174
+     ]
+    },
+    "256": {
+     "opaquePx": 18963,
+     "coverage": 0.348,
+     "bbox": [
+      2,
+      46,
+      203,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "zephyr",
+   "st": "adult",
+   "mu": "golden",
+   "file": "src/assets/dragons/common/zephyr/adult_golden.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 1352,
+     "coverage": 0.399,
+     "bbox": [
+      4,
+      34,
+      203,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 5144,
+     "coverage": 0.376,
+     "bbox": [
+      4,
+      36,
+      203,
+      174
+     ]
+    },
+    "256": {
+     "opaquePx": 19728,
+     "coverage": 0.362,
+     "bbox": [
+      3,
+      36,
+      203,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  },
+  {
+   "sp": "zephyr",
+   "st": "adult",
+   "mu": "prismatic",
+   "file": "src/assets/dragons/common/zephyr/adult_prismatic.svg",
+   "loaded": true,
+   "sizes": {
+    "64": {
+     "opaquePx": 1299,
+     "coverage": 0.383,
+     "bbox": [
+      4,
+      45,
+      203,
+      173
+     ]
+    },
+    "128": {
+     "opaquePx": 4943,
+     "coverage": 0.361,
+     "bbox": [
+      2,
+      47,
+      204,
+      174
+     ]
+    },
+    "256": {
+     "opaquePx": 19074,
+     "coverage": 0.35,
+     "bbox": [
+      1,
+      46,
+      204,
+      173
+     ]
+    }
+   },
+   "natural": [
+    240,
+    200
+   ]
+  }
+ ]
+}
