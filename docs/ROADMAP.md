@@ -1,6 +1,6 @@
 # Dravio — Hiện trạng và lộ trình
 
-Cập nhật: 24/11/2026 (sau khi tích hợp G0 Decision Pack). Nguồn: GDD 3.1 trang 21 (giai đoạn) và trang 23 (epic TD-01…TD-09).
+Cập nhật: 25/11/2026 (G0 được tác giả xác nhận, G1 PR1 đã merge). Nguồn: GDD 3.1 trang 21 (giai đoạn) và trang 23 (epic TD-01…TD-09).
 
 ## Hiện trạng so với GDD
 
@@ -18,20 +18,20 @@ Cập nhật: 24/11/2026 (sau khi tích hợp G0 Decision Pack). Nguồn: GDD 3.
 
 ## Lộ trình đề xuất (theo cổng nghiệm thu)
 
-### G0 — Discovery (đang làm)
+### G0 — Discovery ✅ hoàn thành 25/11/2026 (ADR 0005)
 Nguồn: G0 Decision Pack 1.0 (`docs/g0/`, ADR 0003). Chỉ đánh dấu những gì đã kiểm chứng bằng test trong repo.
 - [x] Khung dự án + engine thuần cho luật đã chốt
 - [x] Anatomy/ngưỡng sinh cảnh 16 loài từ `g0Biology.ts` (`draft: false`), 7 microhabitat, `suitability`; test Vitest qua
 - [x] Trả lời 6 điểm của ADR 0002 → ADR 0003; mỗi câu trả lời có test (`tests/unit/g0Decisions.test.ts`)
 - [x] Prototype mỹ thuật Emberling 3 stage × 4 biến thể tích hợp qua manifest, hiển thị trên trang demo
-- [ ] Tác giả duyệt phong cách Emberling ở 64/128 px (**chờ tác giả**)
+- [x] Tác giả duyệt phong cách Emberling làm prototype G0; thêm huy hiệu hình học cho biến thể để nhận diện ở 64 px không dựa vào màu (ADR 0005)
 - [x] 3 scenario mẫu có đặc tả (`docs/g0/SCENARIOS.md`); phần S03 preview G1 đã thành test
-- [ ] S01 (G1 PR1–PR4) và S02 (G1 PR6 / G2) chạy trên gameplay thật
-- [ ] Xác nhận thiết bị test và trần ngân sách (`docs/g0/QA_BUDGET.md`, **chờ tác giả**)
+- [x] Tác giả xác nhận thiết bị test (ưu tiên Windows + Chromium ở G1) và trần ngân sách 2/10/12 triệu VNĐ (`docs/g0/QA_BUDGET.md`, ADR 0005)
 
 Điểm lệch giữa tài liệu: `docs/g0/INTEGRATION_NOTES.md`.
 
 ### G1 — Vertical slice (1 vùng đất, 4 Common)
+Kịch bản nghiệm thu chạy trên gameplay thật: S01 qua PR1–PR4 (phần engine của S01 đã có test ở PR1), S02 bản giản lược ở PR6 (đầy đủ ở G2). Kiểm thử ưu tiên Windows + Chromium, ghi cấu hình thực tế.
 Thứ tự PR đề xuất, mỗi PR một lát cắt có test:
 1. [x] `GameState` + command bus (`advanceTime`, `feed` + `consumeFood`, `pet`, `renameDragon`) + validate runtime + domain events — ADR 0004, `tests/unit/gameState.test.ts`. Chưa có: trứng tutorial, nhận bonus offline (PR5)
 2. Persistence: IndexedDB, autosave 30s, export/import JSON + checksum, backup

@@ -25,6 +25,15 @@ describe('Emberling G0 sprites', () => {
     }
   });
 
+  it('variants carry a non-colour badge (diamond / ring / star); Normal has none', () => {
+    for (const stage of ['baby', 'juvenile', 'adult']) {
+      expect(SVG_SOURCES[`../../src/assets/g0/emberling/${stage}_normal.svg`]).not.toContain('data-variant-badge');
+      for (const m of ['crystal', 'golden', 'prismatic']) {
+        expect(SVG_SOURCES[`../../src/assets/g0/emberling/${stage}_${m}.svg`]).toContain(`data-variant-badge="${m}"`);
+      }
+    }
+  });
+
   it('records provenance and review status for every sprite', () => {
     for (const s of SPRITES) {
       expect(s.source.origin).toBeTruthy();
