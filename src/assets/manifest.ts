@@ -11,7 +11,8 @@ export interface AssetSource {
   /** Quyền sử dụng. */
   license: string;
   /** Trạng thái duyệt mỹ thuật. */
-  review: 'prototype-pending-review' | 'approved';
+  /** 'approved-prototype': tác giả duyệt làm prototype (ADR 0005/0101), chưa phải art thương mại. */
+  review: 'prototype-pending-review' | 'approved-prototype' | 'pending-author-review' | 'approved';
 }
 
 const G0_PROTOTYPE: AssetSource = {

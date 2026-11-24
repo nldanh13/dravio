@@ -1,45 +1,51 @@
-import { WORLD_DEPTH, WORLD_WIDTH, type Vec } from './originLayout';
+import { OVERVIEW, cameraTransform, sceneBox, type CameraState, type SceneBox } from './camera';
+import { SCENE_HEIGHT, SCENE_WIDTH, type Vec } from './originLayout';
 
 /**
- * Chiếu 2.5D xiên (oblique): mặt đất nghiêng, chiều sâu y nén 0,5 và lệch ngang 0,35; z là độ cao.
- * Sắp xếp vẽ theo y (xa → gần). Hàm thuần để test nghịch đảo khi chạm/bấm.
+ * Chiếu cảnh (ADR 0012): mỗi lần hiển thị một khung 960×540 px cảnh đặt theo `camX`
+ * (toạ độ thế giới của mép trái microhabitat) và camera zoom/kéo trong microhabitat đó.
+ * Mặt đất nhìn nghiêng đã vẽ sẵn trong tài nguyên nên phép chiếu chỉ là tỉ lệ + dời:
+ * y thế giới = y màn hình của điểm chạm đất, z nâng lên trên màn hình. Sắp xếp vẽ theo y.
+ * Hàm thuần để test nghịch đảo khi chạm/bấm.
  */
 
-export const SKEW = 0.35;
-export const SQUASH = 0.5;
-/** Khoảng trống phía trên (đơn vị thế giới) cho rồng bay và sprite cao. */
-export const TOP_PAD = 95;
-const SIDE_PAD = 12;
-
 export interface View {
+  /** px CSS mỗi px cảnh (đã nhân zoom). */
   k: number;
+  /** Gốc màn hình của toạ độ cảnh cục bộ (0,0). */
   ox: number;
   oy: number;
+  /** Toạ độ thế giới của mép trái microhabitat đang xem. */
+  camX: number;
   cssWidth: number;
   cssHeight: number;
+  /** Khung cảnh 16:9 (letterbox) ở zoom 1 — vùng cắt khi vẽ. */
+  box: SceneBox;
+  camera: CameraState;
 }
 
-/** Chiều cao CSS đề xuất cho chiều rộng cho trước (giữ tỉ lệ cảnh). */
+/** Chiều cao CSS đề xuất cho chiều rộng cho trước (giữ tỉ lệ cảnh 16:9). */
 export function sceneHeightFor(cssWidth: number): number {
-  const k = (cssWidth - 2 * SIDE_PAD) / (WORLD_WIDTH + WORLD_DEPTH * SKEW);
-  return Math.round((WORLD_DEPTH * SQUASH + TOP_PAD) * k + 2 * SIDE_PAD);
+  return Math.round((cssWidth * SCENE_HEIGHT) / SCENE_WIDTH);
 }
 
-export function fitView(cssWidth: number, cssHeight: number): View {
-  const kx = (cssWidth - 2 * SIDE_PAD) / (WORLD_WIDTH + WORLD_DEPTH * SKEW);
-  const ky = (cssHeight - 2 * SIDE_PAD) / (WORLD_DEPTH * SQUASH + TOP_PAD);
-  const k = Math.max(0.05, Math.min(kx, ky));
-  const w = (WORLD_WIDTH + WORLD_DEPTH * SKEW) * k;
-  const h = (WORLD_DEPTH * SQUASH + TOP_PAD) * k;
-  return { k, ox: (cssWidth - w) / 2, oy: (cssHeight - h) / 2 + TOP_PAD * k, cssWidth, cssHeight };
+export function fitView(cssWidth: number, cssHeight: number, camX = 0, camera: CameraState = OVERVIEW): View {
+  const box = sceneBox(cssWidth, cssHeight);
+  const { k, ox, oy } = cameraTransform(box, camera);
+  return { k, ox, oy, camX, cssWidth, cssHeight, box, camera };
 }
 
 export function toScreen(v: View, p: Vec, z = 0): Vec {
-  return { x: v.ox + (p.x + p.y * SKEW) * v.k, y: v.oy + (p.y * SQUASH - z) * v.k };
+  return { x: v.ox + (p.x - v.camX) * v.k, y: v.oy + (p.y - z) * v.k };
 }
 
 /** Điểm trên mặt đất (z = 0) dưới vị trí màn hình. */
 export function toGround(v: View, s: Vec): Vec {
-  const y = (s.y - v.oy) / (SQUASH * v.k);
-  return { x: (s.x - v.ox) / v.k - y * SKEW, y };
+  return { x: (s.x - v.ox) / v.k + v.camX, y: (s.y - v.oy) / v.k };
+}
+
+/** Điểm màn hình có nằm trong khung cảnh (không phải viền letterbox) không. */
+export function inSceneBox(v: View, s: Vec): boolean {
+  const b = v.box;
+  return s.x >= b.x && s.x <= b.x + SCENE_WIDTH * b.k0 && s.y >= b.y && s.y <= b.y + SCENE_HEIGHT * b.k0;
 }

@@ -14,4 +14,5 @@ export type DomainEvent =
   | { type: 'dragonMoved'; dragonUid: string; from: Location; to: Location }
   | { type: 'productionChanged'; dragonUid: string; enabled: boolean }
   | { type: 'habitatUnlocked'; zoneId: string; habitatId: string }
-  | { type: 'discoveryRecorded'; discoveryId: string };
+  | { type: 'discoveryRecorded'; discoveryId: string }
+  | { type: 'settingsChanged'; patch: { timeMode?: 'auto' | 'day' | 'sunset' | 'night'; fpsLimit?: 30 | 60; reducedMotion?: boolean } };

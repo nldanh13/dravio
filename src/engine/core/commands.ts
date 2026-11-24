@@ -43,7 +43,20 @@ export type Command =
   /** Chọn/bỏ rồng khỏi ngân sách sản xuất (5 + 2 × cấp, tối đa 25). */
   | { type: 'setProductionSlot'; requestId: string; dragonUid: string; enabled: boolean }
   /** Mở microhabitat miễn phí khi đã có khám phá điều kiện (ADR 0009). */
-  | { type: 'unlockHabitat'; requestId: string; habitatId: string };
+  | { type: 'unlockHabitat'; requestId: string; habitatId: string }
+  /**
+   * Đổi cài đặt hiển thị (GDD Phụ lục C.3 GameSettings; ADR 0012): chế độ thời gian
+   * auto/day/sunset/night, giới hạn FPS, giảm chuyển động. Không đổi kinh tế/thời gian game.
+   */
+  | { type: 'updateSettings'; requestId: string; patch: SettingsPatch };
+
+/** Các cài đặt người chơi được đổi qua lệnh (mở rộng dần theo Settings modal của GDD). */
+export interface SettingsPatch {
+  timeMode?: GameState['settings']['timeMode'];
+  fpsLimit?: GameState['settings']['fpsLimit'];
+  reducedMotion?: boolean;
+}
+const TIME_MODES = ['auto', 'day', 'sunset', 'night'] as const;
 
 export interface CommandContext {
   clock: Clock;
@@ -90,6 +103,26 @@ export function parseCommand(input: unknown): Command | null {
       return isId(input.dragonUid) && typeof input.enabled === 'boolean'
         ? { type: 'setProductionSlot', requestId, dragonUid: input.dragonUid, enabled: input.enabled }
         : null;
+    case 'updateSettings': {
+      const p = input.patch;
+      if (!isObj(p)) return null;
+      const keys = Object.keys(p);
+      if (keys.length === 0 || keys.some((k) => !['timeMode', 'fpsLimit', 'reducedMotion'].includes(k))) return null;
+      const patch: SettingsPatch = {};
+      if ('timeMode' in p) {
+        if (!(TIME_MODES as readonly unknown[]).includes(p.timeMode)) return null;
+        patch.timeMode = p.timeMode as SettingsPatch['timeMode'] & string;
+      }
+      if ('fpsLimit' in p) {
+        if (p.fpsLimit !== 30 && p.fpsLimit !== 60) return null;
+        patch.fpsLimit = p.fpsLimit;
+      }
+      if ('reducedMotion' in p) {
+        if (typeof p.reducedMotion !== 'boolean') return null;
+        patch.reducedMotion = p.reducedMotion;
+      }
+      return { type: 'updateSettings', requestId, patch };
+    }
     default:
       return null;
   }
@@ -255,6 +288,12 @@ function handle(state: GameState, cmd: Command, nowMs: number): Handled {
       if (!r.ok) return { ok: false, error: commandError(r.code) };
       // Mở chỗ không đổi vị trí rồng nào nên không cần quyết toán thời gian; vàng giữ nguyên.
       return { ok: true, state: r.state, events: r.events };
+    }
+
+    case 'updateSettings': {
+      // Chỉ cài đặt hiển thị: không quyết toán thời gian, không đổi vàng/rồng.
+      const settings = { ...state.settings, ...cmd.patch };
+      return { ok: true, state: { ...state, settings }, events: [{ type: 'settingsChanged', patch: { ...cmd.patch } }] };
     }
 
     case 'renameDragon': {

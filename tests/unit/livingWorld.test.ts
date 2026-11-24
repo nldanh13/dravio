@@ -3,8 +3,26 @@ import { createInitialState } from '../../src/engine/core/initialState';
 import { createRng } from '../../src/engine/core/rng';
 import { createAssetAdapter } from '../../src/rendering/assetAdapter';
 import { defaultRenderManifest, validateRenderManifest } from '../../src/rendering/assetContract';
-import { BODY_RADIUS, EAT_MS, LivingWorld, PET_MS, STEER_STEP_MS, blockingObstacles, type Agent } from '../../src/rendering/livingWorld';
-import { EDGE_MARGIN, ORIGIN_LAYOUT, inWater, regionOf } from '../../src/rendering/originLayout';
+import {
+  BODY_RADIUS,
+  EAT_MS,
+  LivingWorld,
+  PET_MS,
+  PRACTICE_FLIGHT_COOLDOWN_MS,
+  STEER_STEP_MS,
+  FOOD_REACT_MARGIN_S,
+  HURRY_FACTOR,
+  blockingObstacles,
+  blocksWater,
+  clipSpeed,
+  crossesWater,
+  walkPathLength,
+  flightAltitude,
+  type Agent,
+} from '../../src/rendering/livingWorld';
+import { EDGE_MARGIN, ORIGIN_LAYOUT, inWater, obstacleDistance, regionOf } from '../../src/rendering/originLayout';
+import { DRAGON_SCENE_SCALE, HABITAT_OFFSET_X, ORIGIN_HABITATS } from '../../src/assets/habitats/origin/manifest';
+import { resolveDragonClip } from '../../src/assets/animations/dragonAnimations';
 import type { DragonInstance } from '../../src/types/game';
 import type { GameState } from '../../src/types/state';
 import { adult } from './fixtures';
@@ -39,12 +57,17 @@ function run(world: LivingWorld, ms: number, now = T0, frame = 16, each?: (w: Li
 }
 
 describe('asset contract + adapter (AI 2 owns art)', () => {
-  it('default manifest from existing Emberling sprites is valid: 3 stages × 4 variants, bundled URLs, feet anchor', () => {
+  it('default manifest has the 48 Common sprites: 4 species × 3 stages × 4 variants, bundled URLs, feet anchor (120, 170)', () => {
     const m = defaultRenderManifest();
     expect(validateRenderManifest(m)).toEqual([]);
-    const e = m.dragons.emberling!;
-    expect(Object.keys(e).sort()).toEqual(['adult', 'baby', 'juvenile']);
-    for (const st of Object.values(e)) expect(Object.keys(st!).sort()).toEqual(['crystal', 'golden', 'normal', 'prismatic']);
+    expect(Object.keys(m.dragons).sort()).toEqual(['droplet', 'emberling', 'sprout', 'zephyr']);
+    for (const sp of Object.values(m.dragons)) {
+      expect(Object.keys(sp).sort()).toEqual(['adult', 'baby', 'juvenile']);
+      for (const st of Object.values(sp)) {
+        expect(Object.keys(st!).sort()).toEqual(['crystal', 'golden', 'normal', 'prismatic']);
+        for (const a of Object.values(st!)) expect([a!.anchorX, a!.anchorY, a!.stageScaled]).toEqual([120, 170, true]);
+      }
+    }
     expect(m.habitats).toEqual({});
   });
 
@@ -72,11 +95,12 @@ describe('asset contract + adapter (AI 2 owns art)', () => {
     expect(adapter.dragon('emberling', 'adult', 'normal')).toBeNull();
     await adapter.preload();
     expect(new Set(loaded).size).toBe(loaded.length);
-    expect(adapter.loadedCount).toBe(11);
+    expect(adapter.loadedCount).toBe(47);
     expect(adapter.failed).toEqual([bad]);
     expect(adapter.dragon('emberling', 'adult', 'crystal')?.asset.url).toBe(m.dragons.emberling!.adult!.crystal!.url);
     expect(adapter.dragon('emberling', 'baby', 'golden')).toBeNull();
-    expect(adapter.dragon('sprout', 'adult', 'normal')).toBeNull();
+    expect(adapter.dragon('sprout', 'adult', 'normal')).not.toBeNull();
+    expect(adapter.dragon('gaia', 'adult', 'normal')).toBeNull();
     adapter.dispose();
     expect(adapter.dragon('emberling', 'adult', 'crystal')).toBeNull();
   });
@@ -96,7 +120,13 @@ describe('living world: FSM + steering by anatomy (display-only)', () => {
 
   it('walker stays in bounds, never enters water or solid obstacles, never flies (10 simulated minutes)', () => {
     const world = new LivingWorld({ consume: () => 'ok', seed: 'walk' });
-    world.sync(stateWith([adult('e1', 'emberling', { location: at('origin_warm_rocks'), personality: 'playful' }), adult('m1', 'emberling', { location: at('origin_meadow'), personality: 'curious' })]));
+    world.sync(
+      stateWith([
+        adult('e1', 'emberling', { location: at('origin_warm_rocks'), personality: 'playful' }),
+        adult('m1', 'emberling', { location: at('origin_meadow'), personality: 'curious' }),
+        adult('s1', 'sprout', { location: at('origin_pondbank'), personality: 'playful' }),
+      ]),
+    );
     let maxZ = 0;
     const start = { ...world.agents.get('e1')!.pos };
     run(world, 600_000, T0, 33, (w) => {
@@ -107,9 +137,12 @@ describe('living world: FSM + steering by anatomy (display-only)', () => {
         expect(a.pos.x).toBeLessThanOrEqual(r.x1 - EDGE_MARGIN + 1e-6);
         expect(a.pos.y).toBeGreaterThanOrEqual(r.y0 + EDGE_MARGIN - 1e-6);
         expect(a.pos.y).toBeLessThanOrEqual(r.y1 - EDGE_MARGIN + 1e-6);
-        for (const o of r.obstacles) expect(Math.hypot(a.pos.x - o.x, a.pos.y - o.y)).toBeGreaterThanOrEqual(o.r + BODY_RADIUS * 0.5 - 1e-6);
+        for (const o of r.obstacles) expect(obstacleDistance(o, a.pos, BODY_RADIUS * 0.5)).toBeGreaterThanOrEqual(1 - 1e-6);
       }
     });
+    // Rồng không biết bơi ở bờ hồ không bao giờ xuống nước.
+    const pond = regionOf('origin_pondbank')!;
+    expect(inWater(pond, world.agents.get('s1')!.pos)).toBe(false);
     const a = world.agents.get('e1')!;
     const moved = Math.hypot(a.pos.x - start.x, a.pos.y - start.y);
     expect(maxZ).toBe(0);
@@ -132,8 +165,10 @@ describe('living world: FSM + steering by anatomy (display-only)', () => {
     expect(swam).toBe(true);
     const pond = regionOf('origin_pondbank')!;
     const walker = { airborne: false, mobility: { walk: true, swim: false, fly: false } };
-    expect(blockingObstacles(walker, pond).some((o) => o.kind === 'water')).toBe(true);
-    expect(blockingObstacles({ ...walker, mobility: { walk: true, swim: true, fly: false } }, pond)).toEqual([]);
+    expect(blocksWater(walker)).toBe(true);
+    expect(blocksWater({ ...walker, mobility: { walk: true, swim: true, fly: false } })).toBe(false);
+    expect(blocksWater({ ...walker, airborne: true })).toBe(false);
+    expect(blockingObstacles(walker, pond).length).toBeGreaterThan(0);
     expect(blockingObstacles({ ...walker, airborne: true }, pond)).toEqual([]);
   });
 
@@ -142,13 +177,17 @@ describe('living world: FSM + steering by anatomy (display-only)', () => {
     const world = new LivingWorld({ consume: (f, d) => (calls.push([f, d]), 'ok'), seed: 'food' });
     const ember = adult('e1', 'emberling', { location: at('origin_meadow') });
     world.sync(stateWith([ember]));
-    world.noteDrop('origin_meadow', { x: 400, y: 450 });
+    const M = HABITAT_OFFSET_X.origin_meadow;
+    void M;
+    const e = world.agents.get('e1')!.pos;
+    const dropAt = { x: e.x + (e.x > M + 480 ? -260 : 260), y: 470 };
+    world.noteDrop('origin_meadow', dropAt);
     const drop = { id: 'food-1', dietId: 'fruit' as const, zoneId: 'origin', habitatId: 'origin_meadow', spawnedAtMs: T0, expiresAtMs: T0 + 12_000 };
     const s = deepFreeze(stateWith([ember], [drop]));
     world.sync(s);
-    expect(world.food.get('food-1')?.pos).toEqual({ x: 400, y: 450 });
+    expect(world.food.get('food-1')?.pos).toEqual(dropAt);
     let sawEat = false;
-    run(world, 11_000, T0 + 100, 16, (w) => {
+    run(world, 12_000, T0 + 100, 16, (w) => {
       if (w.agents.get('e1')!.state === 'eat') sawEat = true;
     });
     expect(calls).toEqual([['food-1', 'e1']]);
@@ -218,7 +257,192 @@ describe('living world: FSM + steering by anatomy (display-only)', () => {
     expect(pa.state).toBe(pb.state);
   });
 
-  it('layout has the 3 Origin microhabitats side by side', () => {
-    expect(ORIGIN_LAYOUT.map((r) => r.habitatId)).toEqual(['origin_meadow', 'origin_warm_rocks', 'origin_pondbank']);
+  it('layout matches the habitat art: west → east, water = pond art, solid props block, flat props do not (ADR 0012)', () => {
+    expect(ORIGIN_LAYOUT.map((r) => r.habitatId)).toEqual(['origin_pondbank', 'origin_meadow', 'origin_warm_rocks']);
+    for (const r of ORIGIN_LAYOUT) {
+      const art = ORIGIN_HABITATS[r.habitatId as keyof typeof ORIGIN_HABITATS];
+      expect(r.x0).toBe(HABITAT_OFFSET_X[art.id]);
+      expect(r.x1 - r.x0).toBe(960);
+      expect(r.y0).toBeGreaterThan(300);
+      expect(r.y1).toBeLessThanOrEqual(540);
+      // Vật cản rắn đặt đúng chân vật thể; vật thể phẳng (thảm, lá súng, phiến đá) không chặn.
+      const standing = art.props.filter((p) => !['flower_patch', 'moss_bed', 'lily_pads', 'mud_wallow', 'flat_warm_stone', 'warm_vent'].includes(p.prop));
+      expect(r.obstacles).toHaveLength(standing.length);
+      for (const p of standing) expect(r.obstacles.some((o) => Math.abs(o.x - (r.x0 + p.x)) < 1 && Math.abs(o.y - p.y) < 3)).toBe(true);
+      // Spot mặt đất (rest/feed/drink…) đứng được cho loài phù hợp; spot nằm trong region.
+      for (const sp of art.spots.filter((x) => !x.elevated)) {
+        expect(sp.x + r.x0).toBeGreaterThanOrEqual(r.x0);
+        expect(sp.y).toBeLessThanOrEqual(r.y1);
+      }
+    }
+    const pond = regionOf('origin_pondbank')!;
+    expect(pond.water).toEqual(ORIGIN_HABITATS.origin_pondbank.water!.map(([x, y]) => [x + pond.x0, y]));
+    expect(regionOf('origin_meadow')!.water).toBeNull();
+    expect(inWater(pond, { x: pond.x0 + 470, y: 400 })).toBe(true);
+    expect(inWater(pond, { x: pond.x0 + 470, y: 500 })).toBe(false);
+  });
+
+  it('movement speed matches clip stride (no foot sliding) and scales with stage', () => {
+    for (const sp of ['emberling', 'droplet', 'sprout', 'zephyr'] as const) {
+      const walk = resolveDragonClip(sp, 'walk')!;
+      const v = clipSpeed(sp, 'adult', 'walk');
+      const cycleMs = ((walk.stridePx! * DRAGON_SCENE_SCALE) / v) * 1000;
+      expect(cycleMs).toBeGreaterThanOrEqual(0.8 * walk.durationMs * 0.99);
+      expect(cycleMs).toBeLessThanOrEqual(1200);
+      expect(clipSpeed(sp, 'baby', 'walk')).toBeCloseTo(v * 0.68, 6);
+    }
+  });
+
+  it('flight altitude is 18/40/56 viewBox px × scene scale, never multiplied by stageScale again', () => {
+    expect(flightAltitude('zephyr', 'baby')).toBeCloseTo(18 * DRAGON_SCENE_SCALE, 9);
+    expect(flightAltitude('zephyr', 'juvenile')).toBeCloseTo(40 * DRAGON_SCENE_SCALE, 9);
+    expect(flightAltitude('zephyr', 'adult')).toBeCloseTo(56 * DRAGON_SCENE_SCALE, 9);
+    expect(flightAltitude('emberling', 'adult')).toBe(0);
+    const world = new LivingWorld({ consume: () => 'ok', seed: 'alt' });
+    world.sync(stateWith([adult('z1', 'zephyr', { location: at('origin_meadow'), personality: 'playful' })]));
+    let maxZ = 0;
+    run(world, 300_000, T0, 33, (w) => (maxZ = Math.max(maxZ, w.agents.get('z1')!.z)));
+    expect(maxZ).toBeGreaterThan(flightAltitude('zephyr', 'adult') * 0.95);
+    expect(maxZ).toBeLessThanOrEqual(flightAltitude('zephyr', 'adult') + 1e-9);
+  });
+
+  it('Zephyr Baby only practises 1–2 s flights in its habitat, then lands; never flies when health-restricted', () => {
+    let restricted = false;
+    const world = new LivingWorld({ consume: () => 'ok', seed: 'baby', healthRestricted: () => restricted });
+    const baby = adult('zb', 'zephyr', { location: at('origin_meadow'), personality: 'playful', xpSec: 0 });
+    world.sync(stateWith([baby]));
+    const a = world.agents.get('zb')!;
+    expect(a.stage).toBe('baby');
+    const flights: { start: number; end: number }[] = [];
+    let flying: number | null = null;
+    run(world, 600_000, T0, 20, (w) => {
+      const z = w.agents.get('zb')!;
+      expect(z.habitatId).toBe('origin_meadow');
+      if (z.airborne && flying === null) flying = w.timeMs;
+      if (!z.airborne && flying !== null) {
+        flights.push({ start: flying, end: w.timeMs });
+        flying = null;
+      }
+      expect(z.z).toBeLessThanOrEqual(flightAltitude('zephyr', 'baby') + 1e-9);
+    });
+    expect(flights.length).toBeGreaterThan(2);
+    for (const f of flights) expect(f.end - f.start).toBeLessThanOrEqual(2000 + STEER_STEP_MS);
+    for (let i = 1; i < flights.length; i++) expect(flights[i]!.start - flights[i - 1]!.end).toBeGreaterThanOrEqual(PRACTICE_FLIGHT_COOLDOWN_MS - 2000);
+    // Hạn chế sức khỏe: không cất cánh.
+    restricted = true;
+    const r2 = new LivingWorld({ consume: () => 'ok', seed: 'baby', healthRestricted: () => restricted });
+    r2.sync(stateWith([baby]));
+    run(r2, 300_000, T0, 33, (w) => expect(w.agents.get('zb')!.airborne).toBe(false));
+  });
+
+  it('landing descends continuously from the current altitude to the ground', () => {
+    const world = new LivingWorld({ consume: () => 'ok', seed: 'land' });
+    world.sync(stateWith([adult('z1', 'zephyr', { location: at('origin_meadow'), personality: 'playful' })]));
+    let prevZ = 0;
+    let landings = 0;
+    let wasLanding = false;
+    run(world, 300_000, T0, 16, (w) => {
+      const z = w.agents.get('z1')!;
+      if (z.landing) {
+        if (!wasLanding) landings++;
+        else {
+          expect(z.z).toBeLessThanOrEqual(prevZ + 1e-9);
+          expect(prevZ - z.z).toBeLessThan(flightAltitude('zephyr', 'adult') * 0.35);
+        }
+        expect(z.anim.state).toBe('landing');
+      }
+      wasLanding = !!z.landing;
+      prevZ = z.z;
+    });
+    expect(landings).toBeGreaterThan(0);
+  });
+
+  it('animation state follows behaviour and anatomy: walk / swim / fly / eat / sleep / pet; walkers never get swim or fly', () => {
+    const world = new LivingWorld({ consume: () => 'ok', seed: 'anim' });
+    world.sync(
+      stateWith([
+        adult('e1', 'emberling', { location: at('origin_meadow'), personality: 'playful' }),
+        adult('d1', 'droplet', { location: at('origin_pondbank'), personality: 'playful' }),
+        adult('z1', 'zephyr', { location: at('origin_meadow'), personality: 'playful' }),
+      ]),
+    );
+    const seen: Record<string, Set<string>> = { e1: new Set(), d1: new Set(), z1: new Set() };
+    run(world, 600_000, T0, 33, (w) => {
+      for (const a of w.agents.values()) seen[a.uid]!.add(a.anim.state);
+    });
+    expect([...seen.e1!]).not.toContain('fly');
+    expect([...seen.e1!]).not.toContain('swim');
+    expect(seen.e1!.has('walk')).toBe(true);
+    expect(seen.d1!.has('swim')).toBe(true);
+    expect(seen.d1!.has('fly')).toBe(false);
+    expect(seen.z1!.has('fly')).toBe(true);
+    expect(seen.z1!.has('landing')).toBe(true);
+    world.petReact('e1');
+    run(world, 100);
+    expect(world.agents.get('e1')!.anim.state).toBe('pet');
+    world.setCare('e1', 'injured');
+    run(world, 100);
+    expect(world.agents.get('e1')!.anim.state).toBe('injured');
+    world.setCare('e1', 'recovery');
+    run(world, 100);
+    expect(world.agents.get('e1')!.anim.state).toBe('recovery');
+    run(world, 2000);
+    expect(world.agents.get('e1')!.care).toBeNull();
+  });
+
+  it('seekFood only targets food it can reach (real path, incl. around the pond) before the 12 s TTL runs out', () => {
+    const pond = regionOf('origin_pondbank')!;
+    const walker = { mobility: { walk: true, swim: false, fly: false } };
+    const left = { x: pond.x0 + 150, y: 400 };
+    const right = { x: pond.x0 + 800, y: 400 };
+    expect(crossesWater(pond, left, right)).toBe(true);
+    const around = walkPathLength(walker, pond, left, right);
+    expect(around).toBeGreaterThan(Math.hypot(right.x - left.x, right.y - left.y));
+    expect(walkPathLength({ mobility: { walk: true, swim: true, fly: false } }, pond, left, right)).toBeCloseTo(650, 6);
+
+    // Sproutling (không bơi) ở bờ hồ, thức ăn ở bờ bên kia: quá xa cho thời gian còn lại → bỏ qua; gần → đi tới.
+    const calls: string[] = [];
+    const world = new LivingWorld({ consume: (f) => (calls.push(f), 'ok'), seed: 'reach' });
+    world.sync(stateWith([adult('s1', 'sprout', { location: at('origin_pondbank'), personality: 'calm' })]));
+    const a = world.agents.get('s1')!;
+    a.pos = { ...left };
+    const v = clipSpeed('sprout', 'adult', 'walk') * HURRY_FACTOR;
+    const farTime = around / v;
+    world.noteDrop('origin_pondbank', right);
+    const ttl = Math.max(1000, Math.floor((farTime - FOOD_REACT_MARGIN_S - 0.5) * 1000));
+    const far = { id: 'far', dietId: 'leaf' as const, zoneId: 'origin', habitatId: 'origin_pondbank', spawnedAtMs: T0, expiresAtMs: T0 + ttl };
+    world.sync(stateWith([adult('s1', 'sprout', { location: at('origin_pondbank'), personality: 'calm' })], [far]));
+    run(world, 3000, T0);
+    expect(a.state).not.toBe('seekFood');
+    expect(world.etaSeconds(a, pond, right)).toBeCloseTo(walkPathLength(walker, pond, a.pos, right) / v, 6);
+    const nearPos = { x: left.x + 60, y: 470 };
+    world.noteDrop('origin_pondbank', nearPos);
+    const near = { id: 'near', dietId: 'leaf' as const, zoneId: 'origin', habitatId: 'origin_pondbank', spawnedAtMs: T0, expiresAtMs: T0 + 12_000 };
+    world.sync(stateWith([adult('s1', 'sprout', { location: at('origin_pondbank'), personality: 'calm' })], [far, near]));
+    run(world, 8000, T0 + 100);
+    expect(calls).toEqual(['near']);
+  });
+
+  it('Space drop suggestion lands near a dragon that eats that food and is off cooldown; none → null', () => {
+    const world = new LivingWorld({ consume: () => 'ok', seed: 'space' });
+    world.sync(
+      stateWith([
+        adult('e1', 'emberling', { location: at('origin_meadow') }),
+        adult('s1', 'sprout', { location: at('origin_meadow'), lastFeedXpAtMs: T0 }),
+      ]),
+    );
+    const meadow = regionOf('origin_meadow')!;
+    const e = world.agents.get('e1')!;
+    const fruit = world.suggestDrop('origin_meadow', 'fruit', T0 + 1000)!;
+    expect(Math.hypot(fruit.x - e.pos.x, fruit.y - e.pos.y)).toBeLessThanOrEqual(121);
+    expect(fruit.x).toBeGreaterThanOrEqual(meadow.x0);
+    expect(fruit.y).toBeGreaterThanOrEqual(meadow.y0);
+    // Lá: chỉ Sproutling ăn, nhưng đang cooldown → không có gợi ý.
+    expect(world.suggestDrop('origin_meadow', 'leaf', T0 + 1000)).toBeNull();
+    const s1 = world.agents.get('s1')!;
+    const leaf = world.suggestDrop('origin_meadow', 'leaf', T0 + 20_000)!;
+    expect(Math.hypot(leaf.x - s1.pos.x, leaf.y - s1.pos.y)).toBeLessThanOrEqual(121);
+    expect(world.suggestDrop('origin_meadow', 'aquatic', T0)).toBeNull();
+    expect(world.suggestDrop('origin_pondbank', 'fruit', T0)).toBeNull();
   });
 });
