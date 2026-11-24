@@ -2,6 +2,23 @@ import { getLocus, type LocusDef } from '../../data/genetics';
 import type { Genotype } from '../../types/game';
 import { hashSeed, createRng, type Rng } from '../core/rng';
 
+/** Genotype hợp lệ: đủ mọi locus của loài, mỗi allele thuộc bộ allele của locus, đã chuẩn hóa. */
+export function isValidGenotype(genotype: unknown, loci: readonly string[]): genotype is Genotype {
+  if (typeof genotype !== 'object' || genotype === null || Array.isArray(genotype)) return false;
+  const g = genotype as Record<string, unknown>;
+  for (const id of loci) {
+    const pair = g[id];
+    if (!Array.isArray(pair) || pair.length !== 2) return false;
+    const locus = getLocus(id);
+    const [x, y] = pair as unknown[];
+    if (typeof x !== 'string' || typeof y !== 'string') return false;
+    if (!locus.alleles.includes(x) || !locus.alleles.includes(y)) return false;
+    const norm = normalizePair(locus, x, y);
+    if (norm[0] !== x || norm[1] !== y) return false;
+  }
+  return Object.keys(g).every((k) => loci.includes(k));
+}
+
 /** Chuẩn hóa cặp allele: allele trội đứng trước (Rr, không phải rR). */
 export function normalizePair(locus: LocusDef, a: string, b: string): readonly [string, string] {
   const [dom] = locus.alleles;

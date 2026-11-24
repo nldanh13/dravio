@@ -1,6 +1,6 @@
 # Hướng dẫn cho AI khi làm việc trên Dravio
 
-Nguồn quyết định chính: `docs/gdd/Dravio_GDD_3.1.docx` (GDD 3.1). Lộ trình: `docs/ROADMAP.md`. Thay đổi lớn hoặc chỗ GDD chưa rõ → ghi ADR trong `docs/adr/`.
+Nguồn quyết định chính: `docs/gdd/Dravio_GDD_3.1.docx` (GDD 3.1), cụ thể hóa bởi ADR 0003 và `docs/g0/`. Dữ liệu sinh học canonical: `src/data/g0Biology.ts`. Lộ trình: `docs/ROADMAP.md`. Thay đổi lớn hoặc chỗ GDD chưa rõ → ghi ADR trong `docs/adr/`.
 
 - Đọc `package.json`, test và code liên quan trước khi sửa. Chỉ làm một epic hoặc lát cắt đã chọn; giữ chức năng đang chạy.
 - Chốt acceptance criteria, viết test cho domain invariants, triển khai engine thuần TypeScript rồi mới nối UI.

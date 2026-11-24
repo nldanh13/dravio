@@ -42,3 +42,7 @@ th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: le
 label { display: flex; flex-direction: column; gap: 4px; }
 select, button { min-height: 44px; font: inherit; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--fg); }
 button { cursor: pointer; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+figure { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px; text-align: center; }
+figure img { width: 100%; height: auto; max-width: 160px; }
+figcaption { font-size: 0.85rem; color: var(--muted); }

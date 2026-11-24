@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react';
 import { DRAGON_SPECIES, getSpecies } from './data/dragons';
 import { MICRO_PER_G } from './data/economy';
 import { pairKey } from './engine/genetics/alleles';
-import { previewBreed } from './engine/genetics/breeding';
+import { queryBreedPreview } from './engine/genetics/breeding';
+import { SPRITES } from './assets/manifest';
 import { LanguageContext, useTranslation } from './i18n';
 import type { DragonInstance, LanguageCode } from './types/game';
 
@@ -45,6 +46,8 @@ function Catalog() {
               <th className="num">{t('catalog.col.rate')}</th>
               <th className="num">{t('catalog.col.growth')}</th>
               <th className="num">{t('catalog.col.sell')}</th>
+              <th>{t('catalog.col.habitat')}</th>
+              <th>{t('catalog.col.diet')}</th>
             </tr>
           </thead>
           <tbody>
@@ -59,6 +62,8 @@ function Catalog() {
                 <td className="num">{n(s.baseRateMicroG / MICRO_PER_G)}</td>
                 <td className="num">{t('catalog.minutes', { n: s.growthTimeSec / 60 })}</td>
                 <td className="num">{n(s.baseSellG)}</td>
+                <td>{s.habitatRules.map((h) => t(`habitat.${h}`)).join(', ')}</td>
+                <td>{s.anatomy.dietIds.map((d) => t(`diet.${d}`)).join(', ')}</td>
               </tr>
             ))}
           </tbody>
@@ -68,11 +73,34 @@ function Catalog() {
   );
 }
 
+function EmberlingGallery() {
+  const { t } = useTranslation();
+  const stages = ['baby', 'juvenile', 'adult'] as const;
+  return (
+    <section>
+      <h2>{t('gallery.heading')}</h2>
+      <p className="muted">{t('gallery.note')}</p>
+      <div className="gallery">
+        {stages.map((stage) =>
+          SPRITES.filter((sp) => sp.stage === stage).map((sp) => (
+            <figure key={`${sp.stage}-${sp.mutation}`}>
+              <img src={sp.url} alt={`${t('species.emberling')} — ${t(`stage.${sp.stage}`)} ${t(`mutation.${sp.mutation}`)}`} width={128} height={107} />
+              <figcaption>
+                {t(`stage.${sp.stage}`)} · {t(`mutation.${sp.mutation}`)}
+              </figcaption>
+            </figure>
+          )),
+        )}
+      </div>
+    </section>
+  );
+}
+
 function BreedingPreview() {
   const { t, n } = useTranslation();
   const [a, setA] = useState('emberling');
   const [b, setB] = useState('sprout');
-  const preview = useMemo(() => previewBreed(demoAdult('demo-a', a), demoAdult('demo-b', b)), [a, b]);
+  const query = useMemo(() => queryBreedPreview(demoAdult('demo-a', a), demoAdult('demo-b', b), 0), [a, b]);
 
   const select = (value: string, onChange: (v: string) => void, label: string) => (
     <label>
@@ -94,20 +122,20 @@ function BreedingPreview() {
         {select(a, setA, t('breeding.parentA'))}
         {select(b, setB, t('breeding.parentB'))}
       </div>
-      {preview.species.size === 0 ? (
-        <p>{t('breeding.none')}</p>
+      {!query.ok ? (
+        <p>{t(`breedError.${query.reason}`)}</p>
       ) : (
         <>
-          <p>{t('breeding.fee', { n: n(preview.feeG) })}</p>
+          <p>{t('breeding.fee', { n: n(query.preview.feeG) })}</p>
           <ul>
-            {[...preview.species].map(([id, p]) => (
+            {[...query.preview.species].map(([id, p]) => (
               <li key={id}>
                 {t(`species.${id}`)} — {n(p * 100)}%
               </li>
             ))}
           </ul>
           <ul>
-            {Object.entries(preview.loci).map(([locus, dist]) => (
+            {Object.entries(query.preview.loci).map(([locus, dist]) => (
               <li key={locus}>
                 <code>{locus}</code>:{' '}
                 {[...dist.values()].map((d) => `${pairKey(d.pair)} ${n(d.p * 100)}%`).join(' · ')}
@@ -144,6 +172,7 @@ function Shell({ onToggle }: { onToggle: () => void }) {
       </header>
       <p className="notice">{t('app.status')}</p>
       <Catalog />
+      <EmberlingGallery />
       <BreedingPreview />
     </main>
   );

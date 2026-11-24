@@ -1,14 +1,14 @@
 # Dravio — Hiện trạng và lộ trình
 
-Cập nhật: 24/11/2026. Nguồn: GDD 3.1 trang 21 (giai đoạn) và trang 23 (epic TD-01…TD-09).
+Cập nhật: 24/11/2026 (sau khi tích hợp G0 Decision Pack). Nguồn: GDD 3.1 trang 21 (giai đoạn) và trang 23 (epic TD-01…TD-09).
 
 ## Hiện trạng so với GDD
 
 | Epic | Phạm vi P0 trong GDD | Đã có | Còn thiếu |
 | --- | --- | --- | --- |
 | TD-01 Core | repository, schema, pure engine, commands, RNG/clock, save | Repo, TS strict, CI, RNG có seed, clock + cap 24h + high-water mark, kiểu dữ liệu lõi | `GameState`, hệ command (requestId, lỗi có kiểu), scheduler/domain events, persistence IndexedDB + migration + backup, validate runtime |
-| TD-02 World | graph, 3 realm, suitability, capacity, renderer | Realm trong catalog | Graph vùng, `ZoneState`, suitability 0–100, sức chứa, Canvas renderer |
-| TD-03 Dragons | 16 catalog, behavior, feeding, phenotype, inventory | Catalog 16 loài (ID + kinh tế v2), kiểu hình dẫn xuất, stage dẫn xuất | Anatomy chốt G0, FSM/utility hành vi, cho ăn, bond, kho, sprite |
+| TD-02 World | graph, 3 realm, suitability, capacity, renderer | 7 microhabitat, `suitability` 0–100 với hard gate | Graph vùng, `ZoneState`, sức chứa, Canvas renderer |
+| TD-03 Dragons | 16 catalog, behavior, feeding, phenotype, inventory | Catalog 16 loài (ID + kinh tế v2), anatomy/diet/sinh cảnh G0, kiểu hình và stage dẫn xuất, sprite Emberling prototype | FSM/utility hành vi, cho ăn, bond, kho, sprite 15 loài còn lại |
 | TD-04 Genetics | recipes, preview, breeding, lineage, pity | Luật tương thích, huyết thống, preview = phân phối engine, roll lai, biến thể + pity 200, phí/thời gian ấp | Tổ ấp (`BreedingEgg`, gõ/boost, cooldown 10 phút), phả hệ đầy đủ, UI Punnett |
 | TD-05 Care | hazards, shelter, case workflow, recovery, tutorial | — | Toàn bộ |
 | TD-06 Progression | expedition, research, Codex, achievements, economy | Công thức vàng/s, giá bán, offline 75%, nâng cấp, gói trứng | Thám hiểm, nghiên cứu, Codex 64 ô, 12 achievement, tutorial onboarding |
@@ -19,12 +19,17 @@ Cập nhật: 24/11/2026. Nguồn: GDD 3.1 trang 21 (giai đoạn) và trang 23 
 ## Lộ trình đề xuất (theo cổng nghiệm thu)
 
 ### G0 — Discovery (đang làm)
+Nguồn: G0 Decision Pack 1.0 (`docs/g0/`, ADR 0003). Chỉ đánh dấu những gì đã kiểm chứng bằng test trong repo.
 - [x] Khung dự án + engine thuần cho luật đã chốt
-- [ ] Chốt anatomy/ngưỡng sinh cảnh 16 loài (thay `draft: true`)
-- [ ] Trả lời các điểm mở trong `docs/adr/0002-open-questions-g0.md`
-- [ ] Prototype mỹ thuật 1 loài (3 stage, 4 biến thể) để khóa phong cách
-- [ ] 3 scenario mẫu: phiên quan sát, phiên cứu hộ, phiên lai tạo
-- [ ] Chốt thiết bị test và ngân sách
+- [x] Anatomy/ngưỡng sinh cảnh 16 loài từ `g0Biology.ts` (`draft: false`), 7 microhabitat, `suitability`; test Vitest qua
+- [x] Trả lời 6 điểm của ADR 0002 → ADR 0003; mỗi câu trả lời có test (`tests/unit/g0Decisions.test.ts`)
+- [x] Prototype mỹ thuật Emberling 3 stage × 4 biến thể tích hợp qua manifest, hiển thị trên trang demo
+- [ ] Tác giả duyệt phong cách Emberling ở 64/128 px (**chờ tác giả**)
+- [x] 3 scenario mẫu có đặc tả (`docs/g0/SCENARIOS.md`); phần S03 preview G1 đã thành test
+- [ ] S01 (G1 PR1–PR4) và S02 (G1 PR6 / G2) chạy trên gameplay thật
+- [ ] Xác nhận thiết bị test và trần ngân sách (`docs/g0/QA_BUDGET.md`, **chờ tác giả**)
+
+Điểm lệch giữa tài liệu: `docs/g0/INTEGRATION_NOTES.md`.
 
 ### G1 — Vertical slice (1 vùng đất, 4 Common)
 Thứ tự PR đề xuất, mỗi PR một lát cắt có test:

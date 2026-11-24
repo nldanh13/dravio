@@ -10,10 +10,13 @@ import {
 } from '../../types/game';
 import { pickUniform, pickWeighted, type Rng } from '../core/rng';
 import { growthStage } from '../economy/rates';
-import { locusDistribution, rollOffspringGenotype } from './alleles';
+import { isValidGenotype, locusDistribution, rollOffspringGenotype } from './alleles';
 
 export type BreedRejection =
   | 'same-dragon'
+  | 'invalid-genotype'
+  | 'released'
+  | 'emergency-shelter'
   | 'not-adult'
   | 'busy'
   | 'cooldown'
@@ -66,6 +69,11 @@ export function checkBreed(
   nowMs: number,
 ): BreedCheck {
   if (a.uid === b.uid) return { ok: false, reason: 'same-dragon' };
+  if (a.location.kind === 'released' || b.location.kind === 'released') return { ok: false, reason: 'released' };
+  // ADR 0003: shelter khẩn cấp không được lai; kho an toàn (storage) thì được.
+  if (a.location.kind === 'shelter' || b.location.kind === 'shelter') {
+    return { ok: false, reason: 'emergency-shelter' };
+  }
   const sa = getSpecies(a.speciesId);
   const sb = getSpecies(b.speciesId);
   if (growthStage(a.xpSec, sa) !== 'adult' || growthStage(b.xpSec, sb) !== 'adult') {
@@ -79,7 +87,24 @@ export function checkBreed(
   if (sa.group !== sb.group) return { ok: false, reason: 'different-group' };
   if (areRelated(a, b)) return { ok: false, reason: 'related' };
   if (candidateSpecies(sa, sb).length === 0) return { ok: false, reason: 'no-candidates' };
+  if (!isValidGenotype(a.genotype, sa.loci) || !isValidGenotype(b.genotype, sb.loci)) {
+    return { ok: false, reason: 'invalid-genotype' };
+  }
+  // Ghi chú ADR 0003: điều kiện health ≥80, mobility ≥80, comfort ≥60 và "không có HealthCase mở"
+  // sẽ được kiểm khi GameState có dữ liệu sức khỏe (TD-05). Không giả lập "khỏe" bằng giá trị mặc định.
   return { ok: true };
+}
+
+export type BreedPreviewQuery = { ok: true; preview: BreedPreview } | { ok: false; reason: BreedRejection };
+
+/**
+ * Query preview cho UI: chỉ trả preview khi cặp hợp lệ; cặp không hợp lệ bị từ chối,
+ * không tiêu RNG và không trừ tiền.
+ */
+export function queryBreedPreview(a: DragonInstance, b: DragonInstance, nowMs: number): BreedPreviewQuery {
+  const check = checkBreed(a, b, nowMs);
+  if (!check.ok) return check;
+  return { ok: true, preview: previewBreed(a, b) };
 }
 
 /** Xác suất từng loài con: chọn nhóm hiếm 60/30/9/1 sau khi bỏ nhóm rỗng, rồi chia đều trong nhóm. */
@@ -122,7 +147,7 @@ export function previewBreed(a: DragonInstance, b: DragonInstance): BreedPreview
 
 /**
  * Phí theo độ hiếm cao nhất của bố mẹ.
- * Ghi chú: GDD chưa nói rõ "cao nhất" là của bố mẹ hay của ứng viên — xem docs/adr/0002.
+ * Đã chốt ở ADR 0003 (#1): độ hiếm cao nhất của BỐ MẸ, biết trước khi roll.
  */
 export function breedFeeG(a: DragonSpecies, b: DragonSpecies): number {
   const top = RARITY_ORDER[Math.max(rarityRank(a.rarity), rarityRank(b.rarity))] ?? 'common';

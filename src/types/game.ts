@@ -3,6 +3,8 @@
  * Giá trị suy ra (stage, kiểu hình, vàng/s) KHÔNG được lưu trong save.
  */
 
+import type { G0Anatomy } from './biology';
+
 export type ElementType = 'fire' | 'water' | 'nature' | 'sky';
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
 export type MutationType = 'normal' | 'crystal' | 'golden' | 'prismatic';
@@ -24,17 +26,14 @@ export function rarityRank(r: Rarity): number {
 }
 
 /**
- * Anatomy giả tưởng. Ngưỡng chi tiết (nhiệt, độ mặn, độ sâu, độ cao) là đầu việc G0
- * và KHÔNG được tự suy ra từ nguyên tố.
+ * Anatomy giả tưởng của loài (G0 Decision Pack, ADR 0003): hô hấp, vận động, thức ăn,
+ * dải nhiệt/độ mặn/độ sâu/độ cao, ngưỡng thoải mái và sức chống chịu.
+ * Nguồn duy nhất: `src/data/g0Biology.ts`. KHÔNG suy ra từ nguyên tố hay nhóm.
  */
-export interface Anatomy {
-  respiration: 'lung' | 'gill' | 'dual';
-  locomotion: readonly ('walk' | 'swim' | 'fly' | 'burrow')[];
-  protection: 'scale' | 'armor' | 'fur';
-  activity: 'day' | 'night' | 'both';
-  /** true khi cấu hình anatomy còn là bản nháp chờ chốt ở G0. */
+export type Anatomy = Omit<G0Anatomy, 'group' | 'habitatRules' | 'palette' | 'silhouetteVi' | 'draft'> & {
+  /** false khi số liệu đã được chốt ở G0 (ADR 0003). */
   draft: boolean;
-}
+};
 
 export interface DragonSpecies {
   id: string;
@@ -46,6 +45,11 @@ export interface DragonSpecies {
   /** Ghi chú sinh cảnh đặc thù: 'humid' (đất ẩm), 'hot' (đất nóng), 'cold-water', 'sea'. */
   habitatTags: readonly string[];
   anatomy: Anatomy;
+  /** Microhabitat hợp lệ (ID trong HABITAT_PROFILES). */
+  habitatRules: readonly string[];
+  palette: Readonly<Record<'primary' | 'secondary' | 'belly' | 'accent', string>>;
+  /** Mô tả silhouette (VI) cho art bible. */
+  silhouetteVi: string;
   loci: readonly string[];
   packEligible: boolean;
   /** Vàng/giây cơ bản tính bằng microG (1 G = 1_000_000 microG). */
