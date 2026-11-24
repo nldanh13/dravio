@@ -434,7 +434,7 @@ describe('writer lock', () => {
     expect(c.acquired).toBe(true);
   });
 
-  it('without Web Locks the tab is the writer and flags unsupported', async () => {
-    expect(await acquireWriterLock(undefined)).toMatchObject({ acquired: true, unsupported: true });
+  it('without Web Locks or localStorage the tab is the writer and flags unsupported', async () => {
+    expect(await acquireWriterLock(undefined, undefined, () => null)).toMatchObject({ acquired: true, unsupported: true, via: 'none' });
   });
 });

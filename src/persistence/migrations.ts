@@ -1,3 +1,4 @@
+import { DISCOVERY_IDS, HABITAT_UNLOCK_RULES } from '../data/habitatUnlocks';
 import { SCHEMA_VERSION } from '../types/state';
 
 /**
@@ -19,13 +20,24 @@ export interface MigrationStep {
 
 /** Chuỗi bước chính thức. Mỗi bước có fixture save thật của bản trước trong `tests/fixtures/`. */
 export const MIGRATION_STEPS: readonly MigrationStep[] = [
-  /** v1 → v2 (ADR 0009): thêm `discoveries` rỗng. Microhabitat đã mở được giữ nguyên. */
+  /**
+   * v1 → v2 (ADR 0009): thêm `discoveries`. Microhabitat đã mở được giữ nguyên; nếu save v1 đã mở
+   * microhabitat cần khám phá thì khám phá đó được ghi bù (ADR 0010) để save cũ vẫn hợp lệ.
+   */
   {
     from: 1,
     to: 2,
     run(state) {
       if ('discoveries' in state) throw new Error('v1 state already has discoveries');
-      return { ...state, discoveries: [] };
+      const opened = new Set<string>();
+      if (Array.isArray(state.zones)) {
+        for (const z of state.zones as unknown[]) {
+          const ids = typeof z === 'object' && z !== null ? (z as { unlockedHabitatIds?: unknown }).unlockedHabitatIds : undefined;
+          if (Array.isArray(ids)) for (const h of ids) if (typeof h === 'string') opened.add(h);
+        }
+      }
+      const discoveries = DISCOVERY_IDS.filter((id) => Object.entries(HABITAT_UNLOCK_RULES).some(([h, r]) => r.requires === id && opened.has(h)));
+      return { ...state, discoveries };
     },
   },
 ];

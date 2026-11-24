@@ -1,13 +1,13 @@
 # Dravio — Hiện trạng và lộ trình
 
-Cập nhật: 25/11/2026 (G0 được tác giả xác nhận, G1 PR1 đã merge). Nguồn: GDD 3.1 trang 21 (giai đoạn) và trang 23 (epic TD-01…TD-09).
+Cập nhật: 25/11/2026 (G0 được tác giả xác nhận; G1 PR1–PR3 đã merge; G1 PR4 phần A — sửa lỗi trước renderer). Nguồn: GDD 3.1 trang 21 (giai đoạn) và trang 23 (epic TD-01…TD-09).
 
 ## Hiện trạng so với GDD
 
 | Epic | Phạm vi P0 trong GDD | Đã có | Còn thiếu |
 | --- | --- | --- | --- |
-| TD-01 Core | repository, schema, pure engine, commands, RNG/clock, save | Repo, TS strict, CI, RNG có seed, clock + cap 24h + high-water mark, `GameState`, command bus (requestId, lỗi có kiểu), domain events, validate runtime, persistence IndexedDB + Dravio Save Schema v1 + khung migration theo schemaVersion + 2 backup + import/export checksum (ADR 0006, 0007) | Scheduler cho jobs |
-| TD-02 World | graph, 3 realm, suitability, capacity, renderer | 7 microhabitat, `suitability` 0–100 với hard gate | Graph vùng, `ZoneState`, sức chứa, Canvas renderer |
+| TD-01 Core | repository, schema, pure engine, commands, RNG/clock, save | Repo, TS strict, CI, RNG có seed, clock + cap 24h + high-water mark, `GameState`, command bus (requestId, lỗi có kiểu), domain events, validate runtime, persistence IndexedDB + Dravio Save Schema v2 + migration theo schemaVersion + 2 backup + import/export checksum (ADR 0006, 0007, 0009), thời gian online/offline theo vòng đời trang, chống ghi đè đa tab bằng Web Locks/lease + compare-and-swap (ADR 0010) | Scheduler cho jobs |
+| TD-02 World | graph, 3 realm, suitability, capacity, renderer | 7 microhabitat, `suitability` 0–100 với hard gate, `ZoneState`, sức chứa 5/zone, ngân sách sản xuất, mở khóa 3 microhabitat Khởi Nguyên (ADR 0008, 0009), world graph dữ liệu + `canTravel` (ADR 0010) | Nối graph vào lệnh di chuyển khi mở realm (G2), Canvas renderer (PR4 phần B) |
 | TD-03 Dragons | 16 catalog, behavior, feeding, phenotype, inventory | Catalog 16 loài (ID + kinh tế v2), anatomy/diet/sinh cảnh G0, kiểu hình và stage dẫn xuất, sprite Emberling prototype | FSM/utility hành vi, cho ăn, bond, kho, sprite 15 loài còn lại |
 | TD-04 Genetics | recipes, preview, breeding, lineage, pity | Luật tương thích, huyết thống, preview = phân phối engine, roll lai, biến thể + pity 200, phí/thời gian ấp | Tổ ấp (`BreedingEgg`, gõ/boost, cooldown 10 phút), phả hệ đầy đủ, UI Punnett |
 | TD-05 Care | hazards, shelter, case workflow, recovery, tutorial | — | Toàn bộ |
@@ -37,6 +37,8 @@ Thứ tự PR đề xuất, mỗi PR một lát cắt có test:
 2. [x] Persistence: IndexedDB, autosave 30s, export/import JSON + checksum, backup — ADR 0006, `tests/unit/persistence.test.ts`, Dravio Save Schema v1 (ADR 0007), kiểm trên Chromium 158 headless (Linux). Windows + Chromium trên thiết bị thật: chưa kiểm thử
 3. [x] Zone đất Khởi Nguyên: suitability, sức chứa 5, ngân sách sản xuất — ADR 0008, `tests/unit/zones.test.ts`, lệnh `moveDragon`/`setProductionSlot`/`unlockHabitat` (miễn phí, cần khám phá; ADR 0009, Dravio Save Schema v2). Chưa có: nhiệm vụ ghi nhận khám phá (PR5), mua nâng cấp sức chứa. Windows + Chromium trên thiết bị thật: chưa kiểm thử
 4. Canvas renderer 2.5D + steering + FSM hành vi cơ bản; thả thức ăn (0,8s / 12s / XP mỗi 8s)
+   - [x] Phần A, PR sửa lỗi riêng (ADR 0010): thời gian online chỉ khi tab hiện, ẩn/ngủ tính offline; lease `localStorage` khi thiếu Web Locks + compare-and-swap slot `main`; validate sức chứa P0/zone/microhabitat/suitability/tham chiếu sản xuất; world graph; kiểm thử đóng trình duyệt đột ngột (SIGKILL) trên Chromium 158 headless (Linux). Windows + Chromium trên thiết bị thật: chưa kiểm thử
+   - [ ] Phần B: renderer (PR riêng)
 5. Tutorial 0–15 phút: 150 G, Emberling, trứng Sproutling, mốc Adult; chuỗi TUT_01–TUT_08 ghi nhận `DISC_EMBERLING_THERMAL` (TUT_04) và `DISC_AQUATIC_HABITAT` (TUT_06), có đường khám phá thay thế khi bỏ hướng dẫn (ADR 0009)
 6. Một ca chăm sóc dựng sẵn (Forecast → … → Closed rút gọn)
 7. Xuất PNG Dragon Passport
